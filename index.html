@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#0b1d3a" />
+  <title>Kartavya</title>
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="icon" href="icon-192.png" sizes="192x192" />
+  <link rel="apple-touch-icon" href="icon-192.png" />
+  <style>
+    :root{
+      --bg1:#fff7ed;--bg2:#ffffff;--bg3:#f0fdf4;--text:#0f172a;--muted:#64748b;--border:#e2e8f0;
+      --card:rgba(255,255,255,.84);--primary:#0b1220;--success:#15803d;--danger:#dc2626;
+      --soft-green:#dcfce7;--soft-red:#fee2e2;--gold:#f4b400;--navy:#0b1d3a;--shadow:0 14px 36px rgba(15,23,42,.10)
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;font-family:Inter,Arial,sans-serif;color:var(--text);
+      background:
+      radial-gradient(circle at top left, rgba(244,180,0,.12), transparent 26%),
+      radial-gradient(circle at bottom right, rgba(21,128,61,.10), transparent 24%),
+      linear-gradient(180deg,var(--bg1),var(--bg2) 48%,var(--bg3));
+    }
+    .app{max-width:430px;margin:0 auto;min-height:100vh;padding:14px 14px 22px;display:none}
+    .card{
+      background:var(--card);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+      border:1px solid rgba(226,232,240,.95);border-radius:24px;padding:14px;box-shadow:var(--shadow);margin-bottom:12px
+    }
+    .space{display:flex;justify-content:space-between;align-items:center;gap:10px}
+    .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+    .title{font-size:28px;font-weight:800;letter-spacing:-.03em}
+    .sub{font-size:19px;font-weight:800;letter-spacing:-.02em}
+    .small{font-size:13px;color:var(--muted)}
+    .pill{padding:7px 11px;border-radius:999px;font-size:12px;font-weight:800}
+    .green-pill{background:linear-gradient(135deg,#e7ffe7,#d8fce8);color:var(--success);box-shadow:inset 0 0 0 1px rgba(21,128,61,.08)}
+    .logo-wrap{
+      width:32px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:50%;
+      background:linear-gradient(135deg,rgba(244,180,0,.16),rgba(244,180,0,.04));box-shadow:inset 0 0 0 1px rgba(244,180,0,.22);flex:0 0 auto
+    }
+    .logo{font-size:18px}
+    .blink-dot{width:10px;height:10px;border-radius:50%;background:var(--danger);display:inline-block;animation:blink 1s infinite;vertical-align:middle;margin-right:8px}
+    @keyframes blink{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.25;transform:scale(.9)}}
+    @keyframes pulse-danger{0%,100%{box-shadow:0 0 0 rgba(220,38,38,0)}50%{box-shadow:0 0 0 6px rgba(220,38,38,.08)}}
+    @keyframes pulse-warning{0%,100%{box-shadow:0 0 0 rgba(244,180,0,0)}50%{box-shadow:0 0 0 6px rgba(244,180,0,.10)}}
+    @keyframes pulse-safe{0%,100%{box-shadow:0 0 0 rgba(21,128,61,0)}50%{box-shadow:0 0 0 4px rgba(21,128,61,.07)}}
+    @keyframes splashFade{0%{opacity:0;transform:scale(.92)}100%{opacity:1;transform:scale(1)}}
+    @keyframes targetGlow{0%,100%{box-shadow:0 0 0 0 rgba(244,180,0,.08)}50%{box-shadow:0 0 28px 8px rgba(244,180,0,.22)}}
+    .field{margin-top:12px}
+    label{display:block;font-size:13px;font-weight:800;margin-bottom:5px;color:var(--muted)}
+    input{
+      width:100%;padding:14px;border-radius:16px;border:1px solid var(--border);
+      font-size:16px;outline:none;background:rgba(255,255,255,.95)
+    }
+    input:focus{border-color:rgba(11,18,32,.35);box-shadow:0 0 0 4px rgba(11,18,32,.06)}
+    .compact-input{padding:8px 10px;font-size:13px;line-height:1.2;border-radius:12px;max-width:100%}
+    .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    button{
+      width:100%;padding:13px 14px;border-radius:16px;font-size:15px;font-weight:800;cursor:pointer;border:none;
+      transition:transform .12s ease,opacity .12s ease,box-shadow .18s ease
+    }
+    button:active{transform:scale(.98)}
+    .btn-primary{background:linear-gradient(135deg,#0b1220,#111827);color:#fff;box-shadow:0 10px 20px rgba(15,23,42,.16)}
+    .btn-outline{background:rgba(255,255,255,.95);color:var(--text);border:1px solid var(--border)}
+    .btn-success{background:linear-gradient(135deg,#15803d,#16a34a);color:#fff;box-shadow:0 10px 20px rgba(21,128,61,.18)}
+    .btn-danger{background:linear-gradient(135deg,#dc2626,#ef4444);color:#fff;box-shadow:0 10px 20px rgba(220,38,38,.18)}
+    .mini{width:auto;padding:8px 12px;border-radius:12px;font-size:13px;white-space:nowrap}
+    .bar-wrap{width:100%;height:18px;border-radius:999px;overflow:hidden;background:rgba(229,231,235,.9);margin-top:12px;display:flex;border:1px solid rgba(226,232,240,.85)}
+    .bar-done{background:linear-gradient(90deg,#dc2626,#ef4444);height:100%;transition:width .5s ease}
+    .bar-left{background:linear-gradient(90deg,#16a34a,#22c55e);height:100%;transition:width .5s ease}
+    .center{text-align:center}
+    .queue-item{border:1px solid rgba(226,232,240,.95);border-radius:16px;padding:10px;margin-top:8px;background:rgba(255,255,255,.95)}
+    .summary-box{margin:0;padding:12px;box-shadow:none}
+    .reward-box{background:linear-gradient(135deg,#ecfdf5,#dcfce7)}
+    .penalty-box{background:linear-gradient(135deg,#fff1f2,#fee2e2)}
+    .inline-pair{display:grid;grid-template-columns:auto 92px auto 92px;gap:8px;align-items:center;margin-top:12px}
+    .inline-label{font-size:13px;font-weight:800;color:var(--muted);white-space:nowrap}
+    .deadline-inline{display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:center;margin-top:12px}
+    .deadline-label{font-size:13px;font-weight:800;color:var(--muted);white-space:nowrap}
+    .deadline-inline input{padding:10px 12px;font-size:14px;min-width:0}
+    .top-card.safe{animation:pulse-safe 2.2s infinite}
+    .top-card.warning{animation:pulse-warning 1.4s infinite}
+    .top-card.danger{animation:pulse-danger 1s infinite}
+    .premium-note{margin-top:10px;font-size:12px;color:var(--muted)}
+    .splash{
+      position:fixed;inset:0;z-index:9999;background:
+      radial-gradient(circle at top, rgba(244,180,0,.14), transparent 28%),
+      linear-gradient(180deg,#0b1d3a,#07152b);
+      color:white;display:flex;align-items:center;justify-content:center;flex-direction:column;text-align:center;padding:24px;animation:splashFade .9s ease
+    }
+    .splash-logo{width:116px;height:116px;border-radius:50%;display:flex;align-items:center;justify-content:center;position:relative;margin-bottom:22px;animation:targetGlow 1.8s ease-in-out infinite}
+    .splash-target{position:relative;width:116px;height:116px;border-radius:50%}
+    .ring1,.ring2,.ring3,.bull{position:absolute;inset:0;margin:auto;border-radius:50%;border:4px solid var(--gold)}
+    .ring1{width:112px;height:112px}.ring2{width:74px;height:74px}.ring3{width:38px;height:38px}.bull{width:14px;height:14px;border:none;background:var(--gold)}
+    .arrow{position:absolute;width:58px;height:6px;background:white;border-radius:4px;transform:rotate(-44deg);top:30px;right:14px}
+    .arrow::before{content:'';position:absolute;right:-2px;top:-5px;border-left:12px solid white;border-top:8px solid transparent;border-bottom:8px solid transparent}
+    .splash-title{font-size:34px;font-weight:800;letter-spacing:-.03em;margin-bottom:8px}.splash-tagline{font-size:19px;font-weight:700;color:var(--gold);margin-bottom:18px}.splash-sub{font-size:13px;color:rgba(255,255,255,.7);letter-spacing:.03em}
+  </style>
+</head>
+<body>
+  <div class="splash" id="splashScreen">
+    <div class="splash-logo">
+      <div class="splash-target">
+        <div class="ring1"></div><div class="ring2"></div><div class="ring3"></div><div class="bull"></div><div class="arrow"></div>
+      </div>
+    </div>
+    <div class="splash-title">Kartavya</div>
+    <div class="splash-tagline">Discipline is Wealth</div>
+    <div class="splash-sub">KARTAVYA DISCIPLINE SYSTEM</div>
+  </div>
+  <div class="app" id="app"></div>
+<script>
+if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}))}
+const STORAGE_KEY='kartavya-ultra-final-v1',TOPUP=5000;
+const state={wallet:5000,taskName:'',reward:'50',penalty:'200',deadlineTime:'',tasks:[],history:[],activeTaskId:null,soundEnabled:true,vibrationEnabled:true,warned10MinTaskId:null,warned5MinTaskId:null};
+function load(){const raw=localStorage.getItem(STORAGE_KEY);if(raw){try{Object.assign(state,JSON.parse(raw))}catch(e){}} if(state.wallet==null)state.wallet=5000; if(!state.deadlineTime)state.deadlineTime=getDefaultDeadlineTime()}
+function save(){localStorage.setItem(STORAGE_KEY,JSON.stringify(state))}
+function rupee(n){return '₹'+Number(n||0).toLocaleString('en-IN')}
+function getDefaultDeadlineTime(){const d=new Date();d.setHours(d.getHours()+1);return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')}
+function addHourToTime(t){const [h,m]=(t||getDefaultDeadlineTime()).split(':').map(Number);const d=new Date();d.setHours(h,m,0,0);d.setHours(d.getHours()+1);return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')}
+function makeDeadline(t){const now=new Date();const [h,m]=(t||getDefaultDeadlineTime()).split(':').map(Number);const d=new Date();d.setHours(h,m,0,0);if(d<=now)d.setDate(d.getDate()+1);return d.toISOString()}
+function secondsLeft(d){return Math.max(0,Math.floor((new Date(d)-new Date())/1000))}
+function minutesLeft(d){return Math.max(0,Math.floor((new Date(d)-new Date())/60000))}
+function formatClock(s){const h=Math.floor(s/3600),m=Math.floor((s%3600)/60),ss=s%60;return String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(ss).padStart(2,'0')}
+function activeTask(){if(state.activeTaskId)return state.tasks.find(x=>x.id===state.activeTaskId)||state.tasks[0]||null;return state.tasks[0]||null}
+function nextTasks(){const a=activeTask();return a?state.tasks.filter(x=>x.id!==a.id):state.tasks}
+function syncActive(){if(!state.tasks.length){state.activeTaskId=null;state.warned10MinTaskId=null;state.warned5MinTaskId=null;save();return}const exists=state.tasks.some(x=>x.id===state.activeTaskId);if(!exists){state.activeTaskId=state.tasks[0].id;state.warned10MinTaskId=null;state.warned5MinTaskId=null}save()}
+function notify(t,b){if('Notification' in window&&Notification.permission==='granted'){try{new Notification(t,{body:b})}catch(e){}}}
+function alarm(type='normal'){if(state.soundEnabled){try{const ctx=new (window.AudioContext||window.webkitAudioContext)();const osc=ctx.createOscillator();const gain=ctx.createGain();osc.connect(gain);gain.connect(ctx.destination);osc.frequency.value=type==='danger'?220:660;gain.gain.value=.04;osc.start();osc.stop(ctx.currentTime+.22)}catch(e){}} if(state.vibrationEnabled&&navigator.vibrate)navigator.vibrate(type==='danger'?[250,120,250]:[120,60,120])}
+function createTask(){if(!state.taskName.trim())return alert('Enter task name.');state.tasks.push({id:Date.now(),taskName:state.taskName,reward:Number(state.reward),penalty:Number(state.penalty),deadline:makeDeadline(state.deadlineTime),createdAt:new Date().toISOString()});state.taskName='';state.reward='50';state.penalty='200';state.deadlineTime=getDefaultDeadlineTime();syncActive();save();render()}
+function removeTask(id){const wasActive=state.activeTaskId===id;state.tasks=state.tasks.filter(x=>x.id!==id);if(wasActive)state.activeTaskId=null;syncActive();save();render()}
+function finishTask(result){const a=activeTask();if(!a)return;if(result==='success'){state.wallet+=Number(a.reward||0);alarm('normal')}else{state.wallet=Math.max(0,state.wallet-Number(a.penalty||0));alarm('danger')}state.history.unshift({...a,result,completedAt:new Date().toISOString()});state.tasks=state.tasks.filter(x=>x.id!==a.id);state.activeTaskId=null;syncActive();save();render()}
+function autoFailIfOverdue(){const a=activeTask();if(a&&secondsLeft(a.deadline)<=0)finishTask('fail')}
+function checkDeadlineWarnings(){const a=activeTask();if(!a)return;const mins=minutesLeft(a.deadline);if(mins<=10&&mins>5&&state.warned10MinTaskId!==a.id){state.warned10MinTaskId=a.id;save();notify('Kartavya Warning',`${a.taskName}: 10 minutes left.`);alarm('danger');alert(`Warning: Only 10 minutes left for ${a.taskName}.`)}if(mins<=5&&mins>0&&state.warned5MinTaskId!==a.id){state.warned5MinTaskId=a.id;save();notify('Kartavya Final Warning',`${a.taskName}: 5 minutes left.`);alarm('danger');alert(`Final warning: Only 5 minutes left for ${a.taskName}.`)}} 
+function addTopup(){state.wallet+=TOPUP;save();render()}
+function requestNotifications(){if(!('Notification' in window))return alert('Notifications not supported in this browser.');Notification.requestPermission().then(p=>{if(p==='granted'){notify('Kartavya','Notifications enabled.');alert('Notifications enabled.')}})}
+function stats(){return{reward:state.history.filter(x=>x.result==='success').reduce((a,b)=>a+Number(b.reward||0),0),penalty:state.history.filter(x=>x.result==='fail').reduce((a,b)=>a+Number(b.penalty||0),0),successCount:state.history.filter(x=>x.result==='success').length,total:state.history.length}}
+function successPercent(){const s=stats();if(s.total===0)return 100;return Math.round((s.successCount/s.total)*100)}
+function progressPercent(a){if(!a)return 0;const total=Math.max(1,new Date(a.deadline)-new Date(a.createdAt));const used=Math.max(0,new Date()-new Date(a.createdAt));return Math.max(0,Math.min(100,Math.round((used/total)*100)))}
+function urgencyClass(){const a=activeTask();if(!a)return 'safe';const mins=minutesLeft(a.deadline);if(mins<=5)return 'danger';if(mins<=10)return 'warning';return 'safe'}
+function refreshLive(){const a=activeTask(),current=document.getElementById('currentTaskText'),pending=document.getElementById('pendingText'),clock=document.getElementById('deadlineClock'),doneBar=document.getElementById('doneBar'),leftBar=document.getElementById('leftBar'),percent=document.getElementById('successPercent'),topCard=document.getElementById('topCard');if(percent)percent.textContent=successPercent()+'% Success';if(topCard)topCard.className=`card top-card ${urgencyClass()}`;if(a){if(current)current.innerHTML=`<span class="blink-dot"></span>${a.taskName}`;if(pending)pending.innerHTML=nextTasks().length?nextTasks().map((x,i)=>`${i+1}. ${x.taskName}`).join('<br>'):'';if(clock)clock.textContent=formatClock(secondsLeft(a.deadline));const pct=progressPercent(a);if(doneBar)doneBar.style.width=pct+'%';if(leftBar)leftBar.style.width=(100-pct)+'%'}else{if(current)current.textContent='No active task';if(pending)pending.innerHTML='';if(clock)clock.textContent='00:00:00';if(doneBar)doneBar.style.width='0%';if(leftBar)leftBar.style.width='100%'}}
+function render(){const app=document.getElementById('app'),a=activeTask(),s=stats(),urgency=urgencyClass();app.innerHTML=`
+<div class="card top-card ${urgency}" id="topCard"><div class="space"><div class="row" style="min-width:0;flex:1"><div class="title">Kartavya</div><div class="logo-wrap"><div class="logo">🎯</div></div><div id="successPercent" class="small pill green-pill">${successPercent()}% Success</div></div><div style="min-width:0;flex:1;text-align:right"><div class="small">Current Task</div><div class="sub" id="currentTaskText" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${a?`<span class="blink-dot"></span>${a.taskName}`:'No active task'}</div></div></div><div class="bar-wrap"><div class="bar-done" id="doneBar" style="width:${a?progressPercent(a):0}%"></div><div class="bar-left" id="leftBar" style="width:${a?100-progressPercent(a):100}%"></div></div><div class="center" style="margin-top:10px"><div class="small">Deadline timer</div><div class="title" id="deadlineClock">${a?formatClock(secondsLeft(a.deadline)):'00:00:00'}</div></div><div class="premium-note">App opens straight into your active duty state to reduce delay and increase focus.</div></div>
+<div class="card"><div class="sub">Create New Task</div><div class="field"><label>Task Name</label><input id="taskNameInput" value="${state.taskName.replace(/"/g,'&quot;')}" placeholder=""></div><div class="deadline-inline"><div class="deadline-label">Deadline</div><input id="deadlineInput" type="time" value="${state.deadlineTime}"><button class="btn-outline mini" id="plusHourBtn">+1 hour</button></div></div>
+<div class="card"><div class="sub">Next Tasks in Sequence</div><div id="pendingText" style="font-weight:700;margin-top:8px">${nextTasks().length?nextTasks().map((x,i)=>`${i+1}. ${x.taskName}`).join('<br>'):''}</div><div style="margin-top:12px"><button class="btn-primary" id="createBtn">Add Task</button></div>${state.tasks.length?state.tasks.map(item=>`<div class="queue-item"><div class="space"><div><div style="font-weight:800">${item.id===state.activeTaskId?'▶ ':''}${item.taskName}</div><div class="small">Deadline ${new Date(item.deadline).toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' })}</div></div><button class="btn-outline mini" data-remove="${item.id}">Delete</button></div></div>`).join(''):''}</div>
+<div class="card"><div class="sub">Summary</div><div class="grid2" style="margin-top:12px"><div class="card summary-box reward-box"><div class="small">Reward</div><div style="font-size:22px;font-weight:800;color:var(--success)">${rupee(s.reward)}</div></div><div class="card summary-box penalty-box"><div class="small">Penalty</div><div style="font-size:22px;font-weight:800;color:var(--danger)">${rupee(s.penalty)}</div></div></div><div class="inline-pair"><div class="inline-label">Reward</div><input id="rewardInput" class="compact-input" type="text" value="₹${state.reward}"><div class="inline-label">Penalty</div><input id="penaltyInput" class="compact-input" type="text" value="₹${state.penalty}"></div>${a?`<div class="grid2" style="margin-top:12px"><button class="btn-success" id="successBtn">Success</button><button class="btn-danger" id="failBtn">Fail</button></div>`:''}</div>
+<div class="card"><div class="space"><div><div class="small">Wallet</div><div class="sub">${rupee(state.wallet)}</div></div><button class="btn-primary mini" id="topupBtn">+ ${rupee(TOPUP)}</button></div></div>
+<div class="card"><div class="sub">Controls</div><div class="row" style="margin-top:12px"><button class="${state.soundEnabled?'btn-primary':'btn-outline'} mini" id="soundBtn">${state.soundEnabled?'Sound On':'Sound Off'}</button><button class="${state.vibrationEnabled?'btn-primary':'btn-outline'} mini" id="vibrationBtn">${state.vibrationEnabled?'Vibration On':'Vibration Off'}</button><button class="btn-outline mini" id="notifBtn">Enable Notifications</button></div><div class="premium-note">Ultra version keeps splash, icon, urgency pulse, and clean home-screen look.</div></div>`;
+document.getElementById('taskNameInput').addEventListener('input',e=>{state.taskName=e.target.value;save()});
+document.getElementById('deadlineInput').addEventListener('input',e=>{state.deadlineTime=e.target.value;save()});
+document.getElementById('plusHourBtn').addEventListener('click',()=>{state.deadlineTime=addHourToTime(state.deadlineTime);save();render()});
+document.getElementById('rewardInput').addEventListener('input',e=>{state.reward=e.target.value.replace(/[^0-9]/g,'')||'0';save()});
+document.getElementById('penaltyInput').addEventListener('input',e=>{state.penalty=e.target.value.replace(/[^0-9]/g,'')||'0';save()});
+document.getElementById('createBtn').addEventListener('click',createTask);
+document.getElementById('topupBtn').addEventListener('click',addTopup);
+document.getElementById('soundBtn').addEventListener('click',()=>{state.soundEnabled=!state.soundEnabled;save();render()});
+document.getElementById('vibrationBtn').addEventListener('click',()=>{state.vibrationEnabled=!state.vibrationEnabled;save();render()});
+document.getElementById('notifBtn').addEventListener('click',requestNotifications);
+const successBtn=document.getElementById('successBtn'); if(successBtn)successBtn.addEventListener('click',()=>finishTask('success'));
+const failBtn=document.getElementById('failBtn'); if(failBtn)failBtn.addEventListener('click',()=>finishTask('fail'));
+document.querySelectorAll('[data-remove]').forEach(btn=>btn.addEventListener('click',()=>removeTask(Number(btn.getAttribute('data-remove')))))
+}
+load();syncActive();window.addEventListener('load',()=>{const splash=document.getElementById('splashScreen'),app=document.getElementById('app');setTimeout(()=>{if(splash)splash.style.display='none';if(app)app.style.display='block';render()},1500)});setInterval(()=>{autoFailIfOverdue();checkDeadlineWarnings();refreshLive()},1000);
+</script>
+</body>
+</html>
