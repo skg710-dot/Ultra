@@ -58,8 +58,8 @@
     input:focus{border-color:rgba(11,18,32,.35);box-shadow:0 0 0 4px rgba(11,18,32,.06)}
     .compact-input{padding:8px 10px;font-size:13px;line-height:1.2;border-radius:12px;max-width:100%}
     .duration-input{
-      width:88px;padding:10px 10px;border-radius:12px;border:1px solid var(--border);
-      font-size:14px;text-align:center;background:#fff;min-width:0
+      width:70px;padding:8px 6px;border-radius:12px;border:1px solid var(--border);
+      font-size:13px;text-align:center;background:#fff;min-width:0
     }
     .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
     button{
@@ -71,7 +71,7 @@
     .btn-outline{background:rgba(255,255,255,.95);color:var(--text);border:1px solid var(--border)}
     .btn-success{background:linear-gradient(135deg,#15803d,#16a34a);color:#fff}
     .btn-danger{background:linear-gradient(135deg,#dc2626,#ef4444);color:#fff}
-    .mini{width:auto;padding:8px 12px;border-radius:12px;font-size:13px;white-space:nowrap}
+    .mini{width:auto;padding:6px 10px;border-radius:12px;font-size:12px;white-space:nowrap}
     .bar-wrap{width:100%;height:18px;border-radius:999px;overflow:hidden;background:rgba(229,231,235,.9);margin-top:12px;display:flex;border:1px solid rgba(226,232,240,.85)}
     .bar-done{background:linear-gradient(90deg,#dc2626,#ef4444);height:100%;transition:width .5s ease}
     .bar-left{background:linear-gradient(90deg,#16a34a,#22c55e);height:100%;transition:width .5s ease}
@@ -82,7 +82,13 @@
     .penalty-box{background:linear-gradient(135deg,#fff1f2,#fee2e2)}
     .inline-pair{display:grid;grid-template-columns:auto 92px auto 92px;gap:8px;align-items:center;margin-top:12px}
     .inline-label{font-size:13px;font-weight:800;color:var(--muted);white-space:nowrap}
-    .duration-inline{display:grid;grid-template-columns:auto auto auto auto auto;gap:8px;align-items:center;margin-top:12px}
+    .duration-inline{
+      display:grid;
+      grid-template-columns:auto 70px auto auto auto;
+      gap:6px;
+      align-items:center;
+      margin-top:12px
+    }
     .duration-label{font-size:13px;font-weight:800;color:var(--muted);white-space:nowrap}
     .top-card.safe{animation:pulse-safe 2.2s infinite}
     .top-card.warning{animation:pulse-warning 1.4s infinite}
@@ -123,7 +129,7 @@ if('serviceWorker' in navigator){
   window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
 }
 
-const STORAGE_KEY='kartavya-duration-based-v1';
+const STORAGE_KEY='kartavya-duration-based-v2';
 const TOPUP=5000;
 const DEFAULT_WALLET=5000;
 const DEFAULT_REWARD=50;
@@ -178,18 +184,10 @@ function rupee(n){return '₹'+Number(n||0).toLocaleString('en-IN')}
 
 function formatDuration(mins){
   mins = Math.max(0, Math.round(mins || 0));
-
-  if(mins < 60){
-    return mins + ' min';
-  }
-
+  if(mins < 60) return mins + ' min';
   const h = Math.floor(mins / 60);
   const m = mins % 60;
-
-  if(m === 0){
-    return h + ' hr';
-  }
-
+  if(m === 0) return h + ' hr';
   return h + '.' + String(m).padStart(2, '0') + ' hr';
 }
 
@@ -496,9 +494,9 @@ function render(){
   <div class="duration-inline">
     <div class="duration-label">Duration</div>
     <input id="durationInput" class="duration-input" type="number" min="1" value="${state.durationMinutes}">
-    <button class="btn-outline mini" id="add15Btn">+15 min</button>
-    <button class="btn-outline mini" id="add30Btn">+30 min</button>
-    <button class="btn-outline mini" id="add60Btn">+1 hr</button>
+    <button class="btn-outline mini" id="add15Btn">+15</button>
+    <button class="btn-outline mini" id="add30Btn">+30</button>
+    <button class="btn-outline mini" id="add60Btn">+60</button>
   </div>
 </div>
 
