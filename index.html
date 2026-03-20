@@ -178,11 +178,19 @@ function rupee(n){return '₹'+Number(n||0).toLocaleString('en-IN')}
 
 function formatDuration(mins){
   mins = Math.max(0, Math.round(mins || 0));
-  if(mins < 60) return mins + ' min';
+
+  if(mins < 60){
+    return mins + ' min';
+  }
+
   const h = Math.floor(mins / 60);
   const m = mins % 60;
-  if(m === 0) return h + ' hr';
-  return h + ' hr ' + m + ' min';
+
+  if(m === 0){
+    return h + ' hr';
+  }
+
+  return h + '.' + String(m).padStart(2, '0') + ' hr';
 }
 
 function activateTask(task){
