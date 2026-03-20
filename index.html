@@ -120,7 +120,7 @@ if('serviceWorker' in navigator){
   window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
 }
 
-const STORAGE_KEY='kartavya-clean-final-v1';
+const STORAGE_KEY='kartavya-full-final-v4';
 const TOPUP=5000;
 const DEFAULT_WALLET=5000;
 const DEFAULT_REWARD=50;
@@ -146,6 +146,12 @@ function sanitizeNumber(value, fallback){
   return Number.isFinite(n) && n >= 0 ? n : fallback;
 }
 
+function currentTimePlusOneHour(){
+  const d=new Date();
+  d.setHours(d.getHours()+1);
+  return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
+}
+
 function load(){
   const raw=localStorage.getItem(STORAGE_KEY);
   if(raw){
@@ -163,23 +169,32 @@ function load(){
   if(typeof state.taskName !== 'string') state.taskName = '';
   if(typeof state.soundEnabled !== 'boolean') state.soundEnabled = true;
   if(typeof state.vibrationEnabled !== 'boolean') state.vibrationEnabled = true;
-  if(!state.deadlineTime) state.deadlineTime=getDefaultDeadlineTime();
 
   migrateTasks();
   syncActive();
+
+  state.deadlineTime = currentTimePlusOneHour();
 }
 
 function save(){localStorage.setItem(STORAGE_KEY,JSON.stringify(state))}
 function rupee(n){return '₹'+Number(n||0).toLocaleString('en-IN')}
 
-function getDefaultDeadlineTime(){
-  const d=new Date();
-  d.setHours(d.getHours()+1);
-  return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
+function formatDuration(mins){
+  mins = Math.max(0, Math.round(mins || 0));
+  if(mins < 60) return mins + ' min';
+  const h = Math.floor(mins / 60);
+  const m = mins % 60;
+  if(m === 0) return h + ' hr';
+  return h + ' hr ' + m + ' min';
+}
+
+function remainingDuration(deadline){
+  const mins = Math.max(0, Math.floor((new Date(deadline) - new Date())/60000));
+  return formatDuration(mins);
 }
 
 function addHourToTime(t){
-  const [h,m]=(t||getDefaultDeadlineTime()).split(':').map(Number);
+  const [h,m]=(t||currentTimePlusOneHour()).split(':').map(Number);
   const d=new Date();
   d.setHours(h,m,0,0);
   d.setHours(d.getHours()+1);
@@ -188,7 +203,7 @@ function addHourToTime(t){
 
 function deadlineTimeToDurationMinutes(timeStr){
   const now=new Date();
-  const [h,m]=(timeStr||getDefaultDeadlineTime()).split(':').map(Number);
+  const [h,m]=(timeStr||currentTimePlusOneHour()).split(':').map(Number);
   const d=new Date();
   d.setHours(h,m,0,0);
   if(d<=now)d.setDate(d.getDate()+1);
@@ -317,7 +332,7 @@ function createTask(){
   state.taskName='';
   state.reward=String(DEFAULT_REWARD);
   state.penalty=String(DEFAULT_PENALTY);
-  state.deadlineTime=getDefaultDeadlineTime();
+  state.deadlineTime=currentTimePlusOneHour();
   syncActive();
   save();
   render();
@@ -439,6 +454,7 @@ function refreshLive(){
     current=document.getElementById('currentTaskText'),
     pending=document.getElementById('pendingText'),
     clock=document.getElementById('deadlineClock'),
+    remain=document.getElementById('remainingText'),
     doneBar=document.getElementById('doneBar'),
     leftBar=document.getElementById('leftBar'),
     percent=document.getElementById('successPercent'),
@@ -449,8 +465,9 @@ function refreshLive(){
 
   if(a){
     if(current) current.innerHTML = `<span class="blink-dot"></span>${a.taskName}`;
-    if(pending) pending.innerHTML = nextTasks().length ? nextTasks().map((x,i)=>`${i+1}. ${x.taskName}`).join('<br>') : '';
+    if(pending) pending.innerHTML = nextTasks().length ? nextTasks().map((x,i)=>`${i+1}. ${x.taskName} · ${formatDuration(x.durationMinutes||0)}`).join('<br>') : '';
     if(clock) clock.textContent = a.deadline ? formatClock(secondsLeft(a.deadline)) : '00:00:00';
+    if(remain) remain.textContent = a.deadline ? `Remaining ${remainingDuration(a.deadline)}` : '';
     const pct=progressPercent(a);
     if(doneBar) doneBar.style.width = pct+'%';
     if(leftBar) leftBar.style.width = (100-pct)+'%';
@@ -458,6 +475,7 @@ function refreshLive(){
     if(current) current.textContent='No active task';
     if(pending) pending.innerHTML='';
     if(clock) clock.textContent='00:00:00';
+    if(remain) remain.textContent='';
     if(doneBar) doneBar.style.width='0%';
     if(leftBar) leftBar.style.width='100%';
   }
@@ -489,8 +507,9 @@ function render(){
   <div class="center" style="margin-top:10px">
     <div class="small">Deadline timer</div>
     <div class="title" id="deadlineClock">${a&&a.deadline?formatClock(secondsLeft(a.deadline)):'00:00:00'}</div>
+    <div class="small" id="remainingText">${a&&a.deadline?`Remaining ${remainingDuration(a.deadline)}`:''}</div>
   </div>
-  <div class="premium-note">Queued tasks start fresh only when they become current. Clean defaults restored.</div>
+  <div class="premium-note">Queued tasks start fresh only when they become current, while keeping full duration.</div>
 </div>
 
 <div class="card">
@@ -508,9 +527,9 @@ function render(){
 
 <div class="card">
   <div class="sub">Next Tasks in Sequence</div>
-  <div id="pendingText" style="font-weight:700;margin-top:8px">${nextTasks().length?nextTasks().map((x,i)=>`${i+1}. ${x.taskName}`).join('<br>'):''}</div>
+  <div id="pendingText" style="font-weight:700;margin-top:8px">${nextTasks().length?nextTasks().map((x,i)=>`${i+1}. ${x.taskName} · ${formatDuration(x.durationMinutes||0)}`).join('<br>'):''}</div>
   <div style="margin-top:12px"><button class="btn-primary" id="createBtn">Add Task</button></div>
-  ${state.tasks.length?state.tasks.map(item=>`<div class="queue-item"><div class="space"><div><div style="font-weight:800">${item.id===state.activeTaskId?'▶ ':''}${item.taskName}</div><div class="small">${item.id===state.activeTaskId && item.deadline ? `Deadline ${new Date(item.deadline).toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' })}` : `Queued · ${item.durationMinutes||0} min`}</div></div><button class="btn-outline mini" data-remove="${item.id}">Delete</button></div></div>`).join(''):''}
+  ${state.tasks.length?state.tasks.map(item=>`<div class="queue-item"><div class="space"><div><div style="font-weight:800">${item.id===state.activeTaskId?'▶ ':''}${item.taskName}</div><div class="small">${item.id===state.activeTaskId && item.deadline ? `Deadline ${new Date(item.deadline).toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' })}` : `Queued · ${formatDuration(item.durationMinutes||0)}`}</div></div><button class="btn-outline mini" data-remove="${item.id}">Delete</button></div></div>`).join(''):''}
 </div>
 
 <div class="card">
