@@ -58,8 +58,13 @@
     input:focus{border-color:rgba(11,18,32,.35);box-shadow:0 0 0 4px rgba(11,18,32,.06)}
     .compact-input{padding:8px 10px;font-size:13px;line-height:1.2;border-radius:12px;max-width:100%}
     .duration-input{
-      width:70px;padding:8px 6px;border-radius:12px;border:1px solid var(--border);
-      font-size:13px;text-align:center;background:#fff;min-width:0
+      width:100%;
+      padding:12px 14px;
+      border-radius:14px;
+      border:1px solid var(--border);
+      font-size:15px;
+      background:#fff;
+      min-width:0
     }
     .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
     button{
@@ -71,11 +76,17 @@
     .btn-outline{background:rgba(255,255,255,.95);color:var(--text);border:1px solid var(--border)}
     .btn-success{background:linear-gradient(135deg,#15803d,#16a34a);color:#fff}
     .btn-danger{background:linear-gradient(135deg,#dc2626,#ef4444);color:#fff}
-    .mini{width:auto;padding:6px 10px;border-radius:12px;font-size:12px;white-space:nowrap}
+    .mini{
+      width:auto;
+      padding:8px 9px;
+      border-radius:12px;
+      font-size:11px;
+      white-space:nowrap;
+      flex:0 0 auto
+    }
     .bar-wrap{width:100%;height:18px;border-radius:999px;overflow:hidden;background:rgba(229,231,235,.9);margin-top:12px;display:flex;border:1px solid rgba(226,232,240,.85)}
     .bar-done{background:linear-gradient(90deg,#dc2626,#ef4444);height:100%;transition:width .5s ease}
     .bar-left{background:linear-gradient(90deg,#16a34a,#22c55e);height:100%;transition:width .5s ease}
-    .center{text-align:center}
     .queue-item{border:1px solid rgba(226,232,240,.95);border-radius:16px;padding:10px;margin-top:8px;background:rgba(255,255,255,.95)}
     .summary-box{margin:0;padding:12px;box-shadow:none}
     .reward-box{background:linear-gradient(135deg,#ecfdf5,#dcfce7)}
@@ -84,15 +95,24 @@
     .inline-label{font-size:13px;font-weight:800;color:var(--muted);white-space:nowrap}
     .duration-inline{
       display:grid;
-      grid-template-columns:auto 70px auto auto auto;
-      gap:6px;
+      grid-template-columns:minmax(0,1fr) auto auto auto;
+      gap:8px;
       align-items:center;
       margin-top:12px
     }
-    .duration-label{font-size:13px;font-weight:800;color:var(--muted);white-space:nowrap}
     .top-card.safe{animation:pulse-safe 2.2s infinite}
     .top-card.warning{animation:pulse-warning 1.4s infinite}
     .top-card.danger{animation:pulse-danger 1s infinite}
+    .task-meta{
+      margin-top:10px;
+      display:flex;
+      justify-content:center;
+      gap:14px;
+      flex-wrap:wrap;
+      font-size:13px;
+      font-weight:800;
+      color:var(--muted)
+    }
     .splash{
       position:fixed;inset:0;z-index:9999;background:
       radial-gradient(circle at top, rgba(244,180,0,.14), transparent 28%),
@@ -129,7 +149,7 @@ if('serviceWorker' in navigator){
   window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
 }
 
-const STORAGE_KEY='kartavya-duration-based-v2';
+const STORAGE_KEY='kartavya-duration-based-v5';
 const TOPUP=5000;
 const DEFAULT_WALLET=5000;
 const DEFAULT_REWARD=50;
@@ -142,6 +162,7 @@ const state={
   reward:String(DEFAULT_REWARD),
   penalty:String(DEFAULT_PENALTY),
   durationMinutes:DEFAULT_DURATION,
+  durationText:'30 min',
   tasks:[],
   history:[],
   activeTaskId:null,
@@ -156,6 +177,65 @@ function sanitizeNumber(value, fallback){
   return Number.isFinite(n) && n >= 0 ? n : fallback;
 }
 
+function escapeHtml(str){
+  return String(str || '')
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;')
+    .replace(/'/g,'&#39;');
+}
+
+function save(){localStorage.setItem(STORAGE_KEY,JSON.stringify(state))}
+function rupee(n){return '₹'+Number(n||0).toLocaleString('en-IN')}
+
+function formatDuration(mins){
+  mins = Math.max(0, Math.round(Number(mins) || 0));
+  if(mins < 60) return mins + ' min';
+  const h = Math.floor(mins / 60);
+  const m = mins % 60;
+  if(m === 0) return h + ' hr';
+  return h + ' hr ' + m + ' min';
+}
+
+function parseDurationToMinutes(text){
+  if(typeof text !== 'string') return null;
+  const raw = text.trim().toLowerCase();
+  if(!raw) return null;
+
+  let total = 0;
+  let matched = false;
+
+  const hrMatch = raw.match(/(\d+(?:\.\d+)?)\s*(hr|hrs|hour|hours|h)\b/);
+  const minMatch = raw.match(/(\d+)\s*(min|mins|minute|minutes|m)\b/);
+
+  if(hrMatch){
+    total += Math.round(parseFloat(hrMatch[1]) * 60);
+    matched = true;
+  }
+  if(minMatch){
+    total += parseInt(minMatch[1], 10);
+    matched = true;
+  }
+
+  if(matched && total > 0) return total;
+
+  if(/^\d+$/.test(raw)){
+    return parseInt(raw,10);
+  }
+
+  return null;
+}
+
+function normalizeDurationInput(text){
+  const mins = parseDurationToMinutes(text);
+  if(mins === null || mins <= 0) return null;
+  return {
+    minutes: mins,
+    text: formatDuration(mins)
+  };
+}
+
 function load(){
   const raw=localStorage.getItem(STORAGE_KEY);
   if(raw){
@@ -168,7 +248,16 @@ function load(){
   state.wallet = sanitizeNumber(state.wallet, DEFAULT_WALLET);
   state.reward = String(sanitizeNumber(state.reward, DEFAULT_REWARD));
   state.penalty = String(sanitizeNumber(state.penalty, DEFAULT_PENALTY));
-  state.durationMinutes = sanitizeNumber(state.durationMinutes, DEFAULT_DURATION);
+  state.durationMinutes = Math.max(1, sanitizeNumber(state.durationMinutes, DEFAULT_DURATION));
+
+  const normalized = normalizeDurationInput(state.durationText || formatDuration(state.durationMinutes));
+  if(normalized){
+    state.durationMinutes = normalized.minutes;
+    state.durationText = normalized.text;
+  }else{
+    state.durationText = formatDuration(state.durationMinutes);
+  }
+
   if(!Array.isArray(state.tasks)) state.tasks = [];
   if(!Array.isArray(state.history)) state.history = [];
   if(typeof state.taskName !== 'string') state.taskName = '';
@@ -179,26 +268,15 @@ function load(){
   syncActive();
 }
 
-function save(){localStorage.setItem(STORAGE_KEY,JSON.stringify(state))}
-function rupee(n){return '₹'+Number(n||0).toLocaleString('en-IN')}
-
-function formatDuration(mins){
-  mins = Math.max(0, Math.round(mins || 0));
-  if(mins < 60) return mins + ' min';
-  const h = Math.floor(mins / 60);
-  const m = mins % 60;
-  if(m === 0) return h + ' hr';
-  return h + '.' + String(m).padStart(2, '0') + ' hr';
-}
-
 function activateTask(task){
   if(!task) return;
   if(task.activatedAt && task.deadline) return;
 
   const now = new Date();
-  const durationMinutes = sanitizeNumber(task.durationMinutes, DEFAULT_DURATION);
+  const durationMinutes = Math.max(1, sanitizeNumber(task.durationMinutes, DEFAULT_DURATION));
 
   task.durationMinutes = durationMinutes;
+  task.durationText = formatDuration(durationMinutes);
   task.activatedAt = now.toISOString();
   task.deadline = new Date(now.getTime() + durationMinutes*60000).toISOString();
 
@@ -211,7 +289,8 @@ function migrateTasks(){
     if(typeof task.taskName !== 'string') task.taskName = 'Task';
     task.reward = sanitizeNumber(task.reward, DEFAULT_REWARD);
     task.penalty = sanitizeNumber(task.penalty, DEFAULT_PENALTY);
-    task.durationMinutes = sanitizeNumber(task.durationMinutes, DEFAULT_DURATION);
+    task.durationMinutes = Math.max(1, sanitizeNumber(task.durationMinutes, DEFAULT_DURATION));
+    task.durationText = formatDuration(task.durationMinutes);
 
     if(index !== 0 && !task.activatedAt){
       delete task.deadline;
@@ -284,12 +363,19 @@ function alarm(type='normal'){
 function createTask(){
   if(!state.taskName.trim()) return alert('Enter task name.');
 
+  const normalized = normalizeDurationInput(state.durationText);
+  if(!normalized) return alert('Enter duration like 30 min, 1 hr, or 1 hr 30 min.');
+
+  state.durationMinutes = normalized.minutes;
+  state.durationText = normalized.text;
+
   const task = {
     id: Date.now(),
     taskName: state.taskName.trim(),
     reward: sanitizeNumber(state.reward, DEFAULT_REWARD),
     penalty: sanitizeNumber(state.penalty, DEFAULT_PENALTY),
-    durationMinutes: sanitizeNumber(state.durationMinutes, DEFAULT_DURATION),
+    durationMinutes: normalized.minutes,
+    durationText: normalized.text,
     createdAt: new Date().toISOString()
   };
 
@@ -302,6 +388,7 @@ function createTask(){
   state.reward=String(DEFAULT_REWARD);
   state.penalty=String(DEFAULT_PENALTY);
   state.durationMinutes=DEFAULT_DURATION;
+  state.durationText=formatDuration(DEFAULT_DURATION);
   syncActive();
   save();
   render();
@@ -426,15 +513,19 @@ function refreshLive(){
     doneBar=document.getElementById('doneBar'),
     leftBar=document.getElementById('leftBar'),
     percent=document.getElementById('successPercent'),
-    topCard=document.getElementById('topCard');
+    topCard=document.getElementById('topCard'),
+    activeDuration=document.getElementById('activeDurationText');
 
   if(percent) percent.textContent = successPercent()+'% Success';
   if(topCard) topCard.className = `card top-card ${urgencyClass()}`;
 
   if(a){
-    if(current) current.innerHTML = `<span class="blink-dot"></span>${a.taskName}`;
-    if(pending) pending.innerHTML = nextTasks().length ? nextTasks().map((x,i)=>`${i+1}. ${x.taskName} (${formatDuration(x.durationMinutes||0)})`).join('<br>') : '';
+    if(current) current.innerHTML = `<span class="blink-dot"></span>${escapeHtml(a.taskName)}`;
+    if(pending) pending.innerHTML = nextTasks().length
+      ? nextTasks().map((x,i)=>`${i+1}. ${escapeHtml(x.taskName)} (${formatDuration(x.durationMinutes||0)})`).join('<br>')
+      : '';
     if(clock) clock.textContent = a.deadline ? formatClock(secondsLeft(a.deadline)) : '00:00:00';
+    if(activeDuration) activeDuration.textContent = formatDuration(a.durationMinutes || 0);
     const pct=progressPercent(a);
     if(doneBar) doneBar.style.width = pct+'%';
     if(leftBar) leftBar.style.width = (100-pct)+'%';
@@ -442,15 +533,40 @@ function refreshLive(){
     if(current) current.textContent='No active task';
     if(pending) pending.innerHTML='';
     if(clock) clock.textContent='00:00:00';
+    if(activeDuration) activeDuration.textContent='--';
     if(doneBar) doneBar.style.width='0%';
     if(leftBar) leftBar.style.width='100%';
   }
 }
 
 function addDuration(mins){
-  state.durationMinutes = sanitizeNumber(state.durationMinutes, DEFAULT_DURATION) + mins;
+  const current = normalizeDurationInput(state.durationText || formatDuration(state.durationMinutes));
+  const currentMinutes = current ? current.minutes : DEFAULT_DURATION;
+  const updatedMinutes = Math.max(1, currentMinutes + mins);
+  state.durationMinutes = updatedMinutes;
+  state.durationText = formatDuration(updatedMinutes);
   save();
   render();
+}
+
+function bindDurationInput(){
+  const durationInput = document.getElementById('durationInput');
+  if(!durationInput) return;
+
+  durationInput.addEventListener('input',e=>{
+    state.durationText = e.target.value;
+    save();
+  });
+
+  durationInput.addEventListener('blur',e=>{
+    const normalized = normalizeDurationInput(e.target.value);
+    if(normalized){
+      state.durationMinutes = normalized.minutes;
+      state.durationText = normalized.text;
+      e.target.value = normalized.text;
+      save();
+    }
+  });
 }
 
 function render(){
@@ -469,7 +585,7 @@ function render(){
     </div>
     <div style="min-width:0;flex:1;text-align:right">
       <div class="small">Current Task</div>
-      <div class="sub" id="currentTaskText" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${a?`<span class="blink-dot"></span>${a.taskName}`:'No active task'}</div>
+      <div class="sub" id="currentTaskText" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${a?`<span class="blink-dot"></span>${escapeHtml(a.taskName)}`:'No active task'}</div>
     </div>
   </div>
 
@@ -482,29 +598,36 @@ function render(){
     <div class="small" style="font-weight:800">Deadline timer</div>
     <div class="title" id="deadlineClock" style="font-size:22px">${a&&a.deadline?formatClock(secondsLeft(a.deadline)):'00:00:00'}</div>
   </div>
+
+  <div class="task-meta">
+    <div>Duration: <span id="activeDurationText">${a ? formatDuration(a.durationMinutes || 0) : '--'}</span></div>
+    <div>${a && a.deadline ? 'Ends: ' + new Date(a.deadline).toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' }) : ''}</div>
+  </div>
 </div>
 
 <div class="card">
   <div class="sub">Create New Task</div>
   <div class="field">
     <label>Task Name</label>
-    <input id="taskNameInput" value="${state.taskName.replace(/"/g,'&quot;')}" placeholder="">
+    <input id="taskNameInput" value="${escapeHtml(state.taskName)}" placeholder="">
   </div>
 
-  <div class="duration-inline">
-    <div class="duration-label">Duration</div>
-    <input id="durationInput" class="duration-input" type="number" min="1" value="${state.durationMinutes}">
-    <button class="btn-outline mini" id="add15Btn">+15</button>
-    <button class="btn-outline mini" id="add30Btn">+30</button>
-    <button class="btn-outline mini" id="add60Btn">+60</button>
+  <div class="field">
+    <label>Duration</label>
+    <div class="duration-inline">
+      <input id="durationInput" class="duration-input" type="text" value="${escapeHtml(state.durationText)}" placeholder="e.g. 1 hr">
+      <button class="btn-outline mini" id="add15Btn">+15m</button>
+      <button class="btn-outline mini" id="add30Btn">+30m</button>
+      <button class="btn-outline mini" id="add60Btn">+1h</button>
+    </div>
   </div>
 </div>
 
 <div class="card">
   <div class="sub">Next Tasks in Sequence</div>
-  <div id="pendingText" style="font-weight:700;margin-top:8px">${nextTasks().length?nextTasks().map((x,i)=>`${i+1}. ${x.taskName} (${formatDuration(x.durationMinutes||0)})`).join('<br>'):''}</div>
+  <div id="pendingText" style="font-weight:700;margin-top:8px">${nextTasks().length?nextTasks().map((x,i)=>`${i+1}. ${escapeHtml(x.taskName)} (${formatDuration(x.durationMinutes||0)})`).join('<br>'):''}</div>
   <div style="margin-top:12px"><button class="btn-primary" id="createBtn">Add Task</button></div>
-  ${state.tasks.length?state.tasks.map(item=>`<div class="queue-item"><div class="space"><div><div style="font-weight:800">${item.id===state.activeTaskId?'▶ ':''}${item.taskName}</div><div class="small">${item.id===state.activeTaskId && item.deadline ? `Ends ${new Date(item.deadline).toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' })}` : `Queued (${formatDuration(item.durationMinutes||0)})`}</div></div><button class="btn-outline mini" data-remove="${item.id}">Delete</button></div></div>`).join(''):''}
+  ${state.tasks.length?state.tasks.map(item=>`<div class="queue-item"><div class="space"><div><div style="font-weight:800">${item.id===state.activeTaskId?'▶ ':''}${escapeHtml(item.taskName)}</div><div class="small">${item.id===state.activeTaskId && item.deadline ? `Ends ${new Date(item.deadline).toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' })} • ${formatDuration(item.durationMinutes||0)}` : `Queued (${formatDuration(item.durationMinutes||0)})`}</div></div><button class="btn-outline mini" data-remove="${item.id}">Delete</button></div></div>`).join(''):''}
 </div>
 
 <div class="card">
@@ -517,7 +640,10 @@ function render(){
     <div class="inline-label">Reward</div><input id="rewardInput" class="compact-input" type="text" value="₹${state.reward}">
     <div class="inline-label">Penalty</div><input id="penaltyInput" class="compact-input" type="text" value="₹${state.penalty}">
   </div>
-  ${a?`<div class="grid2" style="margin-top:12px"><button class="btn-success" id="successBtn">Success</button><button class="btn-danger" id="failBtn">Fail</button></div>`:''}
+  <div class="grid2" style="margin-top:12px">
+    <button class="btn-success" id="successBtn" ${a ? '' : 'disabled style="opacity:.45;pointer-events:none"'}>Success</button>
+    <button class="btn-danger" id="failBtn" ${a ? '' : 'disabled style="opacity:.45;pointer-events:none"'}>Fail</button>
+  </div>
 </div>
 
 <div class="card">
@@ -537,13 +663,27 @@ function render(){
   </div>
 </div>`;
 
-  document.getElementById('taskNameInput').addEventListener('input',e=>{state.taskName=e.target.value;save()});
-  document.getElementById('durationInput').addEventListener('input',e=>{state.durationMinutes=sanitizeNumber(e.target.value, DEFAULT_DURATION);save()});
+  document.getElementById('taskNameInput').addEventListener('input',e=>{
+    state.taskName=e.target.value;
+    save();
+  });
+
+  bindDurationInput();
+
   document.getElementById('add15Btn').addEventListener('click',()=>addDuration(15));
   document.getElementById('add30Btn').addEventListener('click',()=>addDuration(30));
   document.getElementById('add60Btn').addEventListener('click',()=>addDuration(60));
-  document.getElementById('rewardInput').addEventListener('input',e=>{state.reward=String(sanitizeNumber(e.target.value.replace(/[^0-9]/g,''), DEFAULT_REWARD));save()});
-  document.getElementById('penaltyInput').addEventListener('input',e=>{state.penalty=String(sanitizeNumber(e.target.value.replace(/[^0-9]/g,''), DEFAULT_PENALTY));save()});
+
+  document.getElementById('rewardInput').addEventListener('input',e=>{
+    state.reward=String(sanitizeNumber(e.target.value.replace(/[^0-9]/g,''), DEFAULT_REWARD));
+    save();
+  });
+
+  document.getElementById('penaltyInput').addEventListener('input',e=>{
+    state.penalty=String(sanitizeNumber(e.target.value.replace(/[^0-9]/g,''), DEFAULT_PENALTY));
+    save();
+  });
+
   document.getElementById('createBtn').addEventListener('click',createTask);
   document.getElementById('topupBtn').addEventListener('click',addTopup);
   document.getElementById('soundBtn').addEventListener('click',()=>{state.soundEnabled=!state.soundEnabled;save();render()});
