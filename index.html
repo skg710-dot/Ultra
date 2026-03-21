@@ -11,11 +11,12 @@
   <style>
     :root{
       --bg1:#fff7ed;--bg2:#ffffff;--bg3:#f0fdf4;--text:#0f172a;--muted:#64748b;--border:#e2e8f0;
-      --card:rgba(255,255,255,.84);--primary:#0b1220;--success:#15803d;--danger:#dc2626;
+      --card:rgba(255,255,255,.84);--success:#15803d;--danger:#dc2626;
       --soft-green:#ecfdf5;--soft-green-border:#bbf7d0;
       --soft-blue:#eff6ff;--soft-blue-border:#bfdbfe;
       --soft-grey:#f3f4f6;--soft-grey-border:#d1d5db;
-      --gold:#f4b400;--shadow:0 14px 36px rgba(15,23,42,.10)
+      --gold:#f4b400;--gold-deep:#d89b00;
+      --shadow:0 14px 36px rgba(15,23,42,.10)
     }
     *{box-sizing:border-box}
     html,body{height:100%}
@@ -26,17 +27,16 @@
       radial-gradient(circle at bottom right, rgba(21,128,61,.10), transparent 24%),
       linear-gradient(180deg,var(--bg1),var(--bg2) 48%,var(--bg3));
     }
-    .app{max-width:430px;margin:0 auto;min-height:100vh;padding:14px 14px 22px;display:none}
+    .app{max-width:430px;margin:0 auto;min-height:100vh;padding:12px 12px 18px;display:none}
     .card{
       background:var(--card);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
-      border:1px solid rgba(226,232,240,.95);border-radius:24px;padding:14px;box-shadow:var(--shadow);margin-bottom:12px
+      border:1px solid rgba(226,232,240,.95);border-radius:24px;padding:12px;box-shadow:var(--shadow);margin-bottom:10px
     }
-    .space{display:flex;justify-content:space-between;align-items:center;gap:10px}
+    .space{display:flex;justify-content:space-between;align-items:center;gap:8px}
     .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-    .row-nowrap{display:flex;gap:10px;align-items:center;justify-content:center;flex-wrap:nowrap}
-    .title{font-size:28px;font-weight:800;letter-spacing:-.03em}
-    .sub{font-size:19px;font-weight:800;letter-spacing:-.02em}
-    .small{font-size:13px;color:var(--muted)}
+    .title{font-size:26px;font-weight:800;letter-spacing:-.03em}
+    .sub{font-size:18px;font-weight:800;letter-spacing:-.02em}
+    .small{font-size:12px;color:var(--muted)}
     .pill{padding:7px 11px;border-radius:999px;font-size:12px;font-weight:800}
     .green-pill{background:linear-gradient(135deg,#e7ffe7,#d8fce8);color:var(--success)}
     .logo-wrap{
@@ -52,14 +52,14 @@
     @keyframes pulse-safe{0%,100%{box-shadow:0 0 0 rgba(21,128,61,0)}50%{box-shadow:0 0 0 4px rgba(21,128,61,.07)}}
     @keyframes splashFade{0%{opacity:0;transform:scale(.92)}100%{opacity:1;transform:scale(1)}}
     @keyframes targetGlow{0%,100%{box-shadow:0 0 0 0 rgba(244,180,0,.08)}50%{box-shadow:0 0 28px 8px rgba(244,180,0,.22)}}
-    .field{margin-top:12px}
-    label{display:block;font-size:13px;font-weight:800;margin-bottom:5px;color:var(--muted)}
+
+    label{display:block;font-size:12px;font-weight:800;margin-bottom:6px;color:var(--muted)}
     input{
       width:100%;
-      padding:14px;
-      border-radius:16px;
+      padding:12px;
+      border-radius:14px;
       border:1px solid var(--border);
-      font-size:16px;
+      font-size:15px;
       outline:none;
       background:rgba(255,255,255,.95)
     }
@@ -67,95 +67,220 @@
       border-color:rgba(11,18,32,.35);
       box-shadow:0 0 0 4px rgba(11,18,32,.06)
     }
-    #taskNameInput{
+    #taskNameInput,#storeTaskInput{
       background:var(--soft-green);
-      border:1px solid var(--soft-green-border);
+      border:1px solid var(--soft-green-border)
     }
-    #taskNameInput:focus{
+    #taskNameInput:focus,#storeTaskInput:focus{
       border-color:#86efac;
       box-shadow:0 0 0 4px rgba(34,197,94,.10)
     }
-    .compact-input{padding:8px 10px;font-size:13px;line-height:1.2;border-radius:12px;max-width:100%}
     .duration-input{
-      width:100%;
-      padding:12px 14px;
+      padding:12px;
       border-radius:14px;
       border:1px solid var(--soft-blue-border);
       font-size:15px;
-      background:var(--soft-blue);
-      min-width:0
+      background:var(--soft-blue)
     }
     .duration-input:focus{
       border-color:#93c5fd;
       box-shadow:0 0 0 4px rgba(59,130,246,.10)
     }
-    #rewardInput,
-    #penaltyInput{
-      background:var(--soft-grey);
-      border:1px solid var(--soft-grey-border);
-    }
-    #rewardInput:focus,
-    #penaltyInput:focus{
-      border-color:#cbd5e1;
-      box-shadow:0 0 0 4px rgba(148,163,184,.12)
-    }
-    .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+
     button{
-      width:100%;padding:13px 14px;border-radius:16px;font-size:15px;font-weight:800;cursor:pointer;border:none;
+      width:100%;padding:11px 12px;border-radius:14px;font-size:14px;font-weight:800;cursor:pointer;border:none;
       transition:transform .12s ease, opacity .12s ease
     }
     button:active{transform:scale(.98)}
     .btn-primary{background:linear-gradient(135deg,#0b1220,#111827);color:#fff}
+    .btn-gold{background:linear-gradient(135deg,var(--gold),var(--gold-deep));color:#111827}
     .btn-outline{background:rgba(255,255,255,.95);color:var(--text);border:1px solid var(--border)}
     .btn-success{background:linear-gradient(135deg,#15803d,#16a34a);color:#fff}
     .btn-danger{background:linear-gradient(135deg,#dc2626,#ef4444);color:#fff}
     .mini{
       width:auto;
-      padding:8px 9px;
-      border-radius:12px;
+      padding:6px 8px;
+      border-radius:10px;
       font-size:11px;
       white-space:nowrap;
       flex:0 0 auto
     }
-    .duration-inline .btn-outline{
-      background:var(--soft-blue);
-      border:1px solid var(--soft-blue-border);
+    .tiny-btn{
+      width:100%;
+      padding:6px 8px;
+      border-radius:10px;
+      font-size:11px;
+      font-weight:800;
+      margin-top:6px
     }
-    .bar-wrap{width:100%;height:18px;border-radius:999px;overflow:hidden;background:rgba(229,231,235,.9);margin-top:12px;display:flex;border:1px solid rgba(226,232,240,.85)}
+
+    .action-buttons{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:8px;
+      margin-top:10px
+    }
+    .action-buttons button{
+      padding:10px 8px;
+      min-height:42px;
+      border-radius:14px;
+      font-size:13px;
+      line-height:1.15;
+      letter-spacing:.01em;
+      box-shadow:0 6px 18px rgba(15,23,42,.08)
+    }
+
+    .extend-row{
+      display:flex;
+      justify-content:flex-end;
+      align-items:center;
+      gap:8px;
+      margin-top:8px;
+      flex-wrap:wrap
+    }
+
+    .bar-wrap{
+      position:relative;
+      width:100%;
+      height:34px;
+      border-radius:999px;
+      overflow:hidden;
+      background:rgba(229,231,235,.9);
+      margin-top:8px;
+      display:flex;
+      border:1px solid rgba(226,232,240,.85)
+    }
     .bar-done{background:linear-gradient(90deg,#dc2626,#ef4444);height:100%;transition:width .5s ease}
     .bar-left{background:linear-gradient(90deg,#16a34a,#22c55e);height:100%;transition:width .5s ease}
-    .queue-item{
-      border:1px solid var(--soft-grey-border);
-      border-radius:16px;
+    .bar-label{
+      position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+      font-size:15px;font-weight:800;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.35);pointer-events:none;letter-spacing:.02em
+    }
+
+    .performance-wrap{margin-top:10px}
+    .performance-grid{
+      display:grid;
+      grid-template-columns:repeat(3,minmax(0,1fr));
+      gap:8px
+    }
+    .perf-box{
+      border-radius:18px;
+      padding:10px 8px;
+      min-height:74px;
+      display:flex;
+      flex-direction:column;
+      justify-content:space-between;
+      border:1px solid rgba(226,232,240,.8)
+    }
+    .perf-box h4{
+      margin:0;
+      font-size:11px;
+      line-height:1.15;
+      font-weight:800;
+      color:var(--muted)
+    }
+    .perf-box .val{
+      font-size:18px;
+      font-weight:800;
+      line-height:1.1;
+      word-break:break-word
+    }
+    .perf-reward{background:linear-gradient(135deg,#ecfdf5,#dcfce7)}
+    .perf-penalty{background:linear-gradient(135deg,#fff1f2,#fee2e2)}
+    .perf-wallet{background:linear-gradient(135deg,#eff6ff,#dbeafe)}
+
+    .paired-grid{
+      display:grid;
+      grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+      gap:8px;
+      margin-top:10px
+    }
+    .paired-box{
+      border:1px solid rgba(226,232,240,.95);
+      border-radius:18px;
       padding:10px;
-      margin-top:8px;
+      background:rgba(255,255,255,.55);
+      min-width:0
+    }
+    .quick-row{
+      display:grid;
+      grid-template-columns:repeat(3,minmax(0,1fr));
+      gap:6px;
+      margin-top:8px
+    }
+    .quick-row .btn-outline{
+      background:var(--soft-blue);
+      border:1px solid var(--soft-blue-border);
+      padding:9px 6px;
+      font-size:11px;
+      border-radius:12px
+    }
+
+    .list-box{
+      border:1px solid rgba(226,232,240,.95);
+      border-radius:18px;
+      padding:10px;
+      background:rgba(255,255,255,.55);
+      min-height:200px;
+      min-width:0
+    }
+    .list-title{
+      font-size:17px;
+      font-weight:800;
+      margin:0 0 8px 0
+    }
+    .queue-item,.store-item{
+      border:1px solid var(--soft-grey-border);
+      border-radius:14px;
+      padding:9px;
+      margin-top:7px;
       background:var(--soft-grey)
     }
-    .summary-box{margin:0;padding:12px;box-shadow:none}
-    .reward-box{background:linear-gradient(135deg,#ecfdf5,#dcfce7)}
-    .penalty-box{background:linear-gradient(135deg,#fff1f2,#fee2e2)}
-    .inline-pair{display:grid;grid-template-columns:auto 92px auto 92px;gap:8px;align-items:center;margin-top:12px}
-    .inline-label{font-size:13px;font-weight:800;color:var(--muted);white-space:nowrap}
-    .duration-inline{
-      display:grid;
-      grid-template-columns:minmax(0,1fr) auto auto auto;
-      gap:8px;
-      align-items:center;
-      margin-top:12px
+    .queue-item.active{
+      background:linear-gradient(135deg,#eefbf1,#dcfce7);
+      border-color:#86efac
     }
+    .item-name{
+      font-weight:800;
+      line-height:1.22;
+      font-size:13px;
+      word-break:break-word
+    }
+    .item-meta{
+      font-size:11px;
+      color:var(--muted);
+      margin-top:5px;
+      font-weight:700;
+      line-height:1.2
+    }
+    .item-actions-bottom{
+      display:flex;
+      gap:6px;
+      margin-top:8px;
+      flex-wrap:wrap
+    }
+
     .top-card.safe{animation:pulse-safe 2.2s infinite}
     .top-card.warning{animation:pulse-warning 1.4s infinite}
     .top-card.danger{animation:pulse-danger 1s infinite}
     .task-meta{
-      margin-top:10px;
+      margin-top:8px;
       display:flex;
       justify-content:center;
-      gap:14px;
+      gap:12px;
       flex-wrap:wrap;
       font-size:13px;
       font-weight:800;
       color:var(--muted)
     }
+
+    .empty-state{
+      font-size:12px;
+      color:var(--muted);
+      font-weight:700;
+      padding:8px 2px
+    }
+
     .splash{
       position:fixed;inset:0;z-index:9999;background:
       radial-gradient(circle at top, rgba(244,180,0,.14), transparent 28%),
@@ -171,6 +296,20 @@
     .splash-title{font-size:34px;font-weight:800;letter-spacing:-.03em;margin-bottom:8px}
     .splash-tagline{font-size:19px;font-weight:700;color:var(--gold);margin-bottom:18px}
     .splash-sub{font-size:13px;color:rgba(255,255,255,.7);letter-spacing:.03em}
+
+    @media (max-width:380px){
+      .app{padding:10px 10px 16px}
+      .title{font-size:23px}
+      .sub{font-size:16px}
+      .bar-wrap{height:32px}
+      .bar-label{font-size:13px}
+      .action-buttons button{font-size:11px;padding:9px 6px}
+      .perf-box .val{font-size:16px}
+      .list-title{font-size:15px}
+      .item-actions-bottom .mini{font-size:10px;padding:5px 7px}
+      .quick-row .btn-outline{font-size:10px}
+      .extend-row{gap:6px}
+    }
   </style>
 </head>
 <body>
@@ -192,7 +331,7 @@ if('serviceWorker' in navigator){
   window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
 }
 
-const STORAGE_KEY='kartavya-duration-based-v6';
+const STORAGE_KEY='kartavya-duration-based-v10';
 const TOPUP=5000;
 const DEFAULT_WALLET=5000;
 const DEFAULT_REWARD=50;
@@ -207,6 +346,7 @@ const state={
   durationMinutes:DEFAULT_DURATION,
   durationText:'30 min',
   tasks:[],
+  taskStore:[],
   history:[],
   activeTaskId:null,
   soundEnabled:true,
@@ -241,6 +381,15 @@ function formatDuration(mins){
   return h + ' hr ' + m + ' min';
 }
 
+function formatTimeLeftDisplay(seconds){
+  seconds = Math.max(0, Math.floor(Number(seconds) || 0));
+  const mins = Math.floor(seconds / 60);
+  if(mins < 60) return 'Time left ' + mins + ' min';
+  const hours = Math.floor(mins / 60);
+  const rem = mins % 60;
+  return 'Time left ' + hours + ' hr ' + rem + ' min';
+}
+
 function parseDurationToMinutes(text){
   if(typeof text !== 'string') return null;
   const raw = text.trim().toLowerCase();
@@ -248,7 +397,6 @@ function parseDurationToMinutes(text){
 
   let total = 0;
   let matched = false;
-
   const hrMatch = raw.match(/(\d+(?:\.\d+)?)\s*(hr|hrs|hour|hours|h)\b/);
   const minMatch = raw.match(/(\d+)\s*(min|mins|minute|minutes|m)\b/);
 
@@ -260,23 +408,15 @@ function parseDurationToMinutes(text){
     total += parseInt(minMatch[1], 10);
     matched = true;
   }
-
   if(matched && total > 0) return total;
-
-  if(/^\d+$/.test(raw)){
-    return parseInt(raw,10);
-  }
-
+  if(/^\d+$/.test(raw)) return parseInt(raw,10);
   return null;
 }
 
 function normalizeDurationInput(text){
   const mins = parseDurationToMinutes(text);
   if(mins === null || mins <= 0) return null;
-  return {
-    minutes: mins,
-    text: formatDuration(mins)
-  };
+  return { minutes: mins, text: formatDuration(mins) };
 }
 
 function load(){
@@ -302,12 +442,14 @@ function load(){
   }
 
   if(!Array.isArray(state.tasks)) state.tasks = [];
+  if(!Array.isArray(state.taskStore)) state.taskStore = [];
   if(!Array.isArray(state.history)) state.history = [];
   if(typeof state.taskName !== 'string') state.taskName = '';
   if(typeof state.soundEnabled !== 'boolean') state.soundEnabled = true;
   if(typeof state.vibrationEnabled !== 'boolean') state.vibrationEnabled = true;
 
   migrateTasks();
+  migrateTaskStore();
   syncActive();
 }
 
@@ -322,7 +464,6 @@ function activateTask(task){
   task.durationText = formatDuration(durationMinutes);
   task.activatedAt = now.toISOString();
   task.deadline = new Date(now.getTime() + durationMinutes*60000).toISOString();
-
   state.warned10MinTaskId = null;
   state.warned5MinTaskId = null;
 }
@@ -334,31 +475,29 @@ function migrateTasks(){
     task.penalty = sanitizeNumber(task.penalty, DEFAULT_PENALTY);
     task.durationMinutes = Math.max(1, sanitizeNumber(task.durationMinutes, DEFAULT_DURATION));
     task.durationText = formatDuration(task.durationMinutes);
-
     if(index !== 0 && !task.activatedAt){
       delete task.deadline;
+      delete task.activatedAt;
     }
     return task;
   });
 }
 
-function secondsLeft(d){return Math.max(0,Math.floor((new Date(d)-new Date())/1000))}
-
-function formatClock(s){
-  const h=Math.floor(s/3600),m=Math.floor((s%3600)/60),ss=s%60;
-  return String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(ss).padStart(2,'0');
+function migrateTaskStore(){
+  state.taskStore = state.taskStore.map((item, idx) => ({
+    id: item && item.id ? item.id : Date.now() + idx,
+    taskName: item && typeof item.taskName === 'string' && item.taskName.trim() ? item.taskName.trim() : 'Stored Task',
+    createdAt: item && item.createdAt ? item.createdAt : new Date().toISOString()
+  }));
 }
+
+function secondsLeft(d){return Math.max(0,Math.floor((new Date(d)-new Date())/1000))}
 
 function activeTask(){
   if(state.activeTaskId){
     return state.tasks.find(x=>x.id===state.activeTaskId)||state.tasks[0]||null;
   }
   return state.tasks[0]||null;
-}
-
-function nextTasks(){
-  const a=activeTask();
-  return a?state.tasks.filter(x=>x.id!==a.id):state.tasks;
 }
 
 function syncActive(){
@@ -370,9 +509,7 @@ function syncActive(){
     return;
   }
   const exists=state.tasks.some(x=>x.id===state.activeTaskId);
-  if(!exists){
-    state.activeTaskId=state.tasks[0].id;
-  }
+  if(!exists) state.activeTaskId=state.tasks[0].id;
   const current = activeTask();
   activateTask(current);
   save();
@@ -403,33 +540,31 @@ function alarm(type='normal'){
   }
 }
 
+function buildTask(taskName, durationMinutes){
+  return {
+    id: Date.now() + Math.floor(Math.random()*1000),
+    taskName: taskName.trim(),
+    reward: sanitizeNumber(state.reward, DEFAULT_REWARD),
+    penalty: sanitizeNumber(state.penalty, DEFAULT_PENALTY),
+    durationMinutes: durationMinutes,
+    durationText: formatDuration(durationMinutes),
+    createdAt: new Date().toISOString()
+  };
+}
+
 function createTask(){
   if(!state.taskName.trim()) return alert('Enter task name.');
-
   const normalized = normalizeDurationInput(state.durationText);
   if(!normalized) return alert('Enter duration like 30 min, 1 hr, or 1 hr 30 min.');
 
   state.durationMinutes = normalized.minutes;
   state.durationText = normalized.text;
 
-  const task = {
-    id: Date.now(),
-    taskName: state.taskName.trim(),
-    reward: sanitizeNumber(state.reward, DEFAULT_REWARD),
-    penalty: sanitizeNumber(state.penalty, DEFAULT_PENALTY),
-    durationMinutes: normalized.minutes,
-    durationText: normalized.text,
-    createdAt: new Date().toISOString()
-  };
-
-  if(state.tasks.length === 0){
-    activateTask(task);
-  }
+  const task = buildTask(state.taskName, normalized.minutes);
+  if(state.tasks.length === 0) activateTask(task);
 
   state.tasks.push(task);
   state.taskName='';
-  state.reward=String(DEFAULT_REWARD);
-  state.penalty=String(DEFAULT_PENALTY);
   state.durationMinutes=DEFAULT_DURATION;
   state.durationText=formatDuration(DEFAULT_DURATION);
   syncActive();
@@ -440,7 +575,7 @@ function createTask(){
 function removeTask(id){
   const wasActive=state.activeTaskId===id;
   state.tasks=state.tasks.filter(x=>x.id!==id);
-  if(wasActive)state.activeTaskId=null;
+  if(wasActive) state.activeTaskId=null;
   syncActive();
   save();
   render();
@@ -466,6 +601,19 @@ function finishTask(result){
   render();
 }
 
+function extendActiveTask(minutesToAdd){
+  const a = activeTask();
+  if(!a || !a.deadline) return;
+  const add = Math.max(1, Number(minutesToAdd) || 0);
+  a.durationMinutes = Math.max(1, sanitizeNumber(a.durationMinutes, DEFAULT_DURATION) + add);
+  a.durationText = formatDuration(a.durationMinutes);
+  a.deadline = new Date(new Date(a.deadline).getTime() + add*60000).toISOString();
+  state.warned10MinTaskId = null;
+  state.warned5MinTaskId = null;
+  save();
+  render();
+}
+
 function autoFailIfOverdue(){
   const a=activeTask();
   if(a && a.deadline && secondsLeft(a.deadline)<=0) finishTask('fail');
@@ -479,17 +627,17 @@ function checkDeadlineWarnings(){
   if(mins<=10 && mins>5 && state.warned10MinTaskId!==a.id){
     state.warned10MinTaskId=a.id;
     save();
-    notify('Kartavya Warning',`${a.taskName}: 10 minutes left.`);
+    notify('Kartavya Warning',a.taskName + ': 10 minutes left.');
     alarm('danger');
-    alert(`Warning: Only 10 minutes left for ${a.taskName}.`);
+    alert('Warning: Only 10 minutes left for ' + a.taskName + '.');
   }
 
   if(mins<=5 && mins>0 && state.warned5MinTaskId!==a.id){
     state.warned5MinTaskId=a.id;
     save();
-    notify('Kartavya Final Warning',`${a.taskName}: 5 minutes left.`);
+    notify('Kartavya Final Warning',a.taskName + ': 5 minutes left.');
     alarm('danger');
-    alert(`Final warning: Only 5 minutes left for ${a.taskName}.`);
+    alert('Final warning: Only 5 minutes left for ' + a.taskName + '.');
   }
 }
 
@@ -548,46 +696,44 @@ function urgencyClass(){
   return 'safe';
 }
 
-function refreshLive(){
-  const a=activeTask(),
-    current=document.getElementById('currentTaskText'),
-    pending=document.getElementById('pendingText'),
-    clock=document.getElementById('deadlineClock'),
-    doneBar=document.getElementById('doneBar'),
-    leftBar=document.getElementById('leftBar'),
-    percent=document.getElementById('successPercent'),
-    topCard=document.getElementById('topCard'),
-    activeDuration=document.getElementById('activeDurationText');
-
-  if(percent) percent.textContent = successPercent()+'% Success';
-  if(topCard) topCard.className = `card top-card ${urgencyClass()}`;
-
-  if(a){
-    if(current) current.innerHTML = `<span class="blink-dot"></span>${escapeHtml(a.taskName)}`;
-    if(pending) pending.innerHTML = nextTasks().length
-      ? nextTasks().map((x,i)=>`${i+1}. ${escapeHtml(x.taskName)} (${formatDuration(x.durationMinutes||0)})`).join('<br>')
-      : '';
-    if(clock) clock.textContent = a.deadline ? formatClock(secondsLeft(a.deadline)) : '00:00:00';
-    if(activeDuration) activeDuration.textContent = formatDuration(a.durationMinutes || 0);
-    const pct=progressPercent(a);
-    if(doneBar) doneBar.style.width = pct+'%';
-    if(leftBar) leftBar.style.width = (100-pct)+'%';
-  }else{
-    if(current) current.textContent='No active task';
-    if(pending) pending.innerHTML='';
-    if(clock) clock.textContent='00:00:00';
-    if(activeDuration) activeDuration.textContent='--';
-    if(doneBar) doneBar.style.width='0%';
-    if(leftBar) leftBar.style.width='100%';
-  }
-}
-
 function addDuration(mins){
   const current = normalizeDurationInput(state.durationText || formatDuration(state.durationMinutes));
   const currentMinutes = current ? current.minutes : DEFAULT_DURATION;
   const updatedMinutes = Math.max(1, currentMinutes + mins);
   state.durationMinutes = updatedMinutes;
   state.durationText = formatDuration(updatedMinutes);
+  save();
+  render();
+}
+
+function addTaskForFuture(){
+  const input = document.getElementById('storeTaskInput');
+  const value = input ? input.value.trim() : '';
+  if(!value) return alert('Enter a future task.');
+  state.taskStore.unshift({
+    id: Date.now() + Math.floor(Math.random()*1000),
+    taskName: value,
+    createdAt: new Date().toISOString()
+  });
+  save();
+  render();
+}
+
+function sendStoreTaskToQueue(id){
+  const index = state.taskStore.findIndex(x=>x.id===id);
+  if(index === -1) return;
+  const item = state.taskStore[index];
+  const task = buildTask(item.taskName, DEFAULT_DURATION);
+  if(state.tasks.length === 0) activateTask(task);
+  state.tasks.push(task);
+  state.taskStore.splice(index,1);
+  syncActive();
+  save();
+  render();
+}
+
+function deleteStoreTask(id){
+  state.taskStore = state.taskStore.filter(x=>x.id!==id);
   save();
   render();
 }
@@ -612,11 +758,74 @@ function bindDurationInput(){
   });
 }
 
+function refreshLive(){
+  const a=activeTask(),
+    current=document.getElementById('currentTaskText'),
+    clockInline=document.getElementById('timeLeftInline'),
+    doneBar=document.getElementById('doneBar'),
+    leftBar=document.getElementById('leftBar'),
+    percent=document.getElementById('successPercent'),
+    topCard=document.getElementById('topCard'),
+    activeDuration=document.getElementById('activeDurationText');
+
+  if(percent) percent.textContent = successPercent()+'% Success';
+  if(topCard) topCard.className = 'card top-card ' + urgencyClass();
+
+  if(a){
+    if(current) current.innerHTML = '<span class="blink-dot"></span>' + escapeHtml(a.taskName);
+    if(clockInline) clockInline.textContent = formatTimeLeftDisplay(secondsLeft(a.deadline));
+    if(activeDuration) activeDuration.textContent = formatDuration(a.durationMinutes || 0);
+    const pct=progressPercent(a);
+    if(doneBar) doneBar.style.width = pct+'%';
+    if(leftBar) leftBar.style.width = (100-pct)+'%';
+  }else{
+    if(current) current.textContent='No active task';
+    if(clockInline) clockInline.textContent='Time left 0 min';
+    if(activeDuration) activeDuration.textContent='--';
+    if(doneBar) doneBar.style.width='0%';
+    if(leftBar) leftBar.style.width='100%';
+  }
+}
+
 function render(){
   const app=document.getElementById('app'),
     a=activeTask(),
     s=stats(),
     urgency=urgencyClass();
+
+  const currentTaskHtml = a ? '<span class="blink-dot"></span>' + escapeHtml(a.taskName) : 'No active task';
+  const endText = a && a.deadline
+    ? 'Ends: ' + new Date(a.deadline).toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' })
+    : '';
+  const successButtonText = '✔️ Success (Get ' + rupee(Number(state.reward || DEFAULT_REWARD)) + ')';
+  const failButtonText = '❌ Failed (Pay ' + rupee(Number(state.penalty || DEFAULT_PENALTY)) + ')';
+  const timeLeftText = a && a.deadline ? formatTimeLeftDisplay(secondsLeft(a.deadline)) : 'Time left 0 min';
+
+  const queueHtml = state.tasks.length
+    ? state.tasks.map((item, idx)=>{
+        const isActive = item.id === state.activeTaskId;
+        const meta = formatDuration(item.durationMinutes||0);
+        return '<div class="queue-item' + (isActive ? ' active' : '') + '">' +
+          '<div class="item-name">' + (isActive ? '▶ ' : (idx+1)+'. ') + escapeHtml(item.taskName) + '</div>' +
+          '<div class="item-meta">' + meta + '</div>' +
+          '<div class="item-actions-bottom">' +
+            '<button class="btn-outline mini" data-remove="' + item.id + '">Delete</button>' +
+          '</div>' +
+        '</div>';
+      }).join('')
+    : '<div class="empty-state">No queued task yet.</div>';
+
+  const storeHtml = state.taskStore.length
+    ? state.taskStore.map((item, idx)=>{
+        return '<div class="store-item">' +
+          '<div class="item-name">' + (idx+1) + '. ' + escapeHtml(item.taskName) + '</div>' +
+          '<div class="item-actions-bottom">' +
+            '<button class="btn-primary mini" data-send-queue="' + item.id + '">Queue</button>' +
+            '<button class="btn-outline mini" data-store-delete="' + item.id + '">Delete</button>' +
+          '</div>' +
+        '</div>';
+      }).join('')
+    : '<div class="empty-state">No future task stored yet.</div>';
 
   app.innerHTML=`
 <div class="card top-card ${urgency}" id="topCard">
@@ -628,77 +837,98 @@ function render(){
     </div>
     <div style="min-width:0;flex:1;text-align:right">
       <div class="small">Current Task</div>
-      <div class="sub" id="currentTaskText" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${a?`<span class="blink-dot"></span>${escapeHtml(a.taskName)}`:'No active task'}</div>
+      <div class="sub" id="currentTaskText" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${currentTaskHtml}</div>
     </div>
+  </div>
+
+  <div class="extend-row">
+    <div class="small" style="font-weight:800">Extend Duration</div>
+    <button class="btn-gold mini" id="extend15Btn" ${a ? '' : 'disabled style="opacity:.45;pointer-events:none"'}>+15m</button>
   </div>
 
   <div class="bar-wrap">
     <div class="bar-done" id="doneBar" style="width:${a?progressPercent(a):0}%"></div>
     <div class="bar-left" id="leftBar" style="width:${a?100-progressPercent(a):100}%"></div>
-  </div>
-
-  <div class="row-nowrap" style="margin-top:14px">
-    <div class="small" style="font-weight:800">Deadline timer</div>
-    <div class="title" id="deadlineClock" style="font-size:22px">${a&&a.deadline?formatClock(secondsLeft(a.deadline)):'00:00:00'}</div>
+    <div class="bar-label" id="timeLeftInline">${timeLeftText}</div>
   </div>
 
   <div class="task-meta">
     <div>Duration: <span id="activeDurationText">${a ? formatDuration(a.durationMinutes || 0) : '--'}</span></div>
-    <div>${a && a.deadline ? 'Ends: ' + new Date(a.deadline).toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' }) : ''}</div>
+    <div>${endText}</div>
+  </div>
+
+  <div class="action-buttons">
+    <button class="btn-success" id="successBtn" ${a ? '' : 'disabled style="opacity:.45;pointer-events:none"'}>${successButtonText}</button>
+    <button class="btn-danger" id="failBtn" ${a ? '' : 'disabled style="opacity:.45;pointer-events:none"'}>${failButtonText}</button>
   </div>
 </div>
 
 <div class="card">
-  <div class="sub">Create New Task</div>
-  <div class="field">
-    <label>Task Name</label>
-    <input id="taskNameInput" value="${escapeHtml(state.taskName)}" placeholder="">
-  </div>
-
-  <div class="field">
-    <label>Duration</label>
-    <div class="duration-inline">
-      <input id="durationInput" class="duration-input" type="text" value="${escapeHtml(state.durationText)}" placeholder="e.g. 1 hr">
-      <button class="btn-outline mini" id="add15Btn">+15m</button>
-      <button class="btn-outline mini" id="add30Btn">+30m</button>
-      <button class="btn-outline mini" id="add60Btn">+1h</button>
+  <div class="sub">Your Performance</div>
+  <div class="performance-wrap">
+    <div class="performance-grid">
+      <div class="perf-box perf-reward">
+        <h4>Total Reward</h4>
+        <div class="val" style="color:var(--success)">${rupee(s.reward)}</div>
+      </div>
+      <div class="perf-box perf-penalty">
+        <h4>Total Penalty</h4>
+        <div class="val" style="color:var(--danger)">${rupee(s.penalty)}</div>
+      </div>
+      <div class="perf-box perf-wallet">
+        <h4>Wallet Balance</h4>
+        <div class="val">${rupee(state.wallet)}</div>
+        <button class="btn-primary tiny-btn" id="topupBtn">+${rupee(TOPUP)}</button>
+      </div>
     </div>
   </div>
 </div>
 
 <div class="card">
-  <div class="sub">Next Tasks in Sequence</div>
-  <div id="pendingText" style="font-weight:700;margin-top:8px">${nextTasks().length?nextTasks().map((x,i)=>`${i+1}. ${escapeHtml(x.taskName)} (${formatDuration(x.durationMinutes||0)})`).join('<br>'):''}</div>
-  <div style="margin-top:12px"><button class="btn-primary" id="createBtn">Add Task</button></div>
-  ${state.tasks.length?state.tasks.map(item=>`<div class="queue-item"><div class="space"><div><div style="font-weight:800">${item.id===state.activeTaskId?'▶ ':''}${escapeHtml(item.taskName)}</div><div class="small">${item.id===state.activeTaskId && item.deadline ? `Ends ${new Date(item.deadline).toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' })} • ${formatDuration(item.durationMinutes||0)}` : `Queued (${formatDuration(item.durationMinutes||0)})`}</div></div><button class="btn-outline mini" data-remove="${item.id}">Delete</button></div></div>`).join(''):''}
+  <div class="sub">Create New Task</div>
+  <div class="paired-grid">
+    <div class="paired-box">
+      <label>Task Name</label>
+      <input id="taskNameInput" value="${escapeHtml(state.taskName)}" placeholder="">
+      <div style="margin-top:8px">
+        <button class="btn-gold" id="createBtn">Add Task</button>
+      </div>
+    </div>
+
+    <div class="paired-box">
+      <label>Duration</label>
+      <input id="durationInput" class="duration-input" type="text" value="${escapeHtml(state.durationText)}" placeholder="e.g. 1 hr">
+      <div class="quick-row">
+        <button class="btn-outline" id="add15Btn">+15m</button>
+        <button class="btn-outline" id="add30Btn">+30m</button>
+        <button class="btn-outline" id="add60Btn">+1hr</button>
+      </div>
+    </div>
+  </div>
 </div>
 
 <div class="card">
-  <div class="sub">Summary</div>
-  <div class="grid2" style="margin-top:12px">
-    <div class="card summary-box reward-box"><div class="small">Reward</div><div style="font-size:22px;font-weight:800;color:var(--success)">${rupee(s.reward)}</div></div>
-    <div class="card summary-box penalty-box"><div class="small">Penalty</div><div style="font-size:22px;font-weight:800;color:var(--danger)">${rupee(s.penalty)}</div></div>
-  </div>
-  <div class="inline-pair">
-    <div class="inline-label">Reward</div><input id="rewardInput" class="compact-input" type="text" value="₹${state.reward}">
-    <div class="inline-label">Penalty</div><input id="penaltyInput" class="compact-input" type="text" value="₹${state.penalty}">
-  </div>
-  <div class="grid2" style="margin-top:12px">
-    <button class="btn-success" id="successBtn" ${a ? '' : 'disabled style="opacity:.45;pointer-events:none"'}>Success</button>
-    <button class="btn-danger" id="failBtn" ${a ? '' : 'disabled style="opacity:.45;pointer-events:none"'}>Fail</button>
-  </div>
-</div>
+  <div class="paired-grid">
+    <div class="list-box">
+      <div class="list-title">Queued Task</div>
+      ${queueHtml}
+    </div>
 
-<div class="card">
-  <div class="space">
-    <div><div class="small">Wallet</div><div class="sub">${rupee(state.wallet)}</div></div>
-    <button class="btn-primary mini" id="topupBtn">+ ${rupee(TOPUP)}</button>
+    <div class="list-box">
+      <div class="list-title">Task Store</div>
+      <label>Future Task</label>
+      <input id="storeTaskInput" value="" placeholder="Enter Task">
+      <div style="margin-top:8px">
+        <button class="btn-gold" id="storeAddBtn">Add Task for Future</button>
+      </div>
+      <div style="margin-top:8px">${storeHtml}</div>
+    </div>
   </div>
 </div>
 
 <div class="card">
   <div class="sub">Controls</div>
-  <div class="row" style="margin-top:12px">
+  <div class="row" style="margin-top:10px">
     <button class="${state.soundEnabled?'btn-primary':'btn-outline'} mini" id="soundBtn">${state.soundEnabled?'Sound On':'Sound Off'}</button>
     <button class="${state.vibrationEnabled?'btn-primary':'btn-outline'} mini" id="vibrationBtn">${state.vibrationEnabled?'Vibration On':'Vibration Off'}</button>
     <button class="btn-outline mini" id="notifBtn">Enable Notifications</button>
@@ -716,19 +946,19 @@ function render(){
   document.getElementById('add15Btn').addEventListener('click',()=>addDuration(15));
   document.getElementById('add30Btn').addEventListener('click',()=>addDuration(30));
   document.getElementById('add60Btn').addEventListener('click',()=>addDuration(60));
-
-  document.getElementById('rewardInput').addEventListener('input',e=>{
-    state.reward=String(sanitizeNumber(e.target.value.replace(/[^0-9]/g,''), DEFAULT_REWARD));
-    save();
-  });
-
-  document.getElementById('penaltyInput').addEventListener('input',e=>{
-    state.penalty=String(sanitizeNumber(e.target.value.replace(/[^0-9]/g,''), DEFAULT_PENALTY));
-    save();
-  });
+  document.getElementById('extend15Btn').addEventListener('click',()=>extendActiveTask(15));
 
   document.getElementById('createBtn').addEventListener('click',createTask);
   document.getElementById('topupBtn').addEventListener('click',addTopup);
+  document.getElementById('storeAddBtn').addEventListener('click',addTaskForFuture);
+
+  const storeInput=document.getElementById('storeTaskInput');
+  if(storeInput){
+    storeInput.addEventListener('keydown',e=>{
+      if(e.key==='Enter') addTaskForFuture();
+    });
+  }
+
   document.getElementById('soundBtn').addEventListener('click',()=>{state.soundEnabled=!state.soundEnabled;save();render()});
   document.getElementById('vibrationBtn').addEventListener('click',()=>{state.vibrationEnabled=!state.vibrationEnabled;save();render()});
   document.getElementById('notifBtn').addEventListener('click',requestNotifications);
@@ -740,7 +970,17 @@ function render(){
   const failBtn=document.getElementById('failBtn');
   if(failBtn) failBtn.addEventListener('click',()=>finishTask('fail'));
 
-  document.querySelectorAll('[data-remove]').forEach(btn=>btn.addEventListener('click',()=>removeTask(Number(btn.getAttribute('data-remove')))));
+  document.querySelectorAll('[data-remove]').forEach(btn=>
+    btn.addEventListener('click',()=>removeTask(Number(btn.getAttribute('data-remove'))))
+  );
+
+  document.querySelectorAll('[data-send-queue]').forEach(btn=>
+    btn.addEventListener('click',()=>sendStoreTaskToQueue(Number(btn.getAttribute('data-send-queue'))))
+  );
+
+  document.querySelectorAll('[data-store-delete]').forEach(btn=>
+    btn.addEventListener('click',()=>deleteStoreTask(Number(btn.getAttribute('data-store-delete'))))
+  );
 }
 
 load();
