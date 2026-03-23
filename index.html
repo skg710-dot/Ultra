@@ -18,9 +18,6 @@
       --muted:#c7bfae;
       --border:rgba(244,180,0,.16);
 
-      --card:rgba(255,248,230,.05);
-      --card-strong:rgba(255,248,230,.07);
-
       --success:#22c55e;
       --danger:#ef4444;
 
@@ -30,19 +27,13 @@
       --soft-blue:rgba(59,130,246,.16);
       --soft-blue-border:rgba(96,165,250,.30);
 
-      --soft-grey:rgba(255,255,255,.09);
-      --soft-grey-border:rgba(244,180,0,.14);
-
       --gold:#f4b400;
       --gold-deep:#c88d00;
       --gold-soft:#ffd76a;
 
       --shadow:0 22px 54px rgba(0,0,0,.45);
       --shadow-soft:0 10px 24px rgba(0,0,0,.22);
-
       --radius-xl:26px;
-      --radius-lg:20px;
-      --radius-md:16px;
     }
 
     *{box-sizing:border-box}
@@ -89,481 +80,202 @@
       pointer-events:none;
     }
 
-    .space{
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      gap:8px
-    }
-
-    .row{
-      display:flex;
-      gap:8px;
-      align-items:center;
-      flex-wrap:wrap
-    }
+    .space{display:flex;justify-content:space-between;align-items:center;gap:8px}
+    .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 
     .title{
-      font-size:26px;
-      font-weight:800;
-      letter-spacing:-.03em;
-      color:#fff7dc;
-      text-shadow:0 1px 10px rgba(244,180,0,.08)
+      font-size:26px;font-weight:800;letter-spacing:-.03em;
+      color:#fff7dc;text-shadow:0 1px 10px rgba(244,180,0,.08)
     }
+    .sub{font-size:18px;font-weight:800;letter-spacing:-.02em;color:#fff5d7}
 
-    .sub{
-      font-size:18px;
-      font-weight:800;
-      letter-spacing:-.02em;
-      color:#fff5d7
-    }
-
-    .section-head{
-      display:flex;
-      align-items:center;
-      gap:8px;
-      margin-bottom:2px
-    }
-
+    .section-head{display:flex;align-items:center;gap:8px;margin-bottom:2px}
     .section-dot{
-      width:10px;
-      height:10px;
-      border-radius:50%;
+      width:10px;height:10px;border-radius:50%;
       background:linear-gradient(135deg,var(--gold-soft),var(--gold-deep));
       box-shadow:0 0 0 5px rgba(244,180,0,.10),0 0 18px rgba(244,180,0,.26);
       flex:0 0 auto
     }
 
-    .small{
-      font-size:12px;
-      color:var(--muted)
-    }
-
-    .pill{
-      padding:7px 11px;
-      border-radius:999px;
-      font-size:12px;
-      font-weight:800;
-      box-shadow:var(--shadow-soft)
-    }
-
+    .small{font-size:12px;color:var(--muted)}
+    .pill{padding:7px 11px;border-radius:999px;font-size:12px;font-weight:800;box-shadow:var(--shadow-soft)}
     .green-pill{
       background:linear-gradient(135deg,rgba(34,197,94,.22),rgba(34,197,94,.08));
-      color:#d8ffe6;
-      border:1px solid rgba(34,197,94,.24);
+      color:#d8ffe6;border:1px solid rgba(34,197,94,.24);
     }
 
     .logo-wrap{
-      width:34px;
-      height:34px;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      border-radius:50%;
+      width:34px;height:34px;display:flex;align-items:center;justify-content:center;border-radius:50%;
       background:linear-gradient(135deg,rgba(244,180,0,.30),rgba(244,180,0,.08));
-      box-shadow:
-        inset 0 0 0 1px rgba(244,180,0,.34),
-        0 6px 16px rgba(244,180,0,.18);
+      box-shadow:inset 0 0 0 1px rgba(244,180,0,.34),0 6px 16px rgba(244,180,0,.18);
       flex:0 0 auto
     }
-
     .logo{font-size:18px}
 
     .blink-dot{
-      width:10px;
-      height:10px;
-      border-radius:50%;
-      background:var(--danger);
-      display:inline-block;
-      animation:blink 1s infinite;
-      vertical-align:middle;
-      margin-right:8px;
-      box-shadow:0 0 0 4px rgba(239,68,68,.12)
+      width:10px;height:10px;border-radius:50%;background:var(--danger);display:inline-block;
+      animation:blink 1s infinite;vertical-align:middle;margin-right:8px;box-shadow:0 0 0 4px rgba(239,68,68,.12)
     }
+    .status-dot{
+      width:10px;height:10px;border-radius:50%;display:inline-block;margin-right:8px;vertical-align:middle;flex:0 0 auto
+    }
+    .status-dot.red{background:var(--danger);animation:blink 1s infinite;box-shadow:0 0 0 4px rgba(239,68,68,.12)}
+    .status-dot.green{background:var(--success);box-shadow:0 0 0 4px rgba(34,197,94,.12)}
 
-    @keyframes blink{
-      0%,100%{opacity:1;transform:scale(1)}
-      50%{opacity:.3;transform:scale(.9)}
-    }
+    @keyframes blink{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.3;transform:scale(.9)}}
+    @keyframes pulse-danger{0%,100%{box-shadow:0 0 0 rgba(239,68,68,0)}50%{box-shadow:0 0 0 7px rgba(239,68,68,.12)}}
+    @keyframes pulse-warning{0%,100%{box-shadow:0 0 0 rgba(244,180,0,0)}50%{box-shadow:0 0 0 7px rgba(244,180,0,.10)}}
+    @keyframes pulse-safe{0%,100%{box-shadow:0 0 0 rgba(34,197,94,0)}50%{box-shadow:0 0 0 5px rgba(34,197,94,.08)}}
+    @keyframes splashFade{0%{opacity:0;transform:scale(.92)}100%{opacity:1;transform:scale(1)}}
+    @keyframes targetGlow{0%,100%{box-shadow:0 0 0 0 rgba(244,180,0,.08)}50%{box-shadow:0 0 28px 8px rgba(244,180,0,.22)}}
 
-    @keyframes pulse-danger{
-      0%,100%{box-shadow:0 0 0 rgba(239,68,68,0)}
-      50%{box-shadow:0 0 0 7px rgba(239,68,68,.12)}
-    }
-
-    @keyframes pulse-warning{
-      0%,100%{box-shadow:0 0 0 rgba(244,180,0,0)}
-      50%{box-shadow:0 0 0 7px rgba(244,180,0,.10)}
-    }
-
-    @keyframes pulse-safe{
-      0%,100%{box-shadow:0 0 0 rgba(34,197,94,0)}
-      50%{box-shadow:0 0 0 5px rgba(34,197,94,.08)}
-    }
-
-    @keyframes splashFade{
-      0%{opacity:0;transform:scale(.92)}
-      100%{opacity:1;transform:scale(1)}
-    }
-
-    @keyframes targetGlow{
-      0%,100%{box-shadow:0 0 0 0 rgba(244,180,0,.08)}
-      50%{box-shadow:0 0 28px 8px rgba(244,180,0,.22)}
-    }
-
-    label{
-      display:block;
-      font-size:12px;
-      font-weight:800;
-      margin-bottom:6px;
-      color:var(--muted)
-    }
+    label{display:block;font-size:12px;font-weight:800;margin-bottom:6px;color:var(--muted)}
 
     input{
-      width:100%;
-      padding:12px;
-      border-radius:14px;
-      border:1px solid rgba(244,180,0,.18);
-      font-size:15px;
-      outline:none;
-      background:rgba(255,255,255,.10);
-      color:#fff7e6;
+      width:100%;padding:12px;border-radius:14px;border:1px solid rgba(244,180,0,.18);
+      font-size:15px;outline:none;background:rgba(255,255,255,.10);color:#fff7e6;
       box-shadow:inset 0 1px 2px rgba(0,0,0,.20)
     }
+    input::placeholder{color:#c9b78c}
+    input:focus{border-color:rgba(244,180,0,.38);box-shadow:0 0 0 4px rgba(244,180,0,.08)}
 
-    input::placeholder{
-      color:#c9b78c;
+    #taskNameInput,#storeTaskInput,#routineTaskInput{
+      background:var(--soft-green);border:1px solid var(--soft-green-border)
     }
-
-    input:focus{
-      border-color:rgba(244,180,0,.38);
-      box-shadow:0 0 0 4px rgba(244,180,0,.08)
-    }
-
-    #taskNameInput,#storeTaskInput{
-      background:var(--soft-green);
-      border:1px solid var(--soft-green-border)
-    }
-
     .duration-input{
-      padding:12px;
-      border-radius:14px;
-      border:1px solid var(--soft-blue-border);
-      font-size:15px;
-      background:var(--soft-blue)
+      padding:12px;border-radius:14px;border:1px solid var(--soft-blue-border);
+      font-size:15px;background:var(--soft-blue)
     }
 
     button{
-      width:100%;
-      padding:11px 12px;
-      border-radius:14px;
-      font-size:14px;
-      font-weight:800;
-      cursor:pointer;
-      border:none;
+      width:100%;padding:11px 12px;border-radius:14px;font-size:14px;font-weight:800;cursor:pointer;border:none;
       transition:transform .12s ease, opacity .12s ease, box-shadow .15s ease, filter .15s ease
     }
-
     button:hover{filter:brightness(1.04)}
     button:active{transform:scale(.98)}
 
     .btn-primary{
-      background:linear-gradient(135deg,#171717,#2a2a2a);
-      color:#fff8e1;
-      border:1px solid rgba(244,180,0,.14);
-      box-shadow:0 8px 20px rgba(0,0,0,.28)
+      background:linear-gradient(135deg,#171717,#2a2a2a);color:#fff8e1;
+      border:1px solid rgba(244,180,0,.14);box-shadow:0 8px 20px rgba(0,0,0,.28)
     }
-
     .btn-gold{
       background:linear-gradient(135deg,var(--gold-soft),var(--gold),var(--gold-deep));
-      color:#16120a;
-      box-shadow:0 8px 22px rgba(244,180,0,.28)
+      color:#16120a;box-shadow:0 8px 22px rgba(244,180,0,.28)
     }
-
     .btn-outline{
-      background:rgba(255,255,255,.09);
-      color:#fff3d2;
-      border:1px solid rgba(244,180,0,.14);
-      box-shadow:var(--shadow-soft)
+      background:rgba(255,255,255,.09);color:#fff3d2;border:1px solid rgba(244,180,0,.14);box-shadow:var(--shadow-soft)
     }
-
     .btn-success{
-      background:linear-gradient(135deg,#16a34a,#22c55e);
-      color:#ffffff;
-      border:2px solid rgba(255,255,255,.12);
-      box-shadow:0 10px 24px rgba(34,197,94,.24)
+      background:linear-gradient(135deg,#16a34a,#22c55e);color:#ffffff;
+      border:2px solid rgba(255,255,255,.12);box-shadow:0 10px 24px rgba(34,197,94,.24)
     }
-
     .btn-danger{
-      background:linear-gradient(135deg,#dc2626,#ef4444);
-      color:#ffffff;
-      border:2px solid rgba(255,255,255,.12);
-      box-shadow:0 10px 24px rgba(239,68,68,.24)
+      background:linear-gradient(135deg,#dc2626,#ef4444);color:#ffffff;
+      border:2px solid rgba(255,255,255,.12);box-shadow:0 10px 24px rgba(239,68,68,.24)
     }
 
-    .mini{
-      width:auto;
-      padding:6px 8px;
-      border-radius:10px;
-      font-size:11px;
-      white-space:nowrap;
-      flex:0 0 auto
-    }
-
-    .tiny-btn{
-      width:100%;
-      padding:6px 8px;
-      border-radius:10px;
-      font-size:11px;
-      font-weight:800;
-      margin-top:6px
-    }
+    .mini{width:auto;padding:6px 8px;border-radius:10px;font-size:11px;white-space:nowrap;flex:0 0 auto}
+    .tiny-btn{width:100%;padding:6px 8px;border-radius:10px;font-size:11px;font-weight:800;margin-top:6px}
 
     .action-buttons{
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:8px;
-      margin-top:10px
+      display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px
     }
-
     .action-buttons button{
-      padding:10px 8px;
-      min-height:44px;
-      border-radius:14px;
-      font-size:13px;
-      line-height:1.15;
-      letter-spacing:.01em;
-      text-shadow:0 1px 2px rgba(0,0,0,.18)
+      padding:10px 8px;min-height:44px;border-radius:14px;font-size:13px;line-height:1.15;
+      letter-spacing:.01em;text-shadow:0 1px 2px rgba(0,0,0,.18)
     }
 
     .extend-row{
-      display:flex;
-      justify-content:flex-end;
-      align-items:center;
-      gap:8px;
-      margin-top:8px;
-      flex-wrap:wrap
+      display:flex;justify-content:flex-end;align-items:center;gap:8px;margin-top:8px;flex-wrap:wrap
     }
 
     .bar-wrap{
-      position:relative;
-      width:100%;
-      height:34px;
-      border-radius:999px;
-      overflow:hidden;
-      background:rgba(255,255,255,.08);
-      margin-top:8px;
-      display:flex;
-      border:1px solid rgba(244,180,0,.14);
-      box-shadow:inset 0 1px 4px rgba(0,0,0,.20)
+      position:relative;width:100%;height:34px;border-radius:999px;overflow:hidden;background:rgba(255,255,255,.08);
+      margin-top:8px;display:flex;border:1px solid rgba(244,180,0,.14);box-shadow:inset 0 1px 4px rgba(0,0,0,.20)
     }
-
-    .bar-done{
-      background:linear-gradient(90deg,#ff5a5a,#ff8080);
-      height:100%;
-      transition:width .5s ease
-    }
-
-    .bar-left{
-      background:linear-gradient(90deg,#16a34a,#22c55e);
-      height:100%;
-      transition:width .5s ease
-    }
-
+    .bar-done{background:linear-gradient(90deg,#ff5a5a,#ff8080);height:100%;transition:width .5s ease}
+    .bar-left{background:linear-gradient(90deg,#16a34a,#22c55e);height:100%;transition:width .5s ease}
     .bar-label{
-      position:absolute;
-      inset:0;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      font-size:15px;
-      font-weight:800;
-      color:#fff;
-      text-shadow:0 1px 3px rgba(0,0,0,.50);
-      pointer-events:none;
-      letter-spacing:.02em
+      position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+      font-size:15px;font-weight:800;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.50);pointer-events:none;letter-spacing:.02em
     }
 
     .performance-wrap{margin-top:10px}
-
-    .performance-grid{
-      display:grid;
-      grid-template-columns:repeat(3,minmax(0,1fr));
-      gap:8px
-    }
-
+    .performance-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
     .perf-box{
-      border-radius:18px;
-      padding:10px 8px;
-      min-height:74px;
-      display:flex;
-      flex-direction:column;
-      justify-content:space-between;
-      border:1px solid rgba(244,180,0,.12);
-      box-shadow:var(--shadow-soft)
+      border-radius:18px;padding:10px 8px;min-height:74px;display:flex;flex-direction:column;justify-content:space-between;
+      border:1px solid rgba(244,180,0,.12);box-shadow:var(--shadow-soft)
     }
-
-    .perf-box h4{
-      margin:0;
-      font-size:11px;
-      line-height:1.15;
-      font-weight:800;
-      color:#d7c6a0
-    }
-
-    .perf-box .val{
-      font-size:18px;
-      font-weight:800;
-      line-height:1.1;
-      word-break:break-word
-    }
-
+    .perf-box h4{margin:0;font-size:11px;line-height:1.15;font-weight:800;color:#d7c6a0}
+    .perf-box .val{font-size:18px;font-weight:800;line-height:1.1;word-break:break-word}
     .perf-reward{background:linear-gradient(135deg,rgba(34,197,94,.18),rgba(34,197,94,.08))}
     .perf-penalty{background:linear-gradient(135deg,rgba(239,68,68,.18),rgba(239,68,68,.08))}
     .perf-wallet{background:linear-gradient(135deg,rgba(244,180,0,.18),rgba(244,180,0,.08))}
 
-    .paired-grid{
-      display:grid;
-      grid-template-columns:minmax(0,1fr) minmax(0,1fr);
-      gap:8px;
-      margin-top:10px
-    }
-
+    .paired-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px;margin-top:10px}
     .paired-box{
-      border:1px solid rgba(244,180,0,.12);
-      border-radius:18px;
-      padding:10px;
-      background:rgba(255,255,255,.08);
-      min-width:0;
-      box-shadow:var(--shadow-soft)
+      border:1px solid rgba(244,180,0,.12);border-radius:18px;padding:10px;background:rgba(255,255,255,.08);
+      min-width:0;box-shadow:var(--shadow-soft)
     }
 
-    .quick-row{
-      display:grid;
-      grid-template-columns:repeat(3,minmax(0,1fr));
-      gap:6px;
-      margin-top:8px
-    }
-
+    .quick-row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin-top:8px}
     .quick-row .btn-outline{
-      background:rgba(255,255,255,.08);
-      border:1px solid rgba(244,180,0,.14);
-      padding:9px 6px;
-      font-size:11px;
-      border-radius:12px
+      background:rgba(255,255,255,.08);border:1px solid rgba(244,180,0,.14);padding:9px 6px;font-size:11px;border-radius:12px
     }
 
-    .list-box{
-      border:1px solid rgba(244,180,0,.12);
-      border-radius:18px;
-      padding:10px;
-      background:rgba(255,255,255,.08);
-      min-height:200px;
-      min-width:0;
+    .list-box,.full-box{
+      border:1px solid rgba(244,180,0,.12);border-radius:18px;padding:10px;background:rgba(255,255,255,.08);
       box-shadow:var(--shadow-soft)
     }
+    .list-box{min-height:200px;min-width:0}
+    .full-box{margin-top:10px}
 
-    .list-title{
-      font-size:17px;
-      font-weight:800;
-      margin:0 0 8px 0;
-      color:#fff5d7
-    }
+    .list-title{font-size:17px;font-weight:800;margin:0 0 8px 0;color:#fff5d7}
 
-    .queue-item,.store-item{
-      border:1px solid rgba(244,180,0,.12);
-      border-radius:14px;
-      padding:9px;
-      margin-top:7px;
+    .queue-item,.routine-item{
+      border:1px solid rgba(244,180,0,.12);border-radius:14px;padding:9px;margin-top:7px;
       background:linear-gradient(180deg,rgba(255,255,255,.09),rgba(255,255,255,.05));
       box-shadow:0 6px 14px rgba(0,0,0,.14)
     }
-
     .queue-item.active{
       background:linear-gradient(135deg,rgba(34,197,94,.16),rgba(34,197,94,.08));
       border-color:rgba(34,197,94,.22)
     }
 
-    .item-name{
-      font-weight:800;
-      line-height:1.22;
-      font-size:13px;
-      word-break:break-word;
-      color:#fff8e9
+    .store-row{
+      display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:8px;align-items:center;
+      border:1px solid rgba(244,180,0,.12);border-radius:14px;padding:8px 9px;margin-top:7px;
+      background:linear-gradient(180deg,rgba(255,255,255,.09),rgba(255,255,255,.05));
+      box-shadow:0 6px 14px rgba(0,0,0,.14)
     }
 
-    .item-meta{
-      font-size:11px;
-      color:#c9b78c;
-      margin-top:5px;
-      font-weight:700;
-      line-height:1.2
-    }
-
-    .item-actions-bottom{
-      display:flex;
-      gap:6px;
-      margin-top:8px;
-      flex-wrap:wrap
-    }
+    .item-name{font-weight:800;line-height:1.22;font-size:13px;word-break:break-word;color:#fff8e9}
+    .item-meta{font-size:11px;color:#c9b78c;margin-top:5px;font-weight:700;line-height:1.2}
+    .item-actions-bottom{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
 
     .top-card.safe{animation:pulse-safe 2.2s infinite}
     .top-card.warning{animation:pulse-warning 1.4s infinite}
     .top-card.danger{animation:pulse-danger 1s infinite}
 
     .task-meta{
-      margin-top:8px;
-      display:flex;
-      justify-content:center;
-      gap:12px;
-      flex-wrap:wrap;
-      font-size:13px;
-      font-weight:800;
-      color:#c9b78c
+      margin-top:8px;display:flex;justify-content:center;gap:12px;flex-wrap:wrap;
+      font-size:13px;font-weight:800;color:#c9b78c
     }
-
-    .empty-state{
-      font-size:12px;
-      color:#c9b78c;
-      font-weight:700;
-      padding:8px 2px
-    }
+    .empty-state{font-size:12px;color:#c9b78c;font-weight:700;padding:8px 2px}
 
     .splash{
-      position:fixed;
-      inset:0;
-      z-index:9999;
-      background:
+      position:fixed;inset:0;z-index:9999;background:
         radial-gradient(circle at top, rgba(244,180,0,.16), transparent 28%),
         linear-gradient(180deg,#080808,#111111);
-      color:white;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      flex-direction:column;
-      text-align:center;
-      padding:24px;
-      animation:splashFade .9s ease
+      color:white;display:flex;align-items:center;justify-content:center;flex-direction:column;text-align:center;padding:24px;animation:splashFade .9s ease
     }
-
     .splash-logo{
-      width:116px;
-      height:116px;
-      border-radius:50%;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      position:relative;
-      margin-bottom:22px;
-      animation:targetGlow 1.8s ease-in-out infinite
+      width:116px;height:116px;border-radius:50%;display:flex;align-items:center;justify-content:center;position:relative;
+      margin-bottom:22px;animation:targetGlow 1.8s ease-in-out infinite
     }
-
     .splash-target{position:relative;width:116px;height:116px;border-radius:50%}
     .ring1,.ring2,.ring3,.bull{position:absolute;inset:0;margin:auto;border-radius:50%;border:4px solid var(--gold)}
-    .ring1{width:112px;height:112px}
-    .ring2{width:74px;height:74px}
-    .ring3{width:38px;height:38px}
-    .bull{width:14px;height:14px;border:none;background:var(--gold)}
+    .ring1{width:112px;height:112px}.ring2{width:74px;height:74px}.ring3{width:38px;height:38px}.bull{width:14px;height:14px;border:none;background:var(--gold)}
     .arrow{position:absolute;width:58px;height:6px;background:white;border-radius:4px;transform:rotate(-44deg);top:30px;right:14px}
     .arrow::before{content:'';position:absolute;right:-2px;top:-5px;border-left:12px solid white;border-top:8px solid transparent;border-bottom:8px solid transparent}
     .splash-title{font-size:34px;font-weight:800;letter-spacing:-.03em;margin-bottom:8px}
@@ -579,9 +291,10 @@
       .action-buttons button{font-size:11px;padding:9px 6px}
       .perf-box .val{font-size:16px}
       .list-title{font-size:15px}
-      .item-actions-bottom .mini{font-size:10px;padding:5px 7px}
+      .item-actions-bottom .mini,.store-row .mini{font-size:10px;padding:5px 7px}
       .quick-row .btn-outline{font-size:10px}
       .extend-row{gap:6px}
+      .store-row{grid-template-columns:minmax(0,1fr) auto auto;gap:6px}
     }
   </style>
 </head>
@@ -604,7 +317,7 @@ if('serviceWorker' in navigator){
   window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
 }
 
-const STORAGE_KEY='kartavya-duration-based-v11';
+const STORAGE_KEY='kartavya-duration-based-v13';
 const TOPUP=5000;
 const DEFAULT_WALLET=5000;
 const DEFAULT_REWARD=50;
@@ -620,73 +333,58 @@ const state={
   durationText:'30 min',
   tasks:[],
   taskStore:[],
+  routineTasks:[],
   history:[],
   activeTaskId:null,
   soundEnabled:true,
   vibrationEnabled:true,
   warned10MinTaskId:null,
   warned5MinTaskId:null,
-  autoQueuedFromStoreForTaskId:null
+  refillSourceNext:'store',
+  lastRoutineResetDate:null
 };
 
 function sanitizeNumber(value, fallback){
   const n = Number(value);
   return Number.isFinite(n) && n >= 0 ? n : fallback;
 }
-
 function escapeHtml(str){
   return String(str || '')
-    .replace(/&/g,'&amp;')
-    .replace(/</g,'&lt;')
-    .replace(/>/g,'&gt;')
-    .replace(/"/g,'&quot;')
-    .replace(/'/g,'&#39;');
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 }
-
 function save(){localStorage.setItem(STORAGE_KEY,JSON.stringify(state))}
 function rupee(n){return '₹'+Number(n||0).toLocaleString('en-IN')}
-
+function todayKey(){
+  const now = new Date();
+  return now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0') + '-' + String(now.getDate()).padStart(2,'0');
+}
 function formatDuration(mins){
   mins = Math.max(0, Math.round(Number(mins) || 0));
   if(mins < 60) return mins + ' min';
-  const h = Math.floor(mins / 60);
-  const m = mins % 60;
-  if(m === 0) return h + ' hr';
-  return h + ' hr ' + m + ' min';
+  const h = Math.floor(mins / 60), m = mins % 60;
+  return m === 0 ? h + ' hr' : h + ' hr ' + m + ' min';
 }
-
 function formatTimeLeftDisplay(seconds){
   seconds = Math.max(0, Math.floor(Number(seconds) || 0));
   const mins = Math.floor(seconds / 60);
   if(mins < 60) return 'Time left ' + mins + ' min';
-  const hours = Math.floor(mins / 60);
-  const rem = mins % 60;
+  const hours = Math.floor(mins / 60), rem = mins % 60;
   return 'Time left ' + hours + ' hr ' + rem + ' min';
 }
-
 function parseDurationToMinutes(text){
   if(typeof text !== 'string') return null;
   const raw = text.trim().toLowerCase();
   if(!raw) return null;
-
-  let total = 0;
-  let matched = false;
+  let total = 0, matched = false;
   const hrMatch = raw.match(/(\d+(?:\.\d+)?)\s*(hr|hrs|hour|hours|h)\b/);
   const minMatch = raw.match(/(\d+)\s*(min|mins|minute|minutes|m)\b/);
-
-  if(hrMatch){
-    total += Math.round(parseFloat(hrMatch[1]) * 60);
-    matched = true;
-  }
-  if(minMatch){
-    total += parseInt(minMatch[1], 10);
-    matched = true;
-  }
+  if(hrMatch){ total += Math.round(parseFloat(hrMatch[1]) * 60); matched = true; }
+  if(minMatch){ total += parseInt(minMatch[1], 10); matched = true; }
   if(matched && total > 0) return total;
   if(/^\d+$/.test(raw)) return parseInt(raw,10);
   return null;
 }
-
 function normalizeDurationInput(text){
   const mins = parseDurationToMinutes(text);
   if(mins === null || mins <= 0) return null;
@@ -696,27 +394,22 @@ function normalizeDurationInput(text){
 function load(){
   const raw=localStorage.getItem(STORAGE_KEY);
   if(raw){
-    try{
-      const parsed = JSON.parse(raw);
-      Object.assign(state, parsed);
-    }catch(e){}
+    try{ Object.assign(state, JSON.parse(raw)); }catch(e){}
   }
 
   state.wallet = sanitizeNumber(state.wallet, DEFAULT_WALLET);
   state.reward = String(sanitizeNumber(state.reward, DEFAULT_REWARD));
   state.penalty = String(sanitizeNumber(state.penalty, DEFAULT_PENALTY));
   state.durationMinutes = Math.max(1, sanitizeNumber(state.durationMinutes, DEFAULT_DURATION));
+  state.refillSourceNext = state.refillSourceNext === 'routine' ? 'routine' : 'store';
 
   const normalized = normalizeDurationInput(state.durationText || formatDuration(state.durationMinutes));
-  if(normalized){
-    state.durationMinutes = normalized.minutes;
-    state.durationText = normalized.text;
-  }else{
-    state.durationText = formatDuration(state.durationMinutes);
-  }
+  state.durationText = normalized ? normalized.text : formatDuration(state.durationMinutes);
+  state.durationMinutes = normalized ? normalized.minutes : state.durationMinutes;
 
   if(!Array.isArray(state.tasks)) state.tasks = [];
   if(!Array.isArray(state.taskStore)) state.taskStore = [];
+  if(!Array.isArray(state.routineTasks)) state.routineTasks = [];
   if(!Array.isArray(state.history)) state.history = [];
   if(typeof state.taskName !== 'string') state.taskName = '';
   if(typeof state.soundEnabled !== 'boolean') state.soundEnabled = true;
@@ -724,16 +417,16 @@ function load(){
 
   migrateTasks();
   migrateTaskStore();
+  migrateRoutineTasks();
+  resetRoutineTasksIfNewDay();
   syncActive();
 }
 
 function activateTask(task){
   if(!task) return;
   if(task.activatedAt && task.deadline) return;
-
   const now = new Date();
   const durationMinutes = Math.max(1, sanitizeNumber(task.durationMinutes, DEFAULT_DURATION));
-
   task.durationMinutes = durationMinutes;
   task.durationText = formatDuration(durationMinutes);
   task.activatedAt = now.toISOString();
@@ -749,10 +442,7 @@ function migrateTasks(){
     task.penalty = sanitizeNumber(task.penalty, DEFAULT_PENALTY);
     task.durationMinutes = Math.max(1, sanitizeNumber(task.durationMinutes, DEFAULT_DURATION));
     task.durationText = formatDuration(task.durationMinutes);
-    if(index !== 0 && !task.activatedAt){
-      delete task.deadline;
-      delete task.activatedAt;
-    }
+    if(index !== 0 && !task.activatedAt){ delete task.deadline; delete task.activatedAt; }
     return task;
   });
 }
@@ -761,32 +451,52 @@ function migrateTaskStore(){
   state.taskStore = state.taskStore.map((item, idx) => ({
     id: item && item.id ? item.id : Date.now() + idx,
     taskName: item && typeof item.taskName === 'string' && item.taskName.trim() ? item.taskName.trim() : 'Stored Task',
+    completed: !!(item && item.completed),
+    autoServed: !!(item && item.autoServed),
     createdAt: item && item.createdAt ? item.createdAt : new Date().toISOString()
   }));
 }
 
-function secondsLeft(d){return Math.max(0,Math.floor((new Date(d)-new Date())/1000))}
-
-function activeTask(){
-  if(state.activeTaskId){
-    return state.tasks.find(x=>x.id===state.activeTaskId)||state.tasks[0]||null;
-  }
-  return state.tasks[0]||null;
+function migrateRoutineTasks(){
+  state.routineTasks = state.routineTasks.map((item, idx) => ({
+    id: item && item.id ? item.id : Date.now() + idx + 10000,
+    taskName: item && typeof item.taskName === 'string' && item.taskName.trim() ? item.taskName.trim() : 'Routine Task',
+    durationMinutes: Math.max(1, sanitizeNumber(item && item.durationMinutes, DEFAULT_DURATION)),
+    completed: !!(item && item.completed),
+    autoServed: !!(item && item.autoServed),
+    createdAt: item && item.createdAt ? item.createdAt : new Date().toISOString()
+  }));
 }
 
+function resetRoutineTasksIfNewDay(){
+  const today = todayKey();
+  if(state.lastRoutineResetDate !== today){
+    state.routineTasks = state.routineTasks.map(item => ({
+      ...item,
+      completed:false,
+      autoServed:false
+    }));
+    state.lastRoutineResetDate = today;
+    save();
+  }
+}
+
+function secondsLeft(d){return Math.max(0,Math.floor((new Date(d)-new Date())/1000))}
+function activeTask(){
+  if(state.activeTaskId) return state.tasks.find(x=>x.id===state.activeTaskId)||state.tasks[0]||null;
+  return state.tasks[0]||null;
+}
 function syncActive(){
   if(!state.tasks.length){
     state.activeTaskId=null;
     state.warned10MinTaskId=null;
     state.warned5MinTaskId=null;
-    state.autoQueuedFromStoreForTaskId=null;
     save();
     return;
   }
   const exists=state.tasks.some(x=>x.id===state.activeTaskId);
   if(!exists) state.activeTaskId=state.tasks[0].id;
-  const current = activeTask();
-  activateTask(current);
+  activateTask(activeTask());
   save();
 }
 
@@ -795,19 +505,16 @@ function notify(t,b){
     try{new Notification(t,{body:b})}catch(e){}
   }
 }
-
 function alarm(type='normal'){
   if(state.soundEnabled){
     try{
       const ctx=new (window.AudioContext||window.webkitAudioContext)();
       const osc=ctx.createOscillator();
       const gain=ctx.createGain();
-      osc.connect(gain);
-      gain.connect(ctx.destination);
+      osc.connect(gain); gain.connect(ctx.destination);
       osc.frequency.value=type==='danger'?220:660;
       gain.gain.value=.04;
-      osc.start();
-      osc.stop(ctx.currentTime+.22);
+      osc.start(); osc.stop(ctx.currentTime+.22);
     }catch(e){}
   }
   if(state.vibrationEnabled && navigator.vibrate){
@@ -815,15 +522,17 @@ function alarm(type='normal'){
   }
 }
 
-function buildTask(taskName, durationMinutes){
+function buildTask(taskName, durationMinutes, sourceType='', sourceId=null){
   return {
     id: Date.now() + Math.floor(Math.random()*1000),
     taskName: taskName.trim(),
     reward: sanitizeNumber(state.reward, DEFAULT_REWARD),
     penalty: sanitizeNumber(state.penalty, DEFAULT_PENALTY),
-    durationMinutes: durationMinutes,
+    durationMinutes,
     durationText: formatDuration(durationMinutes),
-    createdAt: new Date().toISOString()
+    createdAt: new Date().toISOString(),
+    sourceType,
+    sourceId
   };
 }
 
@@ -831,37 +540,106 @@ function createTask(){
   if(!state.taskName.trim()) return alert('Enter task name.');
   const normalized = normalizeDurationInput(state.durationText);
   if(!normalized) return alert('Enter duration like 30 min, 1 hr, or 1 hr 30 min.');
-
   state.durationMinutes = normalized.minutes;
   state.durationText = normalized.text;
 
-  const task = buildTask(state.taskName, normalized.minutes);
+  const task = buildTask(state.taskName, normalized.minutes, 'manual', null);
   if(state.tasks.length === 0) activateTask(task);
-
   state.tasks.push(task);
+
   state.taskName='';
   state.durationMinutes=DEFAULT_DURATION;
   state.durationText=formatDuration(DEFAULT_DURATION);
-  syncActive();
-  save();
-  render();
+  syncActive(); save(); render();
 }
 
 function removeTask(id){
-  const wasActive=state.activeTaskId===id;
-  state.tasks=state.tasks.filter(x=>x.id!==id);
+  const wasActive = state.activeTaskId===id;
+  state.tasks = state.tasks.filter(x=>x.id!==id);
   if(wasActive) state.activeTaskId=null;
-  syncActive();
-  save();
-  render();
+  syncActive(); save(); render();
+}
+
+function moveQueuedTask(id, direction){
+  const index = state.tasks.findIndex(x=>x.id===id);
+  if(index === -1) return;
+  const target = index + direction;
+  if(target < 0 || target >= state.tasks.length) return;
+  const temp = state.tasks[index];
+  state.tasks[index] = state.tasks[target];
+  state.tasks[target] = temp;
+  save(); render();
+}
+
+function markSourceTaskCompleted(task){
+  if(!task) return;
+
+  if(task.sourceType === 'store' && task.sourceId){
+    state.taskStore = state.taskStore.map(item =>
+      item.id === task.sourceId ? {...item, completed:true} : item
+    );
+  }
+
+  if(task.sourceType === 'routine' && task.sourceId){
+    state.routineTasks = state.routineTasks.map(item =>
+      item.id === task.sourceId ? {...item, completed:true} : item
+    );
+  }
+}
+
+function nextUnfinishedStoreTask(){
+  return state.taskStore.find(item => !item.completed && !item.autoServed) || null;
+}
+function nextUnfinishedRoutineTask(){
+  return state.routineTasks.find(item => !item.completed && !item.autoServed) || null;
+}
+
+function enqueueFromSource(){
+  if(state.tasks.length > 0) return false;
+
+  const storeItem = nextUnfinishedStoreTask();
+  const routineItem = nextUnfinishedRoutineTask();
+  if(!storeItem && !routineItem) return false;
+
+  let source = state.refillSourceNext;
+  if(source === 'store' && !storeItem) source = 'routine';
+  if(source === 'routine' && !routineItem) source = 'store';
+
+  let task = null;
+
+  if(source === 'store' && storeItem){
+    task = buildTask(storeItem.taskName, DEFAULT_DURATION, 'store', storeItem.id);
+    state.taskStore = state.taskStore.map(item =>
+      item.id === storeItem.id ? {...item, autoServed:true} : item
+    );
+    state.refillSourceNext = 'routine';
+  }else if(source === 'routine' && routineItem){
+    task = buildTask(
+      routineItem.taskName,
+      Math.max(1, sanitizeNumber(routineItem.durationMinutes, DEFAULT_DURATION)),
+      'routine',
+      routineItem.id
+    );
+    state.routineTasks = state.routineTasks.map(item =>
+      item.id === routineItem.id ? {...item, autoServed:true} : item
+    );
+    state.refillSourceNext = 'store';
+  }
+
+  if(!task) return false;
+  activateTask(task);
+  state.tasks.push(task);
+  state.activeTaskId = task.id;
+  return true;
 }
 
 function finishTask(result){
   const a=activeTask();
-  if(!a)return;
+  if(!a) return;
 
   if(result==='success'){
     state.wallet += sanitizeNumber(a.reward, DEFAULT_REWARD);
+    markSourceTaskCompleted(a);
     alarm('normal');
   }else{
     state.wallet = Math.max(0, state.wallet - sanitizeNumber(a.penalty, DEFAULT_PENALTY));
@@ -869,12 +647,12 @@ function finishTask(result){
   }
 
   state.history.unshift({...a,result,completedAt:new Date().toISOString()});
-  state.tasks=state.tasks.filter(x=>x.id!==a.id);
-  state.activeTaskId=null;
-  state.autoQueuedFromStoreForTaskId=null;
-  syncActive();
-  save();
-  render();
+  state.tasks = state.tasks.filter(x=>x.id!==a.id);
+  state.activeTaskId = null;
+
+  if(state.tasks.length === 0) enqueueFromSource();
+
+  syncActive(); save(); render();
 }
 
 function extendActiveTask(minutesToAdd){
@@ -886,32 +664,7 @@ function extendActiveTask(minutesToAdd){
   a.deadline = new Date(new Date(a.deadline).getTime() + add*60000).toISOString();
   state.warned10MinTaskId = null;
   state.warned5MinTaskId = null;
-  save();
-  render();
-}
-
-function autoQueueTopStoreTask(){
-  const a = activeTask();
-  if(!a || !a.deadline) return;
-
-  const onlyCurrentTaskPresent = state.tasks.length === 1;
-  const hasStoreTask = state.taskStore.length > 0;
-  const minsLeft = Math.max(0, Math.floor((new Date(a.deadline) - new Date())/60000));
-
-  if(
-    onlyCurrentTaskPresent &&
-    hasStoreTask &&
-    minsLeft <= 5 &&
-    minsLeft > 0 &&
-    state.autoQueuedFromStoreForTaskId !== a.id
-  ){
-    const item = state.taskStore.shift();
-    const task = buildTask(item.taskName, DEFAULT_DURATION);
-    state.tasks.push(task);
-    state.autoQueuedFromStoreForTaskId = a.id;
-    save();
-    render();
-  }
+  save(); render();
 }
 
 function autoFailIfOverdue(){
@@ -925,44 +678,113 @@ function checkDeadlineWarnings(){
   const mins=Math.max(0, Math.floor((new Date(a.deadline)-new Date())/60000));
 
   if(mins<=10 && mins>5 && state.warned10MinTaskId!==a.id){
-    state.warned10MinTaskId=a.id;
-    save();
+    state.warned10MinTaskId=a.id; save();
     notify('Kartavya Warning',a.taskName + ': 10 minutes left.');
     alarm('danger');
     alert('Warning: Only 10 minutes left for ' + a.taskName + '.');
   }
 
   if(mins<=5 && mins>0 && state.warned5MinTaskId!==a.id){
-    state.warned5MinTaskId=a.id;
-    save();
+    state.warned5MinTaskId=a.id; save();
     notify('Kartavya Final Warning',a.taskName + ': 5 minutes left.');
     alarm('danger');
     alert('Final warning: Only 5 minutes left for ' + a.taskName + '.');
   }
 }
 
-function addTopup(){
-  state.wallet += TOPUP;
-  save();
-  render();
-}
-
+function addTopup(){ state.wallet += TOPUP; save(); render(); }
 function requestNotifications(){
   if(!('Notification' in window)) return alert('Notifications not supported in this browser.');
   Notification.requestPermission().then(p=>{
-    if(p==='granted'){
-      notify('Kartavya','Notifications enabled.');
-      alert('Notifications enabled.');
-    }
+    if(p==='granted'){ notify('Kartavya','Notifications enabled.'); alert('Notifications enabled.'); }
   });
 }
-
 function resetScore(){
   const ok = confirm('Reset reward, penalty and success record?');
   if(!ok) return;
+
   state.history = [];
-  save();
-  render();
+  state.taskStore = state.taskStore.map(item => ({...item, completed:false, autoServed:false}));
+  state.routineTasks = state.routineTasks.map(item => ({...item, completed:false, autoServed:false}));
+
+  save(); render();
+}
+
+function addDuration(mins){
+  const current = normalizeDurationInput(state.durationText || formatDuration(state.durationMinutes));
+  const currentMinutes = current ? current.minutes : DEFAULT_DURATION;
+  const updatedMinutes = Math.max(1, currentMinutes + mins);
+  state.durationMinutes = updatedMinutes;
+  state.durationText = formatDuration(updatedMinutes);
+  save(); render();
+}
+
+function addTaskForFuture(){
+  const input = document.getElementById('storeTaskInput');
+  const value = input ? input.value.trim() : '';
+  if(!value) return alert('Enter a future task.');
+  state.taskStore.push({
+    id: Date.now() + Math.floor(Math.random()*1000),
+    taskName: value,
+    completed:false,
+    autoServed:false,
+    createdAt: new Date().toISOString()
+  });
+  save(); render();
+}
+
+function sendStoreTaskToQueue(id){
+  const item = state.taskStore.find(x=>x.id===id);
+  if(!item) return;
+  const task = buildTask(item.taskName, DEFAULT_DURATION, 'store', item.id);
+  if(state.tasks.length === 0) activateTask(task);
+  state.tasks.push(task);
+  syncActive(); save(); render();
+}
+
+function deleteStoreTask(id){
+  const item = state.taskStore.find(x=>x.id===id);
+  if(!item) return;
+  if(!confirm('Delete this task from Task Store?')) return;
+  state.taskStore = state.taskStore.filter(x=>x.id!==id);
+  save(); render();
+}
+
+function addRoutineTask(){
+  const nameInput = document.getElementById('routineTaskInput');
+  const durInput = document.getElementById('routineDurationInput');
+  const taskName = nameInput ? nameInput.value.trim() : '';
+  const durationRaw = durInput ? durInput.value.trim() : '';
+  if(!taskName) return alert('Enter routine task name.');
+  const normalized = normalizeDurationInput(durationRaw || '30 min');
+  if(!normalized) return alert('Enter routine duration like 30 min, 45 min, or 1 hr 15 min.');
+
+  state.routineTasks.push({
+    id: Date.now() + Math.floor(Math.random()*1000),
+    taskName,
+    durationMinutes: normalized.minutes,
+    completed:false,
+    autoServed:false,
+    createdAt:new Date().toISOString()
+  });
+  save(); render();
+}
+
+function sendRoutineTaskToQueue(id){
+  const item = state.routineTasks.find(x=>x.id===id);
+  if(!item) return;
+  const task = buildTask(item.taskName, Math.max(1, sanitizeNumber(item.durationMinutes, DEFAULT_DURATION)), 'routine', item.id);
+  if(state.tasks.length === 0) activateTask(task);
+  state.tasks.push(task);
+  syncActive(); save(); render();
+}
+
+function deleteRoutineTask(id){
+  const item = state.routineTasks.find(x=>x.id===id);
+  if(!item) return;
+  if(!confirm('Delete this task from Routine Task?')) return;
+  state.routineTasks = state.routineTasks.filter(x=>x.id!==id);
+  save(); render();
 }
 
 function stats(){
@@ -973,80 +795,29 @@ function stats(){
     total:state.history.length
   };
 }
-
 function successPercent(){
   const s=stats();
-  if(s.total===0)return 100;
-  return Math.round((s.successCount/s.total)*100);
+  return s.total===0 ? 100 : Math.round((s.successCount/s.total)*100);
 }
-
 function progressPercent(a){
-  if(!a || !a.deadline || !a.activatedAt)return 0;
+  if(!a || !a.deadline || !a.activatedAt) return 0;
   const total=Math.max(1,new Date(a.deadline)-new Date(a.activatedAt));
   const used=Math.max(0,new Date()-new Date(a.activatedAt));
   return Math.max(0,Math.min(100,Math.round((used/total)*100)));
 }
-
 function urgencyClass(){
   const a=activeTask();
-  if(!a || !a.deadline)return 'safe';
+  if(!a || !a.deadline) return 'safe';
   const mins=Math.max(0, Math.floor((new Date(a.deadline)-new Date())/60000));
-  if(mins<=5)return 'danger';
-  if(mins<=10)return 'warning';
+  if(mins<=5) return 'danger';
+  if(mins<=10) return 'warning';
   return 'safe';
-}
-
-function addDuration(mins){
-  const current = normalizeDurationInput(state.durationText || formatDuration(state.durationMinutes));
-  const currentMinutes = current ? current.minutes : DEFAULT_DURATION;
-  const updatedMinutes = Math.max(1, currentMinutes + mins);
-  state.durationMinutes = updatedMinutes;
-  state.durationText = formatDuration(updatedMinutes);
-  save();
-  render();
-}
-
-function addTaskForFuture(){
-  const input = document.getElementById('storeTaskInput');
-  const value = input ? input.value.trim() : '';
-  if(!value) return alert('Enter a future task.');
-  state.taskStore.unshift({
-    id: Date.now() + Math.floor(Math.random()*1000),
-    taskName: value,
-    createdAt: new Date().toISOString()
-  });
-  save();
-  render();
-}
-
-function sendStoreTaskToQueue(id){
-  const index = state.taskStore.findIndex(x=>x.id===id);
-  if(index === -1) return;
-  const item = state.taskStore[index];
-  const task = buildTask(item.taskName, DEFAULT_DURATION);
-  if(state.tasks.length === 0) activateTask(task);
-  state.tasks.push(task);
-  state.taskStore.splice(index,1);
-  syncActive();
-  save();
-  render();
-}
-
-function deleteStoreTask(id){
-  state.taskStore = state.taskStore.filter(x=>x.id!==id);
-  save();
-  render();
 }
 
 function bindDurationInput(){
   const durationInput = document.getElementById('durationInput');
   if(!durationInput) return;
-
-  durationInput.addEventListener('input',e=>{
-    state.durationText = e.target.value;
-    save();
-  });
-
+  durationInput.addEventListener('input',e=>{ state.durationText = e.target.value; save(); });
   durationInput.addEventListener('blur',e=>{
     const normalized = normalizeDurationInput(e.target.value);
     if(normalized){
@@ -1059,6 +830,7 @@ function bindDurationInput(){
 }
 
 function refreshLive(){
+  resetRoutineTasksIfNewDay();
   const a=activeTask(),
     current=document.getElementById('currentTaskText'),
     clockInline=document.getElementById('timeLeftInline'),
@@ -1088,15 +860,15 @@ function refreshLive(){
 }
 
 function render(){
+  resetRoutineTasksIfNewDay();
+
   const app=document.getElementById('app'),
     a=activeTask(),
     s=stats(),
     urgency=urgencyClass();
 
   const currentTaskHtml = a ? '<span class="blink-dot"></span>' + escapeHtml(a.taskName) : 'No active task';
-  const endText = a && a.deadline
-    ? 'Ends: ' + new Date(a.deadline).toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' })
-    : '';
+  const endText = a && a.deadline ? 'Ends: ' + new Date(a.deadline).toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' }) : '';
   const successButtonText = '✔️ Success (Get ' + rupee(Number(state.reward || DEFAULT_REWARD)) + ')';
   const failButtonText = '❌ Failed (Pay ' + rupee(Number(state.penalty || DEFAULT_PENALTY)) + ')';
   const timeLeftText = a && a.deadline ? formatTimeLeftDisplay(secondsLeft(a.deadline)) : 'Time left 0 min';
@@ -1105,24 +877,41 @@ function render(){
     ? state.tasks.map((item, idx)=>{
         const isActive = item.id === state.activeTaskId;
         const meta = formatDuration(item.durationMinutes||0);
+        const upDisabled = idx === 0 ? 'disabled style="opacity:.35;pointer-events:none"' : '';
+        const downDisabled = idx === state.tasks.length-1 ? 'disabled style="opacity:.35;pointer-events:none"' : '';
         return '<div class="queue-item' + (isActive ? ' active' : '') + '">' +
           '<div class="item-name">' + (isActive ? '▶ ' : (idx+1)+'. ') + escapeHtml(item.taskName) + '</div>' +
           '<div class="item-meta">' + meta + '</div>' +
           '<div class="item-actions-bottom">' +
+            '<button class="btn-outline mini" data-move-up="' + item.id + '" ' + upDisabled + '>↑</button>' +
+            '<button class="btn-outline mini" data-move-down="' + item.id + '" ' + downDisabled + '>↓</button>' +
             '<button class="btn-outline mini" data-remove="' + item.id + '">Delete</button>' +
           '</div>' +
         '</div>';
       }).join('')
     : '<div class="empty-state">No queued task yet.</div>';
 
+  const routineHtml = state.routineTasks.length
+    ? state.routineTasks.map((item, idx)=>{
+        const dotClass = item.completed ? 'green' : 'red';
+        return '<div class="routine-item">' +
+          '<div class="item-name"><span class="status-dot ' + dotClass + '"></span>' + (idx+1) + '. ' + escapeHtml(item.taskName) + '</div>' +
+          '<div class="item-meta">' + formatDuration(item.durationMinutes) + '</div>' +
+          '<div class="item-actions-bottom">' +
+            '<button class="btn-primary mini" data-send-routine="' + item.id + '">Queue</button>' +
+            '<button class="btn-outline mini" data-routine-delete="' + item.id + '">Delete</button>' +
+          '</div>' +
+        '</div>';
+      }).join('')
+    : '<div class="empty-state">No routine task yet.</div>';
+
   const storeHtml = state.taskStore.length
     ? state.taskStore.map((item, idx)=>{
-        return '<div class="store-item">' +
-          '<div class="item-name">' + (idx+1) + '. ' + escapeHtml(item.taskName) + '</div>' +
-          '<div class="item-actions-bottom">' +
-            '<button class="btn-primary mini" data-send-queue="' + item.id + '">Queue</button>' +
-            '<button class="btn-outline mini" data-store-delete="' + item.id + '">Delete</button>' +
-          '</div>' +
+        const dotClass = item.completed ? 'green' : 'red';
+        return '<div class="store-row">' +
+          '<div class="item-name"><span class="status-dot ' + dotClass + '"></span>' + (idx+1) + '. ' + escapeHtml(item.taskName) + '</div>' +
+          '<button class="btn-primary mini" data-send-queue="' + item.id + '">Queue</button>' +
+          '<button class="btn-outline mini" data-store-delete="' + item.id + '">Delete</button>' +
         '</div>';
       }).join('')
     : '<div class="empty-state">No future task stored yet.</div>';
@@ -1226,15 +1015,30 @@ function render(){
     <div class="list-box">
       <div class="section-head">
         <span class="section-dot"></span>
-        <div class="list-title">Task Store</div>
+        <div class="list-title">Routine Task</div>
       </div>
-      <label>Future Task</label>
-      <input id="storeTaskInput" value="" placeholder="Enter Task">
+      <label>Task Name</label>
+      <input id="routineTaskInput" value="" placeholder="Enter Task">
+      <label style="margin-top:8px">Duration</label>
+      <input id="routineDurationInput" class="duration-input" value="30 min" placeholder="e.g. 1 hr 15 min">
       <div style="margin-top:8px">
-        <button class="btn-gold" id="storeAddBtn">Add Task for Future</button>
+        <button class="btn-gold" id="routineAddBtn">Add</button>
       </div>
-      <div style="margin-top:8px">${storeHtml}</div>
+      <div style="margin-top:8px">${routineHtml}</div>
     </div>
+  </div>
+
+  <div class="full-box">
+    <div class="section-head">
+      <span class="section-dot"></span>
+      <div class="list-title">Task Store</div>
+    </div>
+    <label>Future Task</label>
+    <input id="storeTaskInput" value="" placeholder="Enter Task">
+    <div style="margin-top:8px">
+      <button class="btn-gold" id="storeAddBtn">Add Task for Future</button>
+    </div>
+    <div style="margin-top:8px">${storeHtml}</div>
   </div>
 </div>
 
@@ -1251,28 +1055,23 @@ function render(){
   </div>
 </div>`;
 
-  document.getElementById('taskNameInput').addEventListener('input',e=>{
-    state.taskName=e.target.value;
-    save();
-  });
-
+  document.getElementById('taskNameInput').addEventListener('input',e=>{ state.taskName=e.target.value; save(); });
   bindDurationInput();
 
   document.getElementById('add15Btn').addEventListener('click',()=>addDuration(15));
   document.getElementById('add30Btn').addEventListener('click',()=>addDuration(30));
   document.getElementById('add60Btn').addEventListener('click',()=>addDuration(60));
   document.getElementById('extend15Btn').addEventListener('click',()=>extendActiveTask(15));
-
   document.getElementById('createBtn').addEventListener('click',createTask);
   document.getElementById('topupBtn').addEventListener('click',addTopup);
   document.getElementById('storeAddBtn').addEventListener('click',addTaskForFuture);
+  document.getElementById('routineAddBtn').addEventListener('click',addRoutineTask);
 
   const storeInput=document.getElementById('storeTaskInput');
-  if(storeInput){
-    storeInput.addEventListener('keydown',e=>{
-      if(e.key==='Enter') addTaskForFuture();
-    });
-  }
+  if(storeInput) storeInput.addEventListener('keydown',e=>{ if(e.key==='Enter') addTaskForFuture(); });
+
+  const routineInput=document.getElementById('routineTaskInput');
+  if(routineInput) routineInput.addEventListener('keydown',e=>{ if(e.key==='Enter') addRoutineTask(); });
 
   document.getElementById('soundBtn').addEventListener('click',()=>{state.soundEnabled=!state.soundEnabled;save();render()});
   document.getElementById('vibrationBtn').addEventListener('click',()=>{state.vibrationEnabled=!state.vibrationEnabled;save();render()});
@@ -1288,21 +1087,30 @@ function render(){
   document.querySelectorAll('[data-remove]').forEach(btn=>
     btn.addEventListener('click',()=>removeTask(Number(btn.getAttribute('data-remove'))))
   );
-
+  document.querySelectorAll('[data-move-up]').forEach(btn=>
+    btn.addEventListener('click',()=>moveQueuedTask(Number(btn.getAttribute('data-move-up')),-1))
+  );
+  document.querySelectorAll('[data-move-down]').forEach(btn=>
+    btn.addEventListener('click',()=>moveQueuedTask(Number(btn.getAttribute('data-move-down')),1))
+  );
   document.querySelectorAll('[data-send-queue]').forEach(btn=>
     btn.addEventListener('click',()=>sendStoreTaskToQueue(Number(btn.getAttribute('data-send-queue'))))
   );
-
   document.querySelectorAll('[data-store-delete]').forEach(btn=>
     btn.addEventListener('click',()=>deleteStoreTask(Number(btn.getAttribute('data-store-delete'))))
+  );
+  document.querySelectorAll('[data-send-routine]').forEach(btn=>
+    btn.addEventListener('click',()=>sendRoutineTaskToQueue(Number(btn.getAttribute('data-send-routine'))))
+  );
+  document.querySelectorAll('[data-routine-delete]').forEach(btn=>
+    btn.addEventListener('click',()=>deleteRoutineTask(Number(btn.getAttribute('data-routine-delete'))))
   );
 }
 
 load();
 
 window.addEventListener('load',()=>{
-  const splash=document.getElementById('splashScreen'),
-    app=document.getElementById('app');
+  const splash=document.getElementById('splashScreen'), app=document.getElementById('app');
   setTimeout(()=>{
     if(splash) splash.style.display='none';
     if(app) app.style.display='block';
@@ -1311,7 +1119,6 @@ window.addEventListener('load',()=>{
 });
 
 setInterval(()=>{
-  autoQueueTopStoreTask();
   autoFailIfOverdue();
   checkDeadlineWarnings();
   refreshLive();
