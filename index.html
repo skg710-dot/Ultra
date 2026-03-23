@@ -24,14 +24,14 @@
       --success:#22c55e;
       --danger:#ef4444;
 
-      --soft-green:rgba(34,197,94,.10);
-      --soft-green-border:rgba(34,197,94,.24);
+      --soft-green:rgba(34,197,94,.16);
+      --soft-green-border:rgba(34,197,94,.30);
 
-      --soft-blue:rgba(59,130,246,.10);
-      --soft-blue-border:rgba(96,165,250,.24);
+      --soft-blue:rgba(59,130,246,.16);
+      --soft-blue-border:rgba(96,165,250,.30);
 
-      --soft-grey:rgba(255,255,255,.04);
-      --soft-grey-border:rgba(244,180,0,.10);
+      --soft-grey:rgba(255,255,255,.09);
+      --soft-grey-border:rgba(244,180,0,.14);
 
       --gold:#f4b400;
       --gold-deep:#c88d00;
@@ -223,10 +223,10 @@
       width:100%;
       padding:12px;
       border-radius:14px;
-      border:1px solid rgba(244,180,0,.12);
+      border:1px solid rgba(244,180,0,.18);
       font-size:15px;
       outline:none;
-      background:rgba(255,255,255,.05);
+      background:rgba(255,255,255,.10);
       color:#fff7e6;
       box-shadow:inset 0 1px 2px rgba(0,0,0,.20)
     }
@@ -281,24 +281,24 @@
     }
 
     .btn-outline{
-      background:rgba(255,255,255,.05);
+      background:rgba(255,255,255,.09);
       color:#fff3d2;
-      border:1px solid rgba(244,180,0,.12);
+      border:1px solid rgba(244,180,0,.14);
       box-shadow:var(--shadow-soft)
     }
 
     .btn-success{
       background:linear-gradient(135deg,#16a34a,#22c55e);
       color:#ffffff;
-      border:1px solid rgba(255,255,255,.10);
-      box-shadow:0 8px 20px rgba(34,197,94,.18)
+      border:2px solid rgba(255,255,255,.12);
+      box-shadow:0 10px 24px rgba(34,197,94,.24)
     }
 
     .btn-danger{
       background:linear-gradient(135deg,#dc2626,#ef4444);
       color:#ffffff;
-      border:1px solid rgba(255,255,255,.10);
-      box-shadow:0 8px 20px rgba(239,68,68,.18)
+      border:2px solid rgba(255,255,255,.12);
+      box-shadow:0 10px 24px rgba(239,68,68,.24)
     }
 
     .mini{
@@ -399,7 +399,7 @@
       display:flex;
       flex-direction:column;
       justify-content:space-between;
-      border:1px solid rgba(244,180,0,.10);
+      border:1px solid rgba(244,180,0,.12);
       box-shadow:var(--shadow-soft)
     }
 
@@ -430,10 +430,10 @@
     }
 
     .paired-box{
-      border:1px solid rgba(244,180,0,.10);
+      border:1px solid rgba(244,180,0,.12);
       border-radius:18px;
       padding:10px;
-      background:rgba(255,255,255,.06);
+      background:rgba(255,255,255,.08);
       min-width:0;
       box-shadow:var(--shadow-soft)
     }
@@ -446,18 +446,18 @@
     }
 
     .quick-row .btn-outline{
-      background:rgba(255,255,255,.06);
-      border:1px solid rgba(244,180,0,.12);
+      background:rgba(255,255,255,.08);
+      border:1px solid rgba(244,180,0,.14);
       padding:9px 6px;
       font-size:11px;
       border-radius:12px
     }
 
     .list-box{
-      border:1px solid rgba(244,180,0,.10);
+      border:1px solid rgba(244,180,0,.12);
       border-radius:18px;
       padding:10px;
-      background:rgba(255,255,255,.06);
+      background:rgba(255,255,255,.08);
       min-height:200px;
       min-width:0;
       box-shadow:var(--shadow-soft)
@@ -471,11 +471,11 @@
     }
 
     .queue-item,.store-item{
-      border:1px solid rgba(244,180,0,.10);
+      border:1px solid rgba(244,180,0,.12);
       border-radius:14px;
       padding:9px;
       margin-top:7px;
-      background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.03));
+      background:linear-gradient(180deg,rgba(255,255,255,.09),rgba(255,255,255,.05));
       box-shadow:0 6px 14px rgba(0,0,0,.14)
     }
 
@@ -604,7 +604,7 @@ if('serviceWorker' in navigator){
   window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
 }
 
-const STORAGE_KEY='kartavya-duration-based-v10';
+const STORAGE_KEY='kartavya-duration-based-v11';
 const TOPUP=5000;
 const DEFAULT_WALLET=5000;
 const DEFAULT_REWARD=50;
@@ -625,7 +625,8 @@ const state={
   soundEnabled:true,
   vibrationEnabled:true,
   warned10MinTaskId:null,
-  warned5MinTaskId:null
+  warned5MinTaskId:null,
+  autoQueuedFromStoreForTaskId:null
 };
 
 function sanitizeNumber(value, fallback){
@@ -778,6 +779,7 @@ function syncActive(){
     state.activeTaskId=null;
     state.warned10MinTaskId=null;
     state.warned5MinTaskId=null;
+    state.autoQueuedFromStoreForTaskId=null;
     save();
     return;
   }
@@ -869,6 +871,7 @@ function finishTask(result){
   state.history.unshift({...a,result,completedAt:new Date().toISOString()});
   state.tasks=state.tasks.filter(x=>x.id!==a.id);
   state.activeTaskId=null;
+  state.autoQueuedFromStoreForTaskId=null;
   syncActive();
   save();
   render();
@@ -885,6 +888,30 @@ function extendActiveTask(minutesToAdd){
   state.warned5MinTaskId = null;
   save();
   render();
+}
+
+function autoQueueTopStoreTask(){
+  const a = activeTask();
+  if(!a || !a.deadline) return;
+
+  const onlyCurrentTaskPresent = state.tasks.length === 1;
+  const hasStoreTask = state.taskStore.length > 0;
+  const minsLeft = Math.max(0, Math.floor((new Date(a.deadline) - new Date())/60000));
+
+  if(
+    onlyCurrentTaskPresent &&
+    hasStoreTask &&
+    minsLeft <= 5 &&
+    minsLeft > 0 &&
+    state.autoQueuedFromStoreForTaskId !== a.id
+  ){
+    const item = state.taskStore.shift();
+    const task = buildTask(item.taskName, DEFAULT_DURATION);
+    state.tasks.push(task);
+    state.autoQueuedFromStoreForTaskId = a.id;
+    save();
+    render();
+  }
 }
 
 function autoFailIfOverdue(){
@@ -1284,6 +1311,7 @@ window.addEventListener('load',()=>{
 });
 
 setInterval(()=>{
+  autoQueueTopStoreTask();
   autoFailIfOverdue();
   checkDeadlineWarnings();
   refreshLive();
