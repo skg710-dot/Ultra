@@ -243,7 +243,7 @@
     }
 
     .store-row{
-      display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:8px;align-items:center;
+      display:grid;grid-template-columns:minmax(0,1fr) auto auto auto auto;gap:8px;align-items:center;
       border:1px solid rgba(244,180,0,.12);border-radius:14px;padding:8px 9px;margin-top:7px;
       background:linear-gradient(180deg,rgba(255,255,255,.09),rgba(255,255,255,.05));
       box-shadow:0 6px 14px rgba(0,0,0,.14)
@@ -294,7 +294,7 @@
       .item-actions-bottom .mini,.store-row .mini{font-size:10px;padding:5px 7px}
       .quick-row .btn-outline{font-size:10px}
       .extend-row{gap:6px}
-      .store-row{grid-template-columns:minmax(0,1fr) auto auto;gap:6px}
+      .store-row{grid-template-columns:minmax(0,1fr) auto auto auto auto;gap:6px}
     }
   </style>
 </head>
@@ -317,7 +317,7 @@ if('serviceWorker' in navigator){
   window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
 }
 
-const STORAGE_KEY='kartavya-duration-based-v13';
+const STORAGE_KEY='kartavya-duration-based-v14';
 const TOPUP=5000;
 const DEFAULT_WALLET=5000;
 const DEFAULT_REWARD=50;
@@ -568,6 +568,17 @@ function moveQueuedTask(id, direction){
   const temp = state.tasks[index];
   state.tasks[index] = state.tasks[target];
   state.tasks[target] = temp;
+  save(); render();
+}
+
+function moveStoreTask(id, direction){
+  const index = state.taskStore.findIndex(x=>x.id===id);
+  if(index === -1) return;
+  const target = index + direction;
+  if(target < 0 || target >= state.taskStore.length) return;
+  const temp = state.taskStore[index];
+  state.taskStore[index] = state.taskStore[target];
+  state.taskStore[target] = temp;
   save(); render();
 }
 
@@ -908,8 +919,12 @@ function render(){
   const storeHtml = state.taskStore.length
     ? state.taskStore.map((item, idx)=>{
         const dotClass = item.completed ? 'green' : 'red';
+        const upDisabled = idx === 0 ? 'disabled style="opacity:.35;pointer-events:none"' : '';
+        const downDisabled = idx === state.taskStore.length-1 ? 'disabled style="opacity:.35;pointer-events:none"' : '';
         return '<div class="store-row">' +
           '<div class="item-name"><span class="status-dot ' + dotClass + '"></span>' + (idx+1) + '. ' + escapeHtml(item.taskName) + '</div>' +
+          '<button class="btn-outline mini" data-store-up="' + item.id + '" ' + upDisabled + '>↑</button>' +
+          '<button class="btn-outline mini" data-store-down="' + item.id + '" ' + downDisabled + '>↓</button>' +
           '<button class="btn-primary mini" data-send-queue="' + item.id + '">Queue</button>' +
           '<button class="btn-outline mini" data-store-delete="' + item.id + '">Delete</button>' +
         '</div>';
@@ -1092,6 +1107,12 @@ function render(){
   );
   document.querySelectorAll('[data-move-down]').forEach(btn=>
     btn.addEventListener('click',()=>moveQueuedTask(Number(btn.getAttribute('data-move-down')),1))
+  );
+  document.querySelectorAll('[data-store-up]').forEach(btn=>
+    btn.addEventListener('click',()=>moveStoreTask(Number(btn.getAttribute('data-store-up')),-1))
+  );
+  document.querySelectorAll('[data-store-down]').forEach(btn=>
+    btn.addEventListener('click',()=>moveStoreTask(Number(btn.getAttribute('data-store-down')),1))
   );
   document.querySelectorAll('[data-send-queue]').forEach(btn=>
     btn.addEventListener('click',()=>sendStoreTaskToQueue(Number(btn.getAttribute('data-send-queue'))))
