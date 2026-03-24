@@ -153,6 +153,43 @@
     @keyframes splashFade{0%{opacity:0;transform:scale(.92)}100%{opacity:1;transform:scale(1)}}
     @keyframes targetGlow{0%,100%{box-shadow:0 0 0 0 rgba(244,180,0,.08)}50%{box-shadow:0 0 28px 8px rgba(244,180,0,.22)}}
 
+    @keyframes bullImpact{
+      0%,60%{
+        box-shadow:0 0 0 0 rgba(244,180,0,0);
+        transform:scale(1);
+      }
+      75%{
+        box-shadow:0 0 0 12px rgba(244,180,0,.22), 0 0 24px rgba(244,180,0,.42);
+        transform:scale(1.22);
+      }
+      100%{
+        box-shadow:0 0 0 5px rgba(244,180,0,.14), 0 0 12px rgba(244,180,0,.24);
+        transform:scale(1);
+      }
+    }
+
+    @keyframes arrowHitExact{
+      0%{
+        opacity:0;
+        transform:translate(34px,-34px) scale(.92);
+      }
+      18%{
+        opacity:1;
+      }
+      70%{
+        opacity:1;
+        transform:translate(0,0) scale(1);
+      }
+      82%{
+        opacity:1;
+        transform:translate(-2px,2px) scale(1.03);
+      }
+      100%{
+        opacity:1;
+        transform:translate(0,0) scale(1);
+      }
+    }
+
     label{display:block;font-size:12px;font-weight:800;margin-bottom:6px;color:var(--muted)}
 
     input{
@@ -249,7 +286,6 @@
 
     .list-title{font-size:17px;font-weight:800;margin:0 0 8px 0;color:#fff5d7}
 
-    /* Lower three panels now use same dark contrast style as top panels with only accent glows */
     .queued-panel,
     .routine-panel,
     .store-panel{
@@ -359,28 +395,42 @@
     .ring1{width:112px;height:112px}
     .ring2{width:74px;height:74px}
     .ring3{width:38px;height:38px}
-    .bull{width:14px;height:14px;border:none;background:var(--gold)}
-
-    .arrow{
-      position:absolute;
-      width:52px;
-      height:8px;
-      background:white;
-      border-radius:999px;
-      transform:rotate(-43deg);
-      top:43px;
-      left:49px;
-      z-index:5;
-      box-shadow:0 0 8px rgba(255,255,255,.20);
+    .bull{
+      width:14px;
+      height:14px;
+      border:none;
+      background:var(--gold);
+      box-shadow:0 0 0 0 rgba(244,180,0,0);
+      animation:bullImpact 1.25s ease-out forwards;
     }
-    .arrow::before{
-      content:'';
+
+    .arrow-svg{
       position:absolute;
-      right:-6px;
-      top:-6px;
-      border-left:16px solid white;
-      border-top:10px solid transparent;
-      border-bottom:10px solid transparent;
+      inset:0;
+      width:116px;
+      height:116px;
+      z-index:8;
+      overflow:visible;
+      pointer-events:none;
+    }
+
+    .arrow-line{
+      stroke:#ffffff;
+      stroke-width:6;
+      stroke-linecap:round;
+      filter:drop-shadow(0 0 6px rgba(255,255,255,.28));
+    }
+
+    .arrow-head{
+      fill:#ffffff;
+      filter:drop-shadow(0 0 6px rgba(255,255,255,.28));
+    }
+
+    .arrow-group{
+      opacity:0;
+      transform:translate(18px,-18px);
+      animation:arrowHitExact 1.2s ease-out forwards;
+      transform-origin:58px 58px;
     }
 
     .splash-title{font-size:34px;font-weight:800;letter-spacing:-.03em;margin-bottom:8px}
@@ -411,7 +461,12 @@
         <div class="ring2"></div>
         <div class="ring3"></div>
         <div class="bull"></div>
-        <div class="arrow"></div>
+        <svg class="arrow-svg" viewBox="0 0 116 116" aria-hidden="true">
+          <g class="arrow-group">
+            <line x1="104" y1="12" x2="58" y2="58" class="arrow-line"></line>
+            <polygon points="58,58 68,54 62,48" class="arrow-head"></polygon>
+          </g>
+        </svg>
       </div>
     </div>
     <div class="splash-title">Kartavya</div>
@@ -423,10 +478,10 @@
 
 <script>
 if('serviceWorker' in navigator){
-  window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
+  window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js?v=2').catch(()=>{}));
 }
 
-const STORAGE_KEY='kartavya-duration-based-v19';
+const STORAGE_KEY='kartavya-duration-based-v23';
 const TOPUP=5000;
 const DEFAULT_WALLET=5000;
 const DEFAULT_REWARD=50;
@@ -628,6 +683,126 @@ function alarm(type='normal'){
   }
   if(state.vibrationEnabled && navigator.vibrate){
     navigator.vibrate(type==='danger'?[250,120,250]:[120,60,120]);
+  }
+}
+
+function playSplashHitSound(){
+  try{
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    if(!AudioCtx) return;
+
+    const ctx = new AudioCtx();
+    const now = ctx.currentTime;
+
+    const master = ctx.createGain();
+    master.gain.setValueAtTime(0.0001, now);
+    master.gain.exponentialRampToValueAtTime(0.18, now + 0.01);
+    master.gain.exponentialRampToValueAtTime(0.0001, now + 0.32);
+    master.connect(ctx.destination);
+
+    const osc1 = ctx.createOscillator();
+    const osc2 = ctx.createOscillator();
+    const osc3 = ctx.createOscillator();
+
+    const gain1 = ctx.createGain();
+    const gain2 = ctx.createGain();
+    const gain3 = ctx.createGain();
+
+    osc1.type = 'triangle';
+    osc2.type = 'sine';
+    osc3.type = 'sine';
+
+    osc1.frequency.setValueAtTime(1800, now);
+    osc1.frequency.exponentialRampToValueAtTime(620, now + 0.20);
+
+    osc2.frequency.setValueAtTime(2400, now);
+    osc2.frequency.exponentialRampToValueAtTime(900, now + 0.16);
+
+    osc3.frequency.setValueAtTime(950, now);
+    osc3.frequency.exponentialRampToValueAtTime(420, now + 0.22);
+
+    gain1.gain.setValueAtTime(0.9, now);
+    gain1.gain.exponentialRampToValueAtTime(0.0001, now + 0.18);
+
+    gain2.gain.setValueAtTime(0.55, now);
+    gain2.gain.exponentialRampToValueAtTime(0.0001, now + 0.14);
+
+    gain3.gain.setValueAtTime(0.35, now);
+    gain3.gain.exponentialRampToValueAtTime(0.0001, now + 0.22);
+
+    osc1.connect(gain1);
+    osc2.connect(gain2);
+    osc3.connect(gain3);
+
+    gain1.connect(master);
+    gain2.connect(master);
+    gain3.connect(master);
+
+    const noiseBuffer = ctx.createBuffer(1, ctx.sampleRate * 0.04, ctx.sampleRate);
+    const data = noiseBuffer.getChannelData(0);
+    for(let i = 0; i < data.length; i++){
+      data[i] = (Math.random() * 2 - 1) * (1 - i / data.length);
+    }
+
+    const noise = ctx.createBufferSource();
+    noise.buffer = noiseBuffer;
+
+    const noiseFilter = ctx.createBiquadFilter();
+    noiseFilter.type = 'highpass';
+    noiseFilter.frequency.setValueAtTime(1800, now);
+
+    const noiseGain = ctx.createGain();
+    noiseGain.gain.setValueAtTime(0.18, now);
+    noiseGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.05);
+
+    noise.connect(noiseFilter);
+    noiseFilter.connect(noiseGain);
+    noiseGain.connect(master);
+
+    osc1.start(now);
+    osc2.start(now);
+    osc3.start(now);
+    noise.start(now);
+
+    osc1.stop(now + 0.20);
+    osc2.stop(now + 0.16);
+    osc3.stop(now + 0.22);
+    noise.stop(now + 0.05);
+  }catch(e){}
+}
+
+function setDeviceTimer(){
+  const a = activeTask();
+  if(!a) return alert('No active task.');
+
+  const taskMinutes = Math.max(1, Math.round(Number(a.durationMinutes) || 0));
+  const timerMinutes = Math.max(1, taskMinutes - 5);
+  const seconds = timerMinutes * 60;
+  const label = encodeURIComponent((a.taskName || 'Kartavya Task') + ' - 5 min early alert');
+
+  const intentUrl =
+    'intent://timer/#Intent;' +
+    'action=android.intent.action.SET_TIMER;' +
+    'S.android.intent.extra.alarm.MESSAGE=' + label + ';' +
+    'i.android.intent.extra.alarm.LENGTH=' + seconds + ';' +
+    'end';
+
+  const ua = navigator.userAgent || '';
+  const isAndroid = /Android/i.test(ua);
+  const isChrome = /Chrome|CriOS/i.test(ua) && !/SamsungBrowser|Firefox|EdgA/i.test(ua);
+
+  if(!isAndroid){
+    return alert('Device timer shortcut works only on Android. Please set a phone timer manually for ' + timerMinutes + ' min.');
+  }
+
+  if(!isChrome){
+    return alert('Please open this app in Chrome to use Set Device Timer. For now, set a phone timer manually for ' + timerMinutes + ' min.');
+  }
+
+  try{
+    window.location.href = intentUrl;
+  }catch(e){
+    alert('Could not open device timer. Please set a phone timer manually for ' + timerMinutes + ' min.');
   }
 }
 
@@ -1121,9 +1296,12 @@ function render(){
     </div>
   </div>
 
-  <div class="extend-row">
-    <div class="small" style="font-weight:800">Extend Duration</div>
-    <button class="btn-gold mini" id="extend15Btn" ${a ? '' : 'disabled style="opacity:.45;pointer-events:none"'}>+15m</button>
+  <div class="extend-row" style="justify-content:space-between">
+    <button class="btn-outline mini" id="deviceTimerBtn" ${a ? '' : 'disabled style="opacity:.45;pointer-events:none"'}>Set Device Timer</button>
+    <div class="row" style="gap:8px">
+      <div class="small" style="font-weight:800">Extend Duration</div>
+      <button class="btn-gold mini" id="extend15Btn" ${a ? '' : 'disabled style="opacity:.45;pointer-events:none"'}>+15m</button>
+    </div>
   </div>
 
   <div class="bar-wrap">
@@ -1206,10 +1384,19 @@ function render(){
     <span class="section-dot"></span>
     <div class="list-title">Routine Task</div>
   </div>
-  <label>Task Name</label>
-  <input id="routineTaskInput" value="" placeholder="Enter Task">
-  <label style="margin-top:8px">Duration</label>
-  <input id="routineDurationInput" class="duration-input" value="30 min" placeholder="e.g. 1 hr 15 min">
+
+  <div class="paired-grid">
+    <div class="paired-box">
+      <label>Task Name</label>
+      <input id="routineTaskInput" value="" placeholder="Enter Task">
+    </div>
+
+    <div class="paired-box">
+      <label>Duration</label>
+      <input id="routineDurationInput" class="duration-input" value="30 min" placeholder="e.g. 1 hr 15 min">
+    </div>
+  </div>
+
   <div style="margin-top:8px">
     <button class="btn-gold" id="routineAddBtn">Add</button>
   </div>
@@ -1221,10 +1408,19 @@ function render(){
     <span class="section-dot"></span>
     <div class="list-title">Task Store</div>
   </div>
-  <label>Future Task</label>
-  <input id="storeTaskInput" value="" placeholder="Enter Task">
-  <label style="margin-top:8px">Duration</label>
-  <input id="storeDurationInput" class="duration-input" value="${escapeHtml(state.storeDurationText)}" placeholder="e.g. 30 min">
+
+  <div class="paired-grid">
+    <div class="paired-box">
+      <label>Future Task</label>
+      <input id="storeTaskInput" value="" placeholder="Enter Task">
+    </div>
+
+    <div class="paired-box">
+      <label>Duration</label>
+      <input id="storeDurationInput" class="duration-input" value="${escapeHtml(state.storeDurationText)}" placeholder="e.g. 30 min">
+    </div>
+  </div>
+
   <div style="margin-top:8px">
     <button class="btn-gold" id="storeAddBtn">Add Task for Future</button>
   </div>
@@ -1256,6 +1452,9 @@ function render(){
   document.getElementById('topupBtn').addEventListener('click',addTopup);
   document.getElementById('storeAddBtn').addEventListener('click',addTaskForFuture);
   document.getElementById('routineAddBtn').addEventListener('click',addRoutineTask);
+
+  const deviceTimerBtn = document.getElementById('deviceTimerBtn');
+  if(deviceTimerBtn) deviceTimerBtn.addEventListener('click', setDeviceTimer);
 
   const storeInput=document.getElementById('storeTaskInput');
   if(storeInput) storeInput.addEventListener('keydown',e=>{ if(e.key==='Enter') addTaskForFuture(); });
@@ -1312,12 +1511,28 @@ function render(){
 load();
 
 window.addEventListener('load',()=>{
-  const splash=document.getElementById('splashScreen'), app=document.getElementById('app');
+  const splash=document.getElementById('splashScreen');
+  const app=document.getElementById('app');
+
+  let splashSoundPlayed = false;
+
+  const triggerSplashHit = ()=>{
+    if(splashSoundPlayed) return;
+    splashSoundPlayed = true;
+    playSplashHitSound();
+    if(navigator.vibrate) navigator.vibrate(70);
+  };
+
+  setTimeout(triggerSplashHit, 780);
+
+  document.addEventListener('touchstart', triggerSplashHit, { once:true });
+  document.addEventListener('click', triggerSplashHit, { once:true });
+
   setTimeout(()=>{
     if(splash) splash.style.display='none';
     if(app) app.style.display='block';
     render();
-  },1500);
+  },2200);
 });
 
 setInterval(()=>{
