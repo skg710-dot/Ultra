@@ -12,35 +12,20 @@
     :root{
       --text:#f5f1e8;
       --muted:#c7bfae;
-      --border:rgba(255,255,255,.10);
-
       --success:#22c55e;
       --danger:#ef4444;
-
       --soft-green:rgba(34,197,94,.16);
       --soft-green-border:rgba(34,197,94,.30);
-
       --soft-blue:rgba(59,130,246,.16);
       --soft-blue-border:rgba(96,165,250,.30);
-
       --gold:#f4b400;
       --gold-deep:#c88d00;
       --gold-soft:#ffd76a;
-
       --shadow:0 22px 54px rgba(0,0,0,.28);
       --shadow-soft:0 10px 24px rgba(0,0,0,.18);
       --radius-xl:26px;
-
-      --queued-accent:rgba(96,165,250,.18);
-      --queued-accent-strong:rgba(96,165,250,.30);
       --queued-title:#dcecff;
-
-      --routine-accent:rgba(34,197,94,.18);
-      --routine-accent-strong:rgba(34,197,94,.30);
       --routine-title:#e3ffeb;
-
-      --store-accent:rgba(244,180,0,.18);
-      --store-accent-strong:rgba(244,180,0,.30);
       --store-title:#fff1c9;
     }
 
@@ -63,7 +48,7 @@
       margin:0 auto;
       min-height:100vh;
       padding:12px 12px 18px;
-      display:none
+      display:none;
     }
 
     .card{
@@ -152,42 +137,17 @@
     @keyframes pulse-safe{0%,100%{box-shadow:0 0 0 rgba(34,197,94,0)}50%{box-shadow:0 0 0 5px rgba(34,197,94,.08)}}
     @keyframes splashFade{0%{opacity:0;transform:scale(.92)}100%{opacity:1;transform:scale(1)}}
     @keyframes targetGlow{0%,100%{box-shadow:0 0 0 0 rgba(244,180,0,.08)}50%{box-shadow:0 0 28px 8px rgba(244,180,0,.22)}}
-
     @keyframes bullImpact{
-      0%,60%{
-        box-shadow:0 0 0 0 rgba(244,180,0,0);
-        transform:scale(1);
-      }
-      75%{
-        box-shadow:0 0 0 12px rgba(244,180,0,.22), 0 0 24px rgba(244,180,0,.42);
-        transform:scale(1.22);
-      }
-      100%{
-        box-shadow:0 0 0 5px rgba(244,180,0,.14), 0 0 12px rgba(244,180,0,.24);
-        transform:scale(1);
-      }
+      0%,60%{box-shadow:0 0 0 0 rgba(244,180,0,0);transform:scale(1)}
+      75%{box-shadow:0 0 0 12px rgba(244,180,0,.22), 0 0 24px rgba(244,180,0,.42);transform:scale(1.22)}
+      100%{box-shadow:0 0 0 5px rgba(244,180,0,.14), 0 0 12px rgba(244,180,0,.24);transform:scale(1)}
     }
-
     @keyframes arrowHitExact{
-      0%{
-        opacity:0;
-        transform:translate(34px,-34px) scale(.92);
-      }
-      18%{
-        opacity:1;
-      }
-      70%{
-        opacity:1;
-        transform:translate(0,0) scale(1);
-      }
-      82%{
-        opacity:1;
-        transform:translate(-2px,2px) scale(1.03);
-      }
-      100%{
-        opacity:1;
-        transform:translate(0,0) scale(1);
-      }
+      0%{opacity:0;transform:translate(34px,-34px) scale(.92)}
+      18%{opacity:1}
+      70%{opacity:1;transform:translate(0,0) scale(1)}
+      82%{opacity:1;transform:translate(-2px,2px) scale(1.03)}
+      100%{opacity:1;transform:translate(0,0) scale(1)}
     }
 
     label{display:block;font-size:12px;font-weight:800;margin-bottom:6px;color:var(--muted)}
@@ -396,41 +356,24 @@
     .ring2{width:74px;height:74px}
     .ring3{width:38px;height:38px}
     .bull{
-      width:14px;
-      height:14px;
-      border:none;
-      background:var(--gold);
+      width:14px;height:14px;border:none;background:var(--gold);
       box-shadow:0 0 0 0 rgba(244,180,0,0);
       animation:bullImpact 1.25s ease-out forwards;
     }
 
     .arrow-svg{
-      position:absolute;
-      inset:0;
-      width:116px;
-      height:116px;
-      z-index:8;
-      overflow:visible;
-      pointer-events:none;
+      position:absolute;inset:0;width:116px;height:116px;z-index:8;overflow:visible;pointer-events:none
     }
-
     .arrow-line{
-      stroke:#ffffff;
-      stroke-width:6;
-      stroke-linecap:round;
-      filter:drop-shadow(0 0 6px rgba(255,255,255,.28));
+      stroke:#ffffff;stroke-width:6;stroke-linecap:round;
+      filter:drop-shadow(0 0 6px rgba(255,255,255,.28))
     }
-
     .arrow-head{
-      fill:#ffffff;
-      filter:drop-shadow(0 0 6px rgba(255,255,255,.28));
+      fill:#ffffff;filter:drop-shadow(0 0 6px rgba(255,255,255,.28))
     }
-
     .arrow-group{
-      opacity:0;
-      transform:translate(18px,-18px);
-      animation:arrowHitExact 1.2s ease-out forwards;
-      transform-origin:58px 58px;
+      opacity:0;transform:translate(18px,-18px);
+      animation:arrowHitExact 1.2s ease-out forwards;transform-origin:58px 58px
     }
 
     .splash-title{font-size:34px;font-weight:800;letter-spacing:-.03em;margin-bottom:8px}
@@ -481,12 +424,19 @@ if('serviceWorker' in navigator){
   window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js?v=2').catch(()=>{}));
 }
 
-const STORAGE_KEY='kartavya-duration-based-v23';
+const STORAGE_KEY='kartavya-duration-based-v25';
 const TOPUP=5000;
 const DEFAULT_WALLET=5000;
 const DEFAULT_REWARD=50;
 const DEFAULT_PENALTY=200;
 const DEFAULT_DURATION=30;
+
+/*
+  PASTE YOUR MACRODROID WEBHOOK URL BELOW
+  Example:
+  const MACRODROID_WEBHOOK_URL = 'https://trigger.macrodroid.com/31164bbe-dc2b-4b9e-a072-5ea363c1f205/kartavya_timer';
+*/
+const MACRODROID_WEBHOOK_URL = 'PASTE_YOUR_MACRODROID_WEBHOOK_URL_HERE';
 
 const state={
   wallet:DEFAULT_WALLET,
@@ -599,6 +549,7 @@ function activateTask(task){
   task.durationText = formatDuration(durationMinutes);
   task.activatedAt = now.toISOString();
   task.deadline = new Date(now.getTime() + durationMinutes*60000).toISOString();
+  task.autoReminderSent = false;
   state.warned10MinTaskId = null;
   state.warned5MinTaskId = null;
 }
@@ -610,6 +561,7 @@ function migrateTasks(){
     task.penalty = sanitizeNumber(task.penalty, DEFAULT_PENALTY);
     task.durationMinutes = Math.max(1, sanitizeNumber(task.durationMinutes, DEFAULT_DURATION));
     task.durationText = formatDuration(task.durationMinutes);
+    if(typeof task.autoReminderSent !== 'boolean') task.autoReminderSent = false;
     if(index !== 0 && !task.activatedAt){ delete task.deadline; delete task.activatedAt; }
     return task;
   });
@@ -771,39 +723,60 @@ function playSplashHitSound(){
   }catch(e){}
 }
 
+function sendMacroDroidReminder(waitMinutes, taskName, successMessage, silent=false){
+  if(!MACRODROID_WEBHOOK_URL || MACRODROID_WEBHOOK_URL.includes('PASTE_YOUR_MACRODROID_WEBHOOK_URL_HERE')){
+    if(!silent) alert('Please paste your MacroDroid webhook URL in the HTML file first.');
+    return Promise.resolve(false);
+  }
+
+  const reminderMinutes = Math.max(1, Math.round(Number(waitMinutes) || 0));
+  const separator = MACRODROID_WEBHOOK_URL.includes('?') ? '&' : '?';
+  const url =
+    MACRODROID_WEBHOOK_URL +
+    separator +
+    'task_name=' + encodeURIComponent(taskName || 'Kartavya Task') +
+    '&reminder_mins=' + encodeURIComponent(reminderMinutes);
+
+  return fetch(url, { method:'GET', mode:'no-cors' })
+    .then(() => {
+      if(!silent && successMessage) alert(successMessage);
+      return true;
+    })
+    .catch(() => {
+      if(!silent) alert('Could not contact MacroDroid. Check internet and webhook URL.');
+      return false;
+    });
+}
+
+function autoSendMacroDroidForActiveTask(){
+  const a = activeTask();
+  if(!a || !a.deadline) return;
+  if(a.autoReminderSent) return;
+  if(!MACRODROID_WEBHOOK_URL || MACRODROID_WEBHOOK_URL.includes('PASTE_YOUR_MACRODROID_WEBHOOK_URL_HERE')) return;
+
+  const totalMinutes = Math.max(1, Math.round(Number(a.durationMinutes) || 0));
+  const waitMinutes = Math.max(1, totalMinutes - 5);
+
+  sendMacroDroidReminder(waitMinutes, a.taskName, '', true).then(ok => {
+    if(ok){
+      a.autoReminderSent = true;
+      save();
+    }
+  });
+}
+
 function setDeviceTimer(){
   const a = activeTask();
-  if(!a) return alert('No active task.');
+  if(!a || !a.deadline) return alert('No active task.');
 
-  const taskMinutes = Math.max(1, Math.round(Number(a.durationMinutes) || 0));
-  const timerMinutes = Math.max(1, taskMinutes - 5);
-  const seconds = timerMinutes * 60;
-  const label = encodeURIComponent((a.taskName || 'Kartavya Task') + ' - 5 min early alert');
+  const remainingMinutes = Math.max(1, Math.ceil(secondsLeft(a.deadline) / 60));
+  const waitMinutes = Math.max(1, remainingMinutes - 5);
 
-  const intentUrl =
-    'intent://timer/#Intent;' +
-    'action=android.intent.action.SET_TIMER;' +
-    'S.android.intent.extra.alarm.MESSAGE=' + label + ';' +
-    'i.android.intent.extra.alarm.LENGTH=' + seconds + ';' +
-    'end';
-
-  const ua = navigator.userAgent || '';
-  const isAndroid = /Android/i.test(ua);
-  const isChrome = /Chrome|CriOS/i.test(ua) && !/SamsungBrowser|Firefox|EdgA/i.test(ua);
-
-  if(!isAndroid){
-    return alert('Device timer shortcut works only on Android. Please set a phone timer manually for ' + timerMinutes + ' min.');
-  }
-
-  if(!isChrome){
-    return alert('Please open this app in Chrome to use Set Device Timer. For now, set a phone timer manually for ' + timerMinutes + ' min.');
-  }
-
-  try{
-    window.location.href = intentUrl;
-  }catch(e){
-    alert('Could not open device timer. Please set a phone timer manually for ' + timerMinutes + ' min.');
-  }
+  sendMacroDroidReminder(
+    waitMinutes,
+    a.taskName,
+    'MacroDroid reminder set for ' + waitMinutes + ' min from now.'
+  );
 }
 
 async function showPersistentNotification(title, body, tag){
@@ -836,7 +809,8 @@ function buildTask(taskName, durationMinutes, sourceType='', sourceId=null){
     durationText: formatDuration(durationMinutes),
     createdAt: new Date().toISOString(),
     sourceType,
-    sourceId
+    sourceId,
+    autoReminderSent:false
   };
 }
 
@@ -855,6 +829,7 @@ function createTask(){
   state.durationMinutes=DEFAULT_DURATION;
   state.durationText=formatDuration(DEFAULT_DURATION);
   syncActive(); save(); render();
+  autoSendMacroDroidForActiveTask();
 }
 
 function removeTask(id){
@@ -862,6 +837,7 @@ function removeTask(id){
   state.tasks = state.tasks.filter(x=>x.id!==id);
   if(wasActive) state.activeTaskId=null;
   syncActive(); save(); render();
+  autoSendMacroDroidForActiveTask();
 }
 
 function moveQueuedTask(id, direction){
@@ -979,6 +955,7 @@ function finishTask(result){
   if(state.tasks.length === 0) enqueueFromSource();
 
   syncActive(); save(); render();
+  autoSendMacroDroidForActiveTask();
 }
 
 function extendActiveTask(minutesToAdd){
@@ -988,9 +965,11 @@ function extendActiveTask(minutesToAdd){
   a.durationMinutes = Math.max(1, sanitizeNumber(a.durationMinutes, DEFAULT_DURATION) + add);
   a.durationText = formatDuration(a.durationMinutes);
   a.deadline = new Date(new Date(a.deadline).getTime() + add*60000).toISOString();
+  a.autoReminderSent = false;
   state.warned10MinTaskId = null;
   state.warned5MinTaskId = null;
   save(); render();
+  autoSendMacroDroidForActiveTask();
 }
 
 function autoFailIfOverdue(){
@@ -1037,6 +1016,7 @@ function resetScore(){
   state.history = [];
   state.taskStore = state.taskStore.map(item => ({...item, completed:false, autoServed:false}));
   state.routineTasks = state.routineTasks.map(item => ({...item, completed:false, autoServed:false}));
+  state.tasks = state.tasks.map(item => ({...item, autoReminderSent:false}));
 
   save(); render();
 }
@@ -1095,6 +1075,7 @@ function sendStoreTaskToQueue(id){
   if(state.tasks.length === 0) activateTask(task);
   state.tasks.push(task);
   syncActive(); save(); render();
+  autoSendMacroDroidForActiveTask();
 }
 
 function deleteStoreTask(id){
@@ -1132,6 +1113,7 @@ function sendRoutineTaskToQueue(id){
   if(state.tasks.length === 0) activateTask(task);
   state.tasks.push(task);
   syncActive(); save(); render();
+  autoSendMacroDroidForActiveTask();
 }
 
 function deleteRoutineTask(id){
@@ -1532,6 +1514,7 @@ window.addEventListener('load',()=>{
     if(splash) splash.style.display='none';
     if(app) app.style.display='block';
     render();
+    autoSendMacroDroidForActiveTask();
   },2200);
 });
 
