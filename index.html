@@ -295,7 +295,7 @@
     .queue-item,.routine-item{
       border:1px solid rgba(255,255,255,.10);
       border-radius:14px;
-      padding:9px;
+      padding:8px 9px;
       margin-top:7px;
       background:linear-gradient(180deg,rgba(255,255,255,.08),rgba(255,255,255,.04));
       box-shadow:0 6px 14px rgba(0,0,0,.14)
@@ -304,6 +304,16 @@
       background:linear-gradient(135deg,rgba(34,197,94,.20),rgba(34,197,94,.10));
       border-color:rgba(34,197,94,.28)
     }
+
+    .queue-row,.routine-row{
+      display:grid;
+      align-items:center;
+      gap:8px;
+    }
+    .queue-row{grid-template-columns:minmax(0,1fr) auto auto auto}
+    .routine-row{grid-template-columns:minmax(0,1fr) auto auto auto auto}
+    .queue-row .item-name,.routine-row .item-name{margin:0}
+    .queue-row .mini,.routine-row .mini{margin:0}
 
     .store-row{
       display:grid;
@@ -318,7 +328,10 @@
       box-shadow:0 6px 14px rgba(0,0,0,.14)
     }
 
-    .item-name{font-weight:800;line-height:1.22;font-size:13px;word-break:break-word;color:#fff8e9}
+    .item-name{
+      font-weight:800;line-height:1.22;font-size:13px;word-break:break-word;color:#fff8e9;
+      min-width:0;
+    }
     .item-meta{font-size:11px;color:#c9b78c;margin-top:5px;font-weight:700;line-height:1.2}
     .item-actions-bottom{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
 
@@ -393,6 +406,8 @@
       .quick-row .btn-outline{font-size:10px}
       .extend-row{gap:6px}
       .store-row{grid-template-columns:minmax(0,1fr) auto auto auto auto;gap:6px}
+      .queue-row{grid-template-columns:minmax(0,1fr) auto auto auto;gap:6px}
+      .routine-row{grid-template-columns:minmax(0,1fr) auto auto auto auto;gap:6px}
     }
   </style>
 </head>
@@ -424,7 +439,7 @@ if('serviceWorker' in navigator){
   window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js?v=2').catch(()=>{}));
 }
 
-const STORAGE_KEY='kartavya-duration-based-v25';
+const STORAGE_KEY='kartavya-duration-based-v26';
 const TOPUP=5000;
 const DEFAULT_WALLET=5000;
 const DEFAULT_REWARD=50;
@@ -1217,13 +1232,13 @@ function render(){
         const upDisabled = idx === 0 ? 'disabled style="opacity:.35;pointer-events:none"' : '';
         const downDisabled = idx === state.tasks.length-1 ? 'disabled style="opacity:.35;pointer-events:none"' : '';
         return '<div class="queue-item' + (isActive ? ' active' : '') + '">' +
-          '<div class="item-name">' + (isActive ? '▶ ' : (idx+1)+'. ') + escapeHtml(item.taskName) + '</div>' +
-          '<div class="item-meta">' + meta + '</div>' +
-          '<div class="item-actions-bottom">' +
+          '<div class="queue-row">' +
+            '<div class="item-name">' + (isActive ? '▶ ' : (idx+1)+'. ') + escapeHtml(item.taskName) + '</div>' +
             '<button class="btn-outline mini" data-move-up="' + item.id + '" ' + upDisabled + '>↑</button>' +
             '<button class="btn-outline mini" data-move-down="' + item.id + '" ' + downDisabled + '>↓</button>' +
             '<button class="btn-outline mini" data-remove="' + item.id + '">Delete</button>' +
           '</div>' +
+          '<div class="item-meta">' + meta + '</div>' +
         '</div>';
       }).join('')
     : '<div class="empty-state">No queued task yet.</div>';
@@ -1234,14 +1249,14 @@ function render(){
         const upDisabled = idx === 0 ? 'disabled style="opacity:.35;pointer-events:none"' : '';
         const downDisabled = idx === state.routineTasks.length-1 ? 'disabled style="opacity:.35;pointer-events:none"' : '';
         return '<div class="routine-item">' +
-          '<div class="item-name"><span class="status-dot ' + dotClass + '"></span>' + (idx+1) + '. ' + escapeHtml(item.taskName) + '</div>' +
-          '<div class="item-meta">' + formatDuration(item.durationMinutes) + '</div>' +
-          '<div class="item-actions-bottom">' +
+          '<div class="routine-row">' +
+            '<div class="item-name"><span class="status-dot ' + dotClass + '"></span>' + (idx+1) + '. ' + escapeHtml(item.taskName) + '</div>' +
             '<button class="btn-outline mini" data-routine-up="' + item.id + '" ' + upDisabled + '>↑</button>' +
             '<button class="btn-outline mini" data-routine-down="' + item.id + '" ' + downDisabled + '>↓</button>' +
             '<button class="btn-primary mini" data-send-routine="' + item.id + '">Queue</button>' +
             '<button class="btn-outline mini" data-routine-delete="' + item.id + '">Delete</button>' +
           '</div>' +
+          '<div class="item-meta">' + formatDuration(item.durationMinutes) + '</div>' +
         '</div>';
       }).join('')
     : '<div class="empty-state">No routine task yet.</div>';
