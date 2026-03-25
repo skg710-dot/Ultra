@@ -1016,30 +1016,11 @@ function extendActiveTask(minutesToAdd){
 }
 
 function autoFailIfOverdue(){
-  const a=activeTask();
-  if(a && a.deadline && secondsLeft(a.deadline)<=0) finishTask('fail');
+  return;
 }
 
 function checkDeadlineWarnings(){
-  const a=activeTask();
-  if(!a || !a.deadline) return;
-  const mins=Math.max(0, Math.floor((new Date(a.deadline)-new Date())/60000));
-
-  if(mins<=10 && mins>5 && state.warned10MinTaskId!==a.id){
-    state.warned10MinTaskId=a.id;
-    save();
-    showPersistentNotification('Kartavya Warning', a.taskName + ': 10 minutes left.', 'kartavya-10-' + a.id);
-    alarm('danger');
-    alert('Warning: Only 10 minutes left for ' + a.taskName + '.');
-  }
-
-  if(mins<=5 && mins>0 && state.warned5MinTaskId!==a.id){
-    state.warned5MinTaskId=a.id;
-    save();
-    showPersistentNotification('Kartavya Final Warning', a.taskName + ': 5 minutes left.', 'kartavya-5-' + a.id);
-    alarm('danger');
-    alert('Final warning: Only 5 minutes left for ' + a.taskName + '.');
-  }
+  return;
 }
 
 function addTopup(){ state.wallet += TOPUP; save(); render(); }
