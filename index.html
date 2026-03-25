@@ -1089,6 +1089,10 @@ function addTaskForFuture(){
     autoServed:false,
     createdAt: new Date().toISOString()
   });
+
+  state.storeDurationText = '30 min';
+  if(input) input.value = '';
+
   save(); render();
 }
 
