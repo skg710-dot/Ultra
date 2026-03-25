@@ -439,7 +439,7 @@ if('serviceWorker' in navigator){
   window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js?v=2').catch(()=>{}));
 }
 
-const STORAGE_KEY='kartavya-duration-based-v26';
+const STORAGE_KEY='kartavya-main-data';
 const TOPUP=5000;
 const DEFAULT_WALLET=5000;
 const DEFAULT_REWARD=50;
@@ -522,9 +522,37 @@ function normalizeDurationInput(text){
 }
 
 function load(){
-  const raw=localStorage.getItem(STORAGE_KEY);
-  if(raw){
-    try{ Object.assign(state, JSON.parse(raw)); }catch(e){}
+  const legacyKeys = [
+    'kartavya-main-data',
+    'kartavya-duration-based-v26',
+    'kartavya-duration-based-v25',
+    'kartavya-duration-based-v24',
+    'kartavya-duration-based-v23',
+    'kartavya-duration-based-v22',
+    'kartavya-duration-based-v21',
+    'kartavya-duration-based-v20',
+    'kartavya-duration-based-v19'
+  ];
+
+  let loaded = false;
+
+  for(const key of legacyKeys){
+    const raw = localStorage.getItem(key);
+    if(raw){
+      try{
+        Object.assign(state, JSON.parse(raw));
+        loaded = true;
+
+        if(key !== STORAGE_KEY){
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        }
+        break;
+      }catch(e){}
+    }
+  }
+
+  if(!loaded){
+    save();
   }
 
   state.wallet = sanitizeNumber(state.wallet, DEFAULT_WALLET);
