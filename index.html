@@ -455,6 +455,7 @@ const state={
   routineTasks:[],
   history:[],
   activeTaskId:null,
+  queuePausedAfterFail:false,
   soundEnabled:true,
   vibrationEnabled:true,
   warned10MinTaskId:null,
@@ -548,6 +549,7 @@ function load(){
   state.penalty = String(sanitizeNumber(state.penalty, DEFAULT_PENALTY));
   state.durationMinutes = Math.max(1, sanitizeNumber(state.durationMinutes, DEFAULT_DURATION));
   state.refillSourceNext = state.refillSourceNext === 'routine' ? 'routine' : 'store';
+  if(typeof state.queuePausedAfterFail !== 'boolean') state.queuePausedAfterFail = false;
 
   const normalized = normalizeDurationInput(state.durationText || formatDuration(state.durationMinutes));
   state.durationText = normalized ? normalized.text : formatDuration(state.durationMinutes);
@@ -636,19 +638,29 @@ function resetRoutineTasksIfNewDay(){
 
 function secondsLeft(d){return Math.max(0,Math.floor((new Date(d)-new Date())/1000))}
 function activeTask(){
-  if(state.activeTaskId) return state.tasks.find(x=>x.id===state.activeTaskId)||state.tasks[0]||null;
-  return state.tasks[0]||null;
+  if(!state.activeTaskId) return null;
+  return state.tasks.find(x=>x.id===state.activeTaskId) || null;
 }
 function syncActive(){
   if(!state.tasks.length){
-    state.activeTaskId=null;
-    state.warned10MinTaskId=null;
-    state.warned5MinTaskId=null;
+    state.activeTaskId = null;
+    state.queuePausedAfterFail = false;
+    state.warned10MinTaskId = null;
+    state.warned5MinTaskId = null;
     save();
     return;
   }
-  const exists=state.tasks.some(x=>x.id===state.activeTaskId);
-  if(!exists) state.activeTaskId=state.tasks[0].id;
+
+  if(state.queuePausedAfterFail && !state.activeTaskId){
+    save();
+    return;
+  }
+
+  const exists = state.tasks.some(x=>x.id===state.activeTaskId);
+  if(!exists){
+    state.activeTaskId = state.tasks[0].id;
+  }
+
   activateTask(activeTask());
   save();
 }
@@ -811,6 +823,11 @@ function buildTask(taskName, durationMinutes, sourceType='', sourceId=null){
 }
 
 function createTask(){
+  if(state.queuePausedAfterFail && state.tasks.length){
+    startNextTask();
+    return;
+  }
+
   if(!state.taskName.trim()) return alert('Enter task name.');
   const normalized = normalizeDurationInput(state.durationText);
   if(!normalized) return alert('Enter duration like 30 min, 1 hr, or 1 hr 30 min.');
@@ -818,8 +835,12 @@ function createTask(){
   state.durationText = normalized.text;
 
   const task = buildTask(state.taskName, normalized.minutes, 'manual', null);
-  if(state.tasks.length === 0) activateTask(task);
   state.tasks.push(task);
+  state.queuePausedAfterFail = false;
+
+  if(!state.activeTaskId){
+    state.activeTaskId = task.id;
+  }
 
   state.taskName='';
   state.durationMinutes=DEFAULT_DURATION;
@@ -828,10 +849,20 @@ function createTask(){
   autoSendMacroDroidForActiveTask();
 }
 
+function startNextTask(){
+  if(!state.tasks.length) return;
+  state.queuePausedAfterFail = false;
+  state.activeTaskId = state.tasks[0].id;
+  syncActive();
+  render();
+  autoSendMacroDroidForActiveTask();
+}
+
 function removeTask(id){
   const wasActive = state.activeTaskId===id;
   state.tasks = state.tasks.filter(x=>x.id!==id);
   if(wasActive) state.activeTaskId=null;
+  if(!state.tasks.length) state.queuePausedAfterFail = false;
   syncActive(); save(); render();
   autoSendMacroDroidForActiveTask();
 }
@@ -925,9 +956,7 @@ function enqueueFromSource(){
   }
 
   if(!task) return false;
-  activateTask(task);
   state.tasks.push(task);
-  state.activeTaskId = task.id;
   return true;
 }
 
@@ -948,8 +977,11 @@ function finishTask(result){
   state.tasks = state.tasks.filter(x=>x.id!==a.id);
   state.activeTaskId = null;
 
-  if(state.tasks.length === 0) enqueueFromSource();
+  if(state.tasks.length === 0){
+    enqueueFromSource();
+  }
 
+  state.queuePausedAfterFail = false;
   syncActive(); save(); render();
   autoSendMacroDroidForActiveTask();
 }
@@ -968,20 +1000,37 @@ function extendActiveTask(minutesToAdd){
   autoSendMacroDroidForActiveTask();
 }
 
-function autoFailIfOverdue(){ return; }
+function autoFailIfOverdue(){
+  const a = activeTask();
+  if(!a || !a.deadline) return;
+
+  if(secondsLeft(a.deadline) <= 0){
+    state.wallet = Math.max(0, state.wallet - sanitizeNumber(a.penalty, DEFAULT_PENALTY));
+    alarm('danger');
+
+    state.history.unshift({
+      ...a,
+      result:'fail',
+      completedAt:new Date().toISOString()
+    });
+
+    state.tasks = state.tasks.filter(x => x.id !== a.id);
+    state.activeTaskId = null;
+
+    if(state.tasks.length === 0){
+      enqueueFromSource();
+    }
+
+    state.queuePausedAfterFail = state.tasks.length > 0;
+
+    save();
+    render();
+  }
+}
+
 function checkDeadlineWarnings(){ return; }
 
 function addTopup(){ state.wallet += TOPUP; save(); render(); }
-
-function requestNotifications(){
-  if(!('Notification' in window)) return alert('Notifications not supported in this browser.');
-  Notification.requestPermission().then(async p=>{
-    if(p==='granted'){
-      await showPersistentNotification('Kartavya','Notifications enabled.','kartavya-enabled');
-      alert('Notifications enabled.');
-    }
-  });
-}
 
 function resetScore(){
   const ok = confirm('Reset reward, penalty and success record?');
@@ -1048,8 +1097,11 @@ function sendStoreTaskToQueue(id){
   const item = state.taskStore.find(x=>x.id===id);
   if(!item) return;
   const task = buildTask(item.taskName, item.durationMinutes, 'store', item.id);
-  if(state.tasks.length === 0) activateTask(task);
   state.tasks.push(task);
+  state.queuePausedAfterFail = false;
+  if(!state.activeTaskId){
+    state.activeTaskId = task.id;
+  }
   syncActive(); save(); render();
   autoSendMacroDroidForActiveTask();
 }
@@ -1086,8 +1138,11 @@ function sendRoutineTaskToQueue(id){
   const item = state.routineTasks.find(x=>x.id===id);
   if(!item) return;
   const task = buildTask(item.taskName, Math.max(1, sanitizeNumber(item.durationMinutes, DEFAULT_DURATION)), 'routine', item.id);
-  if(state.tasks.length === 0) activateTask(task);
   state.tasks.push(task);
+  state.queuePausedAfterFail = false;
+  if(!state.activeTaskId){
+    state.activeTaskId = task.id;
+  }
   syncActive(); save(); render();
   autoSendMacroDroidForActiveTask();
 }
@@ -1164,9 +1219,9 @@ function refreshLive(){
     if(doneBar) doneBar.style.width = pct+'%';
     if(leftBar) leftBar.style.width = (100-pct)+'%';
   }else{
-    if(current) current.textContent='No active task';
-    if(clockInline) clockInline.textContent='Time left 0 min';
-    if(activeDuration) activeDuration.textContent='--';
+    if(current) current.textContent = state.queuePausedAfterFail && state.tasks.length ? 'No active task' : 'No active task';
+    if(clockInline) clockInline.textContent = 'Time left 0 min';
+    if(activeDuration) activeDuration.textContent = '--';
     if(doneBar) doneBar.style.width='0%';
     if(leftBar) leftBar.style.width='100%';
   }
@@ -1179,6 +1234,9 @@ function render(){
     a=activeTask(),
     s=stats(),
     urgency=urgencyClass();
+
+  const shouldShowStartNext = state.queuePausedAfterFail && state.tasks.length > 0;
+  const createButtonText = shouldShowStartNext ? 'Start Next Task' : 'Add Task';
 
   const currentTaskHtml = a ? '<span class="current-cycle-dot"></span>' + escapeHtml(a.taskName) : 'No active task';
   const endText = a && a.deadline ? 'Ends: ' + new Date(a.deadline).toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' }) : '';
@@ -1310,7 +1368,7 @@ function render(){
       <label>Task Name</label>
       <input id="taskNameInput" value="${escapeHtml(state.taskName)}" placeholder="">
       <div style="margin-top:8px">
-        <button class="btn-gold" id="createBtn">Add Task</button>
+        <button class="btn-gold" id="createBtn">${createButtonText}</button>
       </div>
     </div>
 
