@@ -27,6 +27,10 @@
       --queued-title:#dcecff;
       --routine-title:#e3ffeb;
       --store-title:#fff1c9;
+      --queue-blue-1:#2563eb;
+      --queue-blue-2:#3b82f6;
+      --drag-light:rgba(255,255,255,.14);
+      --drag-light-border:rgba(255,255,255,.18);
     }
 
     *{box-sizing:border-box}
@@ -194,6 +198,36 @@
       background:linear-gradient(135deg,#dc2626,#ef4444);color:#ffffff;
       border:2px solid rgba(255,255,255,.12);box-shadow:0 10px 24px rgba(239,68,68,.24)
     }
+    .btn-queue{
+      background:linear-gradient(135deg,var(--queue-blue-1),var(--queue-blue-2));
+      color:#ffffff;
+      border:2px solid rgba(255,255,255,.10);
+      box-shadow:0 10px 22px rgba(37,99,235,.22)
+    }
+    .btn-delete{
+      background:linear-gradient(135deg,#dc2626,#ef4444);
+      color:#ffffff;
+      border:2px solid rgba(255,255,255,.10);
+      box-shadow:0 10px 22px rgba(239,68,68,.22)
+    }
+    .drag-handle{
+      width:auto;
+      padding:6px 10px;
+      border-radius:10px;
+      font-size:15px;
+      line-height:1;
+      font-weight:800;
+      color:#eef4ff;
+      background:var(--drag-light);
+      border:1px solid var(--drag-light-border);
+      box-shadow:var(--shadow-soft);
+      cursor:grab;
+      user-select:none;
+      -webkit-user-select:none;
+      touch-action:none;
+      flex:0 0 auto;
+    }
+    .drag-handle:active{cursor:grabbing;transform:scale(.98)}
 
     .mini{width:auto;padding:6px 8px;border-radius:10px;font-size:11px;white-space:nowrap;flex:0 0 auto}
     .tiny-btn{width:auto;padding:6px 8px;border-radius:10px;font-size:11px;font-weight:800}
@@ -291,7 +325,7 @@
       box-shadow:0 0 0 5px rgba(244,180,0,.10),0 0 18px rgba(244,180,0,.24);
     }
 
-    .queue-item,.routine-item{
+    .draggable-item{
       border:1px solid rgba(255,255,255,.10);
       border-radius:14px;
       padding:8px 9px;
@@ -299,31 +333,26 @@
       background:linear-gradient(180deg,rgba(255,255,255,.08),rgba(255,255,255,.04));
       box-shadow:0 6px 14px rgba(0,0,0,.14)
     }
-    .queue-item.active{
+    .draggable-item.active{
       background:linear-gradient(135deg,rgba(34,197,94,.20),rgba(34,197,94,.10));
       border-color:rgba(34,197,94,.28)
     }
+    .draggable-item.over{
+      outline:2px dashed rgba(147,197,253,.75);
+      outline-offset:2px;
+    }
+    .draggable-item.drag-source{
+      opacity:.65;
+    }
 
-    .queue-row,.routine-row{
+    .queue-row,.routine-row,.store-row{
       display:grid;
       align-items:center;
       gap:8px;
     }
-    .queue-row{grid-template-columns:minmax(0,1fr) auto auto auto}
-    .routine-row{grid-template-columns:minmax(0,1fr) auto auto auto auto}
-
-    .store-row{
-      display:grid;
-      grid-template-columns:minmax(0,1fr) auto auto auto auto;
-      gap:8px;
-      align-items:center;
-      border:1px solid rgba(255,255,255,.10);
-      border-radius:14px;
-      padding:8px 9px;
-      margin-top:7px;
-      background:linear-gradient(180deg,rgba(255,255,255,.08),rgba(255,255,255,.04));
-      box-shadow:0 6px 14px rgba(0,0,0,.14)
-    }
+    .queue-row{grid-template-columns:minmax(0,1fr) auto auto}
+    .routine-row{grid-template-columns:minmax(0,1fr) auto auto auto}
+    .store-row{grid-template-columns:minmax(0,1fr) auto auto auto}
 
     .item-name{
       font-weight:800;line-height:1.22;font-size:13px;word-break:break-word;color:#fff8e9;min-width:0;
@@ -397,12 +426,12 @@
       .action-buttons button{font-size:11px;padding:9px 6px}
       .perf-box .val{font-size:16px}
       .list-title{font-size:15px}
-      .mini,.store-row .mini,.queue-row .mini,.routine-row .mini{font-size:10px;padding:5px 7px}
+      .mini,.drag-handle{font-size:10px;padding:5px 7px}
       .quick-row .btn-outline{font-size:10px}
       .extend-row{gap:6px}
-      .store-row{grid-template-columns:minmax(0,1fr) auto auto auto auto;gap:6px}
-      .queue-row{grid-template-columns:minmax(0,1fr) auto auto auto;gap:6px}
-      .routine-row{grid-template-columns:minmax(0,1fr) auto auto auto auto;gap:6px}
+      .queue-row{grid-template-columns:minmax(0,1fr) auto auto;gap:6px}
+      .routine-row{grid-template-columns:minmax(0,1fr) auto auto auto;gap:6px}
+      .store-row{grid-template-columns:minmax(0,1fr) auto auto auto;gap:6px}
     }
   </style>
 </head>
@@ -462,6 +491,12 @@ const state={
   warned5MinTaskId:null,
   refillSourceNext:'store',
   lastRoutineResetDate:null
+};
+
+const dragState = {
+  list:null,
+  id:null,
+  overId:null
 };
 
 function sanitizeNumber(value, fallback){
@@ -858,6 +893,126 @@ function startNextTask(){
   autoSendMacroDroidForActiveTask();
 }
 
+function reorderByIds(arr, draggedId, targetId){
+  const from = arr.findIndex(x => x.id === draggedId);
+  const to = arr.findIndex(x => x.id === targetId);
+  if(from === -1 || to === -1 || from === to) return arr;
+  const copy = [...arr];
+  const [moved] = copy.splice(from, 1);
+  copy.splice(to, 0, moved);
+  return copy;
+}
+
+function reorderList(listKey, draggedId, targetId){
+  if(!draggedId || !targetId || draggedId === targetId) return;
+  state[listKey] = reorderByIds(state[listKey], draggedId, targetId);
+  save();
+  render();
+}
+
+function clearDragClasses(){
+  document.querySelectorAll('.draggable-item').forEach(el=>{
+    el.classList.remove('over','drag-source');
+  });
+}
+
+function bindDragAndDrop(){
+  const handles = document.querySelectorAll('[data-drag-handle]');
+  const rows = document.querySelectorAll('.draggable-item');
+
+  rows.forEach(row=>{
+    row.addEventListener('dragover', e=>{
+      if(!dragState.list) return;
+      const list = row.getAttribute('data-list');
+      if(list !== dragState.list) return;
+      e.preventDefault();
+      clearDragClasses();
+      row.classList.add('over');
+      dragState.overId = Number(row.getAttribute('data-id'));
+      const source = document.querySelector(`.draggable-item[data-list="${dragState.list}"][data-id="${dragState.id}"]`);
+      if(source) source.classList.add('drag-source');
+    });
+
+    row.addEventListener('drop', e=>{
+      e.preventDefault();
+      const list = row.getAttribute('data-list');
+      const targetId = Number(row.getAttribute('data-id'));
+      if(list === dragState.list){
+        const map = { queue:'tasks', routine:'routineTasks', store:'taskStore' };
+        reorderList(map[list], dragState.id, targetId);
+      }
+      dragState.list = null;
+      dragState.id = null;
+      dragState.overId = null;
+      clearDragClasses();
+    });
+
+    row.addEventListener('dragend', ()=>{
+      dragState.list = null;
+      dragState.id = null;
+      dragState.overId = null;
+      clearDragClasses();
+    });
+  });
+
+  handles.forEach(handle=>{
+    handle.addEventListener('dragstart', e=>{
+      dragState.list = handle.getAttribute('data-list');
+      dragState.id = Number(handle.getAttribute('data-id'));
+      dragState.overId = null;
+      if(e.dataTransfer){
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/plain', String(dragState.id));
+      }
+      const source = document.querySelector(`.draggable-item[data-list="${dragState.list}"][data-id="${dragState.id}"]`);
+      if(source) source.classList.add('drag-source');
+    });
+
+    handle.addEventListener('touchstart', e=>{
+      dragState.list = handle.getAttribute('data-list');
+      dragState.id = Number(handle.getAttribute('data-id'));
+      dragState.overId = null;
+      clearDragClasses();
+      const source = document.querySelector(`.draggable-item[data-list="${dragState.list}"][data-id="${dragState.id}"]`);
+      if(source) source.classList.add('drag-source');
+    }, {passive:true});
+
+    handle.addEventListener('touchmove', e=>{
+      if(!dragState.list) return;
+      const touch = e.touches[0];
+      if(!touch) return;
+      const el = document.elementFromPoint(touch.clientX, touch.clientY);
+      const row = el && el.closest('.draggable-item');
+      clearDragClasses();
+      const source = document.querySelector(`.draggable-item[data-list="${dragState.list}"][data-id="${dragState.id}"]`);
+      if(source) source.classList.add('drag-source');
+
+      if(row && row.getAttribute('data-list') === dragState.list){
+        row.classList.add('over');
+        dragState.overId = Number(row.getAttribute('data-id'));
+      }
+    }, {passive:true});
+
+    handle.addEventListener('touchend', ()=>{
+      if(dragState.list && dragState.overId && dragState.overId !== dragState.id){
+        const map = { queue:'tasks', routine:'routineTasks', store:'taskStore' };
+        reorderList(map[dragState.list], dragState.id, dragState.overId);
+      }
+      dragState.list = null;
+      dragState.id = null;
+      dragState.overId = null;
+      clearDragClasses();
+    });
+
+    handle.addEventListener('touchcancel', ()=>{
+      dragState.list = null;
+      dragState.id = null;
+      dragState.overId = null;
+      clearDragClasses();
+    });
+  });
+}
+
 function removeTask(id){
   const wasActive = state.activeTaskId===id;
   state.tasks = state.tasks.filter(x=>x.id!==id);
@@ -865,39 +1020,6 @@ function removeTask(id){
   if(!state.tasks.length) state.queuePausedAfterFail = false;
   syncActive(); save(); render();
   autoSendMacroDroidForActiveTask();
-}
-
-function moveQueuedTask(id, direction){
-  const index = state.tasks.findIndex(x=>x.id===id);
-  if(index === -1) return;
-  const target = index + direction;
-  if(target < 0 || target >= state.tasks.length) return;
-  const temp = state.tasks[index];
-  state.tasks[index] = state.tasks[target];
-  state.tasks[target] = temp;
-  save(); render();
-}
-
-function moveRoutineTask(id, direction){
-  const index = state.routineTasks.findIndex(x=>x.id===id);
-  if(index === -1) return;
-  const target = index + direction;
-  if(target < 0 || target >= state.routineTasks.length) return;
-  const temp = state.routineTasks[index];
-  state.routineTasks[index] = state.routineTasks[target];
-  state.routineTasks[target] = temp;
-  save(); render();
-}
-
-function moveStoreTask(id, direction){
-  const index = state.taskStore.findIndex(x=>x.id===id);
-  if(index === -1) return;
-  const target = index + direction;
-  if(target < 0 || target >= state.taskStore.length) return;
-  const temp = state.taskStore[index];
-  state.taskStore[index] = state.taskStore[target];
-  state.taskStore[target] = temp;
-  save(); render();
 }
 
 function markSourceTaskCompleted(task){
@@ -1219,7 +1341,7 @@ function refreshLive(){
     if(doneBar) doneBar.style.width = pct+'%';
     if(leftBar) leftBar.style.width = (100-pct)+'%';
   }else{
-    if(current) current.textContent = state.queuePausedAfterFail && state.tasks.length ? 'No active task' : 'No active task';
+    if(current) current.textContent = 'No active task';
     if(clockInline) clockInline.textContent = 'Time left 0 min';
     if(activeDuration) activeDuration.textContent = '--';
     if(doneBar) doneBar.style.width='0%';
@@ -1248,14 +1370,11 @@ function render(){
     ? state.tasks.map((item, idx)=>{
         const isActive = item.id === state.activeTaskId;
         const meta = formatDuration(item.durationMinutes||0);
-        const upDisabled = idx === 0 ? 'disabled style="opacity:.35;pointer-events:none"' : '';
-        const downDisabled = idx === state.tasks.length-1 ? 'disabled style="opacity:.35;pointer-events:none"' : '';
-        return '<div class="queue-item' + (isActive ? ' active' : '') + '">' +
+        return '<div class="draggable-item' + (isActive ? ' active' : '') + '" data-list="queue" data-id="' + item.id + '">' +
           '<div class="queue-row">' +
             '<div class="item-name">' + (isActive ? '▶ ' : (idx+1)+'. ') + escapeHtml(item.taskName) + '</div>' +
-            '<button class="btn-outline mini" data-move-up="' + item.id + '" ' + upDisabled + '>↑</button>' +
-            '<button class="btn-outline mini" data-move-down="' + item.id + '" ' + downDisabled + '>↓</button>' +
-            '<button class="btn-outline mini" data-remove="' + item.id + '">Delete</button>' +
+            '<button class="drag-handle" draggable="true" data-drag-handle="1" data-list="queue" data-id="' + item.id + '">⋮⋮</button>' +
+            '<button class="btn-delete mini" data-remove="' + item.id + '">Delete</button>' +
           '</div>' +
           '<div class="item-meta">' + meta + '</div>' +
         '</div>';
@@ -1265,15 +1384,12 @@ function render(){
   const routineHtml = state.routineTasks.length
     ? state.routineTasks.map((item, idx)=>{
         const dotClass = item.completed ? 'green' : 'red';
-        const upDisabled = idx === 0 ? 'disabled style="opacity:.35;pointer-events:none"' : '';
-        const downDisabled = idx === state.routineTasks.length-1 ? 'disabled style="opacity:.35;pointer-events:none"' : '';
-        return '<div class="routine-item">' +
+        return '<div class="draggable-item" data-list="routine" data-id="' + item.id + '">' +
           '<div class="routine-row">' +
             '<div class="item-name"><span class="status-dot ' + dotClass + '"></span>' + (idx+1) + '. ' + escapeHtml(item.taskName) + '</div>' +
-            '<button class="btn-outline mini" data-routine-up="' + item.id + '" ' + upDisabled + '>↑</button>' +
-            '<button class="btn-outline mini" data-routine-down="' + item.id + '" ' + downDisabled + '>↓</button>' +
-            '<button class="btn-primary mini" data-send-routine="' + item.id + '">Queue</button>' +
-            '<button class="btn-outline mini" data-routine-delete="' + item.id + '">Delete</button>' +
+            '<button class="drag-handle" draggable="true" data-drag-handle="1" data-list="routine" data-id="' + item.id + '">⋮⋮</button>' +
+            '<button class="btn-queue mini" data-send-routine="' + item.id + '">Queue</button>' +
+            '<button class="btn-delete mini" data-routine-delete="' + item.id + '">Delete</button>' +
           '</div>' +
           '<div class="item-meta">' + formatDuration(item.durationMinutes) + '</div>' +
         '</div>';
@@ -1283,17 +1399,16 @@ function render(){
   const storeHtml = state.taskStore.length
     ? state.taskStore.map((item, idx)=>{
         const dotClass = item.completed ? 'green' : 'red';
-        const upDisabled = idx === 0 ? 'disabled style="opacity:.35;pointer-events:none"' : '';
-        const downDisabled = idx === state.taskStore.length-1 ? 'disabled style="opacity:.35;pointer-events:none"' : '';
-        return '<div class="store-row">' +
-          '<div>' +
-            '<div class="item-name"><span class="status-dot ' + dotClass + '"></span>' + (idx+1) + '. ' + escapeHtml(item.taskName) + '</div>' +
-            '<div class="item-meta">' + formatDuration(item.durationMinutes) + '</div>' +
+        return '<div class="draggable-item" data-list="store" data-id="' + item.id + '">' +
+          '<div class="store-row">' +
+            '<div>' +
+              '<div class="item-name"><span class="status-dot ' + dotClass + '"></span>' + (idx+1) + '. ' + escapeHtml(item.taskName) + '</div>' +
+              '<div class="item-meta">' + formatDuration(item.durationMinutes) + '</div>' +
+            '</div>' +
+            '<button class="drag-handle" draggable="true" data-drag-handle="1" data-list="store" data-id="' + item.id + '">⋮⋮</button>' +
+            '<button class="btn-queue mini" data-send-queue="' + item.id + '">Queue</button>' +
+            '<button class="btn-delete mini" data-store-delete="' + item.id + '">Delete</button>' +
           '</div>' +
-          '<button class="btn-outline mini" data-store-up="' + item.id + '" ' + upDisabled + '>↑</button>' +
-          '<button class="btn-outline mini" data-store-down="' + item.id + '" ' + downDisabled + '>↓</button>' +
-          '<button class="btn-primary mini" data-send-queue="' + item.id + '">Queue</button>' +
-          '<button class="btn-outline mini" data-store-delete="' + item.id + '">Delete</button>' +
         '</div>';
       }).join('')
     : '<div class="empty-state">No future task stored yet.</div>';
@@ -1480,24 +1595,6 @@ function render(){
   document.querySelectorAll('[data-remove]').forEach(btn=>
     btn.addEventListener('click',()=>removeTask(Number(btn.getAttribute('data-remove'))))
   );
-  document.querySelectorAll('[data-move-up]').forEach(btn=>
-    btn.addEventListener('click',()=>moveQueuedTask(Number(btn.getAttribute('data-move-up')),-1))
-  );
-  document.querySelectorAll('[data-move-down]').forEach(btn=>
-    btn.addEventListener('click',()=>moveQueuedTask(Number(btn.getAttribute('data-move-down')),1))
-  );
-  document.querySelectorAll('[data-routine-up]').forEach(btn=>
-    btn.addEventListener('click',()=>moveRoutineTask(Number(btn.getAttribute('data-routine-up')),-1))
-  );
-  document.querySelectorAll('[data-routine-down]').forEach(btn=>
-    btn.addEventListener('click',()=>moveRoutineTask(Number(btn.getAttribute('data-routine-down')),1))
-  );
-  document.querySelectorAll('[data-store-up]').forEach(btn=>
-    btn.addEventListener('click',()=>moveStoreTask(Number(btn.getAttribute('data-store-up')),-1))
-  );
-  document.querySelectorAll('[data-store-down]').forEach(btn=>
-    btn.addEventListener('click',()=>moveStoreTask(Number(btn.getAttribute('data-store-down')),1))
-  );
   document.querySelectorAll('[data-send-queue]').forEach(btn=>
     btn.addEventListener('click',()=>sendStoreTaskToQueue(Number(btn.getAttribute('data-send-queue'))))
   );
@@ -1510,6 +1607,8 @@ function render(){
   document.querySelectorAll('[data-routine-delete]').forEach(btn=>
     btn.addEventListener('click',()=>deleteRoutineTask(Number(btn.getAttribute('data-routine-delete'))))
   );
+
+  bindDragAndDrop();
 }
 
 load();
@@ -1545,4 +1644,4 @@ setInterval(()=>{
 },1000);
 </script>
 </body>
-</html>
+  </html>
