@@ -196,7 +196,7 @@
     }
 
     .mini{width:auto;padding:6px 8px;border-radius:10px;font-size:11px;white-space:nowrap;flex:0 0 auto}
-    .tiny-btn{width:100%;padding:6px 8px;border-radius:10px;font-size:11px;font-weight:800;margin-top:6px}
+    .tiny-btn{width:auto;padding:6px 8px;border-radius:10px;font-size:11px;font-weight:800}
 
     .action-buttons{
       display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px
@@ -234,7 +234,7 @@
     .perf-wallet{background:linear-gradient(135deg,rgba(244,180,0,.18),rgba(244,180,0,.08))}
 
     .paired-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px;margin-top:10px}
-    .paired-box,.full-box{
+    .paired-box{
       border:1px solid rgba(255,255,255,.08);border-radius:18px;padding:10px;background:rgba(255,255,255,.06);
       box-shadow:var(--shadow-soft);min-width:0
     }
@@ -266,7 +266,6 @@
       background:linear-gradient(135deg,#93c5fd,#3b82f6);
       box-shadow:0 0 0 5px rgba(96,165,250,.10),0 0 18px rgba(96,165,250,.24);
     }
-    .queued-panel .empty-state{color:#d7c487}
 
     .routine-panel{
       border:1px solid rgba(98,235,146,.32);
@@ -312,8 +311,6 @@
     }
     .queue-row{grid-template-columns:minmax(0,1fr) auto auto auto}
     .routine-row{grid-template-columns:minmax(0,1fr) auto auto auto auto}
-    .queue-row .item-name,.routine-row .item-name{margin:0}
-    .queue-row .mini,.routine-row .mini{margin:0}
 
     .store-row{
       display:grid;
@@ -329,11 +326,9 @@
     }
 
     .item-name{
-      font-weight:800;line-height:1.22;font-size:13px;word-break:break-word;color:#fff8e9;
-      min-width:0;
+      font-weight:800;line-height:1.22;font-size:13px;word-break:break-word;color:#fff8e9;min-width:0;
     }
     .item-meta{font-size:11px;color:#c9b78c;margin-top:5px;font-weight:700;line-height:1.2}
-    .item-actions-bottom{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
 
     .top-card{
       border:1px solid rgba(220,240,255,.35);
@@ -402,7 +397,7 @@
       .action-buttons button{font-size:11px;padding:9px 6px}
       .perf-box .val{font-size:16px}
       .list-title{font-size:15px}
-      .item-actions-bottom .mini,.store-row .mini{font-size:10px;padding:5px 7px}
+      .mini,.store-row .mini,.queue-row .mini,.routine-row .mini{font-size:10px;padding:5px 7px}
       .quick-row .btn-outline{font-size:10px}
       .extend-row{gap:6px}
       .store-row{grid-template-columns:minmax(0,1fr) auto auto auto auto;gap:6px}
@@ -445,13 +440,7 @@ const DEFAULT_WALLET=5000;
 const DEFAULT_REWARD=50;
 const DEFAULT_PENALTY=200;
 const DEFAULT_DURATION=30;
-
-/*
-  PASTE YOUR MACRODROID WEBHOOK URL BELOW
-  Example:
-  const MACRODROID_WEBHOOK_URL = 'https://trigger.macrodroid.com/31164bbe-dc2b-4b9e-a072-5ea363c1f205/kartavya_timer';
-*/
-const MACRODROID_WEBHOOK_URL = 'https://trigger.macrodroid.com/31164bbe-dc2b-4b9e-a072-5ea363c1f205/kartavya_timer';
+const MACRODROID_WEBHOOK_URL = 'PASTE_YOUR_MACRODROID_WEBHOOK_URL_HERE';
 
 const state={
   wallet:DEFAULT_WALLET,
@@ -542,7 +531,6 @@ function load(){
       try{
         Object.assign(state, JSON.parse(raw));
         loaded = true;
-
         if(key !== STORAGE_KEY){
           localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
         }
@@ -573,8 +561,9 @@ function load(){
   if(!Array.isArray(state.routineTasks)) state.routineTasks = [];
   if(!Array.isArray(state.history)) state.history = [];
   if(typeof state.taskName !== 'string') state.taskName = '';
-  if(typeof state.soundEnabled !== 'boolean') state.soundEnabled = true;
-  if(typeof state.vibrationEnabled !== 'boolean') state.vibrationEnabled = true;
+
+  state.soundEnabled = true;
+  state.vibrationEnabled = true;
 
   migrateTasks();
   migrateTaskStore();
@@ -685,7 +674,6 @@ function playSplashHitSound(){
   try{
     const AudioCtx = window.AudioContext || window.webkitAudioContext;
     if(!AudioCtx) return;
-
     const ctx = new AudioCtx();
     const now = ctx.currentTime;
 
@@ -698,7 +686,6 @@ function playSplashHitSound(){
     const osc1 = ctx.createOscillator();
     const osc2 = ctx.createOscillator();
     const osc3 = ctx.createOscillator();
-
     const gain1 = ctx.createGain();
     const gain2 = ctx.createGain();
     const gain3 = ctx.createGain();
@@ -709,29 +696,20 @@ function playSplashHitSound(){
 
     osc1.frequency.setValueAtTime(1800, now);
     osc1.frequency.exponentialRampToValueAtTime(620, now + 0.20);
-
     osc2.frequency.setValueAtTime(2400, now);
     osc2.frequency.exponentialRampToValueAtTime(900, now + 0.16);
-
     osc3.frequency.setValueAtTime(950, now);
     osc3.frequency.exponentialRampToValueAtTime(420, now + 0.22);
 
     gain1.gain.setValueAtTime(0.9, now);
     gain1.gain.exponentialRampToValueAtTime(0.0001, now + 0.18);
-
     gain2.gain.setValueAtTime(0.55, now);
     gain2.gain.exponentialRampToValueAtTime(0.0001, now + 0.14);
-
     gain3.gain.setValueAtTime(0.35, now);
     gain3.gain.exponentialRampToValueAtTime(0.0001, now + 0.22);
 
-    osc1.connect(gain1);
-    osc2.connect(gain2);
-    osc3.connect(gain3);
-
-    gain1.connect(master);
-    gain2.connect(master);
-    gain3.connect(master);
+    osc1.connect(gain1); osc2.connect(gain2); osc3.connect(gain3);
+    gain1.connect(master); gain2.connect(master); gain3.connect(master);
 
     const noiseBuffer = ctx.createBuffer(1, ctx.sampleRate * 0.04, ctx.sampleRate);
     const data = noiseBuffer.getChannelData(0);
@@ -741,28 +719,18 @@ function playSplashHitSound(){
 
     const noise = ctx.createBufferSource();
     noise.buffer = noiseBuffer;
-
     const noiseFilter = ctx.createBiquadFilter();
     noiseFilter.type = 'highpass';
     noiseFilter.frequency.setValueAtTime(1800, now);
-
     const noiseGain = ctx.createGain();
     noiseGain.gain.setValueAtTime(0.18, now);
     noiseGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.05);
-
     noise.connect(noiseFilter);
     noiseFilter.connect(noiseGain);
     noiseGain.connect(master);
 
-    osc1.start(now);
-    osc2.start(now);
-    osc3.start(now);
-    noise.start(now);
-
-    osc1.stop(now + 0.20);
-    osc2.stop(now + 0.16);
-    osc3.stop(now + 0.22);
-    noise.stop(now + 0.05);
+    osc1.start(now); osc2.start(now); osc3.start(now); noise.start(now);
+    osc1.stop(now + 0.20); osc2.stop(now + 0.16); osc3.stop(now + 0.22); noise.stop(now + 0.05);
   }catch(e){}
 }
 
@@ -797,8 +765,8 @@ function autoSendMacroDroidForActiveTask(){
   if(a.autoReminderSent) return;
   if(!MACRODROID_WEBHOOK_URL || MACRODROID_WEBHOOK_URL.includes('PASTE_YOUR_MACRODROID_WEBHOOK_URL_HERE')) return;
 
-  const totalMinutes = Math.max(1, Math.round(Number(a.durationMinutes) || 0));
-  const waitMinutes = Math.max(1, totalMinutes - 5);
+  const remainingMinutes = Math.max(1, Math.ceil(secondsLeft(a.deadline) / 60));
+  const waitMinutes = Math.max(1, remainingMinutes - 5);
 
   sendMacroDroidReminder(waitMinutes, a.taskName, '', true).then(ok => {
     if(ok){
@@ -808,24 +776,9 @@ function autoSendMacroDroidForActiveTask(){
   });
 }
 
-function setDeviceTimer(){
-  const a = activeTask();
-  if(!a || !a.deadline) return alert('No active task.');
-
-  const remainingMinutes = Math.max(1, Math.ceil(secondsLeft(a.deadline) / 60));
-  const waitMinutes = Math.max(1, remainingMinutes - 5);
-
-  sendMacroDroidReminder(
-    waitMinutes,
-    a.taskName,
-    'MacroDroid reminder set for ' + waitMinutes + ' min from now.'
-  );
-}
-
 async function showPersistentNotification(title, body, tag){
   if(!('Notification' in window)) return;
   if(Notification.permission !== 'granted') return;
-
   try{
     const reg = await navigator.serviceWorker.ready;
     await reg.showNotification(title, {
@@ -1015,15 +968,11 @@ function extendActiveTask(minutesToAdd){
   autoSendMacroDroidForActiveTask();
 }
 
-function autoFailIfOverdue(){
-  return;
-}
-
-function checkDeadlineWarnings(){
-  return;
-}
+function autoFailIfOverdue(){ return; }
+function checkDeadlineWarnings(){ return; }
 
 function addTopup(){ state.wallet += TOPUP; save(); render(); }
+
 function requestNotifications(){
   if(!('Notification' in window)) return alert('Notifications not supported in this browser.');
   Notification.requestPermission().then(async p=>{
@@ -1033,15 +982,14 @@ function requestNotifications(){
     }
   });
 }
+
 function resetScore(){
   const ok = confirm('Reset reward, penalty and success record?');
   if(!ok) return;
-
   state.history = [];
   state.taskStore = state.taskStore.map(item => ({...item, completed:false, autoServed:false}));
   state.routineTasks = state.routineTasks.map(item => ({...item, completed:false, autoServed:false}));
   state.tasks = state.tasks.map(item => ({...item, autoReminderSent:false}));
-
   save(); render();
 }
 
@@ -1306,12 +1254,9 @@ function render(){
     </div>
   </div>
 
-  <div class="extend-row" style="justify-content:space-between">
-    <button class="btn-outline mini" id="deviceTimerBtn" ${a ? '' : 'disabled style="opacity:.45;pointer-events:none"'}>Set Device Timer</button>
-    <div class="row" style="gap:8px">
-      <div class="small" style="font-weight:800">Extend Duration</div>
-      <button class="btn-gold mini" id="extend15Btn" ${a ? '' : 'disabled style="opacity:.45;pointer-events:none"'}>+15m</button>
-    </div>
+  <div class="extend-row">
+    <div class="small" style="font-weight:800">Extend Duration</div>
+    <button class="btn-gold mini" id="extend15Btn" ${a ? '' : 'disabled style="opacity:.45;pointer-events:none"'}>+15m</button>
   </div>
 
   <div class="bar-wrap">
@@ -1408,7 +1353,7 @@ function render(){
   </div>
 
   <div style="margin-top:8px">
-    <button class="btn-gold" id="routineAddBtn">Add</button>
+    <button class="btn-gold" id="routineAddBtn">Add Routine Task</button>
   </div>
   <div style="margin-top:8px">${routineHtml}</div>
 </div>
@@ -1443,9 +1388,6 @@ function render(){
     <div class="sub">Controls</div>
   </div>
   <div class="row" style="margin-top:10px">
-    <button class="${state.soundEnabled?'btn-primary':'btn-outline'} mini" id="soundBtn">${state.soundEnabled?'Sound On':'Sound Off'}</button>
-    <button class="${state.vibrationEnabled?'btn-primary':'btn-outline'} mini" id="vibrationBtn">${state.vibrationEnabled?'Vibration On':'Vibration Off'}</button>
-    <button class="btn-outline mini" id="notifBtn">Enable Notifications</button>
     <button class="btn-outline mini" id="resetScoreBtn">Reset Score</button>
   </div>
 </div>`;
@@ -1463,18 +1405,12 @@ function render(){
   document.getElementById('storeAddBtn').addEventListener('click',addTaskForFuture);
   document.getElementById('routineAddBtn').addEventListener('click',addRoutineTask);
 
-  const deviceTimerBtn = document.getElementById('deviceTimerBtn');
-  if(deviceTimerBtn) deviceTimerBtn.addEventListener('click', setDeviceTimer);
-
   const storeInput=document.getElementById('storeTaskInput');
   if(storeInput) storeInput.addEventListener('keydown',e=>{ if(e.key==='Enter') addTaskForFuture(); });
 
   const routineInput=document.getElementById('routineTaskInput');
   if(routineInput) routineInput.addEventListener('keydown',e=>{ if(e.key==='Enter') addRoutineTask(); });
 
-  document.getElementById('soundBtn').addEventListener('click',()=>{state.soundEnabled=!state.soundEnabled;save();render()});
-  document.getElementById('vibrationBtn').addEventListener('click',()=>{state.vibrationEnabled=!state.vibrationEnabled;save();render()});
-  document.getElementById('notifBtn').addEventListener('click',requestNotifications);
   document.getElementById('resetScoreBtn').addEventListener('click',resetScore);
 
   const successBtn=document.getElementById('successBtn');
@@ -1525,7 +1461,6 @@ window.addEventListener('load',()=>{
   const app=document.getElementById('app');
 
   let splashSoundPlayed = false;
-
   const triggerSplashHit = ()=>{
     if(splashSoundPlayed) return;
     splashSoundPlayed = true;
@@ -1534,7 +1469,6 @@ window.addEventListener('load',()=>{
   };
 
   setTimeout(triggerSplashHit, 780);
-
   document.addEventListener('touchstart', triggerSplashHit, { once:true });
   document.addEventListener('click', triggerSplashHit, { once:true });
 
