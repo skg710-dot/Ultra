@@ -1109,18 +1109,6 @@ function finishTask(result){
 }
 
 function extendActiveTask(minutesToAdd){
-  const a = activeTask();
-  if(!a || !a.deadline) return;
-  const add = Math.max(1, Number(minutesToAdd) || 0);
-  a.durationMinutes = Math.max(1, sanitizeNumber(a.durationMinutes, DEFAULT_DURATION) + add);
-  a.durationText = formatDuration(a.durationMinutes);
-  a.deadline = new Date(new Date(a.deadline).getTime() + add*60000).toISOString();
-  a.autoReminderSent = false;
-  state.warned10MinTaskId = null;
-  state.warned5MinTaskId = null;
-  save(); render();
-  autoSendMacroDroidForActiveTask();
-}
 
 function autoFailIfOverdue(){
   const a = activeTask();
@@ -1427,11 +1415,6 @@ function render(){
     </div>
   </div>
 
-  <div class="extend-row">
-    <div class="small" style="font-weight:800">Extend Duration</div>
-    <button class="btn-gold mini" id="extend15Btn" ${a ? '' : 'disabled style="opacity:.45;pointer-events:none"'}>+15m</button>
-  </div>
-
   <div class="bar-wrap">
     <div class="bar-done" id="doneBar" style="width:${a?progressPercent(a):0}%"></div>
     <div class="bar-left" id="leftBar" style="width:${a?100-progressPercent(a):100}%"></div>
@@ -1572,7 +1555,6 @@ function render(){
   document.getElementById('add15Btn').addEventListener('click',()=>addDuration(15));
   document.getElementById('add30Btn').addEventListener('click',()=>addDuration(30));
   document.getElementById('add60Btn').addEventListener('click',()=>addDuration(60));
-  document.getElementById('extend15Btn').addEventListener('click',()=>extendActiveTask(15));
   document.getElementById('createBtn').addEventListener('click',createTask);
   document.getElementById('topupBtn').addEventListener('click',addTopup);
   document.getElementById('storeAddBtn').addEventListener('click',addTaskForFuture);
