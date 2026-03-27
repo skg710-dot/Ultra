@@ -240,10 +240,6 @@
       letter-spacing:.01em;text-shadow:0 1px 2px rgba(0,0,0,.18)
     }
 
-    .extend-row{
-      display:flex;justify-content:flex-end;align-items:center;gap:8px;margin-top:8px;flex-wrap:wrap
-    }
-
     .bar-wrap{
       position:relative;width:100%;height:34px;border-radius:999px;overflow:hidden;background:rgba(255,255,255,.08);
       margin-top:8px;display:flex;border:1px solid rgba(244,180,0,.14);box-shadow:inset 0 1px 4px rgba(0,0,0,.20)
@@ -341,9 +337,7 @@
       outline:2px dashed rgba(147,197,253,.75);
       outline-offset:2px;
     }
-    .draggable-item.drag-source{
-      opacity:.65;
-    }
+    .draggable-item.drag-source{opacity:.65}
 
     .queue-row,.routine-row,.store-row{
       display:grid;
@@ -428,7 +422,6 @@
       .list-title{font-size:15px}
       .mini,.drag-handle{font-size:10px;padding:5px 7px}
       .quick-row .btn-outline{font-size:10px}
-      .extend-row{gap:6px}
       .queue-row{grid-template-columns:minmax(0,1fr) auto auto;gap:6px}
       .routine-row{grid-template-columns:minmax(0,1fr) auto auto auto;gap:6px}
       .store-row{grid-template-columns:minmax(0,1fr) auto auto auto;gap:6px}
@@ -469,7 +462,7 @@ const DEFAULT_WALLET=5000;
 const DEFAULT_REWARD=50;
 const DEFAULT_PENALTY=200;
 const DEFAULT_DURATION=30;
-const MACRODROID_WEBHOOK_URL = 'https://trigger.macrodroid.com/d9eb52fe-8048-4ba7-b019-277907053898/kartavya _timer';
+const MACRODROID_WEBHOOK_URL='https://trigger.macrodroid.com/31164bbe-dc2b-4b9e-a072-5ea363c1f205/kartavya_timer';
 
 const state={
   wallet:DEFAULT_WALLET,
@@ -493,11 +486,7 @@ const state={
   lastRoutineResetDate:null
 };
 
-const dragState = {
-  list:null,
-  id:null,
-  overId:null
-};
+const dragState={list:null,id:null,overId:null};
 
 function sanitizeNumber(value, fallback){
   const n = Number(value);
@@ -558,7 +547,6 @@ function load(){
     'kartavya-duration-based-v20',
     'kartavya-duration-based-v19'
   ];
-
   let loaded = false;
 
   for(const key of legacyKeys){
@@ -575,9 +563,7 @@ function load(){
     }
   }
 
-  if(!loaded){
-    save();
-  }
+  if(!loaded) save();
 
   state.wallet = sanitizeNumber(state.wallet, DEFAULT_WALLET);
   state.reward = String(sanitizeNumber(state.reward, DEFAULT_REWARD));
@@ -823,25 +809,6 @@ function autoSendMacroDroidForActiveTask(){
   });
 }
 
-async function showPersistentNotification(title, body, tag){
-  if(!('Notification' in window)) return;
-  if(Notification.permission !== 'granted') return;
-  try{
-    const reg = await navigator.serviceWorker.ready;
-    await reg.showNotification(title, {
-      body,
-      tag,
-      renotify:true,
-      requireInteraction:true,
-      icon:'./icon-192.png',
-      badge:'./icon-192.png',
-      data:{ url:'./' }
-    });
-  }catch(e){
-    try{ new Notification(title,{body}); }catch(err){}
-  }
-}
-
 function buildTask(taskName, durationMinutes, sourceType='', sourceId=null){
   return {
     id: Date.now() + Math.floor(Math.random()*1000),
@@ -902,20 +869,17 @@ function reorderByIds(arr, draggedId, targetId){
   copy.splice(to, 0, moved);
   return copy;
 }
-
 function reorderList(listKey, draggedId, targetId){
   if(!draggedId || !targetId || draggedId === targetId) return;
   state[listKey] = reorderByIds(state[listKey], draggedId, targetId);
   save();
   render();
 }
-
 function clearDragClasses(){
   document.querySelectorAll('.draggable-item').forEach(el=>{
     el.classList.remove('over','drag-source');
   });
 }
-
 function bindDragAndDrop(){
   const handles = document.querySelectorAll('[data-drag-handle]');
   const rows = document.querySelectorAll('.draggable-item');
@@ -968,7 +932,7 @@ function bindDragAndDrop(){
       if(source) source.classList.add('drag-source');
     });
 
-    handle.addEventListener('touchstart', e=>{
+    handle.addEventListener('touchstart', ()=>{
       dragState.list = handle.getAttribute('data-list');
       dragState.id = Number(handle.getAttribute('data-id'));
       dragState.overId = null;
@@ -1108,8 +1072,6 @@ function finishTask(result){
   autoSendMacroDroidForActiveTask();
 }
 
-function extendActiveTask(minutesToAdd){
-
 function autoFailIfOverdue(){
   const a = activeTask();
   if(!a || !a.deadline) return;
@@ -1132,7 +1094,6 @@ function autoFailIfOverdue(){
     }
 
     state.queuePausedAfterFail = state.tasks.length > 0;
-
     save();
     render();
   }
@@ -1357,14 +1318,15 @@ function render(){
   const queueHtml = state.tasks.length
     ? state.tasks.map((item, idx)=>{
         const isActive = item.id === state.activeTaskId;
-        const meta = formatDuration(item.durationMinutes||0);
         return '<div class="draggable-item' + (isActive ? ' active' : '') + '" data-list="queue" data-id="' + item.id + '">' +
           '<div class="queue-row">' +
-            '<div class="item-name">' + (isActive ? '▶ ' : (idx+1)+'. ') + escapeHtml(item.taskName) + '</div>' +
+            '<div>' +
+              '<div class="item-name">' + (isActive ? '▶ ' : (idx+1)+'. ') + escapeHtml(item.taskName) + '</div>' +
+              '<div class="item-meta">' + formatDuration(item.durationMinutes||0) + '</div>' +
+            '</div>' +
             '<button class="drag-handle" draggable="true" data-drag-handle="1" data-list="queue" data-id="' + item.id + '">⋮⋮</button>' +
             '<button class="btn-delete mini" data-remove="' + item.id + '">Delete</button>' +
           '</div>' +
-          '<div class="item-meta">' + meta + '</div>' +
         '</div>';
       }).join('')
     : '<div class="empty-state">No queued task yet.</div>';
@@ -1374,12 +1336,14 @@ function render(){
         const dotClass = item.completed ? 'green' : 'red';
         return '<div class="draggable-item" data-list="routine" data-id="' + item.id + '">' +
           '<div class="routine-row">' +
-            '<div class="item-name"><span class="status-dot ' + dotClass + '"></span>' + (idx+1) + '. ' + escapeHtml(item.taskName) + '</div>' +
+            '<div>' +
+              '<div class="item-name"><span class="status-dot ' + dotClass + '"></span>' + (idx+1) + '. ' + escapeHtml(item.taskName) + '</div>' +
+              '<div class="item-meta">' + formatDuration(item.durationMinutes) + '</div>' +
+            '</div>' +
             '<button class="drag-handle" draggable="true" data-drag-handle="1" data-list="routine" data-id="' + item.id + '">⋮⋮</button>' +
             '<button class="btn-queue mini" data-send-routine="' + item.id + '">Queue</button>' +
             '<button class="btn-delete mini" data-routine-delete="' + item.id + '">Delete</button>' +
           '</div>' +
-          '<div class="item-meta">' + formatDuration(item.durationMinutes) + '</div>' +
         '</div>';
       }).join('')
     : '<div class="empty-state">No routine task yet.</div>';
@@ -1626,4 +1590,4 @@ setInterval(()=>{
 },1000);
 </script>
 </body>
-  </html>
+</html>
