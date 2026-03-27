@@ -1,4 +1,4 @@
-const CACHE_NAME='kartavya-ultra-final-v5';
+const CACHE_NAME='kartavya-ultra-final-v6';
 const ASSETS=['./','./index.html','./manifest.webmanifest','./sw.js','./icon-192.png','./icon-512.png'];
 
 self.addEventListener('install',event=>{
