@@ -485,7 +485,9 @@ const state={
   warned10MinTaskId:null,
   warned5MinTaskId:null,
   refillSourceNext:'store',
-  lastRoutineResetDate:null
+  lastRoutineResetDate:null,
+  showRoutineList:false,
+  showStoreList:false
 };
 
 const dragState={list:null,id:null,overId:null};
@@ -536,6 +538,19 @@ function normalizeDurationInput(text){
   if(mins === null || mins <= 0) return null;
   return { minutes: mins, text: formatDuration(mins) };
 }
+function newReminderToken(){
+  return 'rt_' + Date.now() + '_' + Math.random().toString(36).slice(2,8);
+}
+function toggleRoutineList(){
+  state.showRoutineList = !state.showRoutineList;
+  save();
+  render();
+}
+function toggleStoreList(){
+  state.showStoreList = !state.showStoreList;
+  save();
+  render();
+}
 
 function load(){
   const legacyKeys = [
@@ -573,6 +588,8 @@ function load(){
   state.durationMinutes = Math.max(1, sanitizeNumber(state.durationMinutes, DEFAULT_DURATION));
   state.refillSourceNext = state.refillSourceNext === 'routine' ? 'routine' : 'store';
   if(typeof state.queuePausedAfterFail !== 'boolean') state.queuePausedAfterFail = false;
+  if(typeof state.showRoutineList !== 'boolean') state.showRoutineList = false;
+  if(typeof state.showStoreList !== 'boolean') state.showStoreList = false;
 
   const normalized = normalizeDurationInput(state.durationText || formatDuration(state.durationMinutes));
   state.durationText = normalized ? normalized.text : formatDuration(state.durationMinutes);
@@ -606,6 +623,7 @@ function activateTask(task){
   task.durationText = formatDuration(durationMinutes);
   task.activatedAt = now.toISOString();
   task.deadline = new Date(now.getTime() + durationMinutes*60000).toISOString();
+  task.reminderToken = newReminderToken();
   task.autoReminderSent = false;
   state.warned10MinTaskId = null;
   state.warned5MinTaskId = null;
@@ -619,6 +637,7 @@ function migrateTasks(){
     task.durationMinutes = Math.max(1, sanitizeNumber(task.durationMinutes, DEFAULT_DURATION));
     task.durationText = formatDuration(task.durationMinutes);
     if(typeof task.autoReminderSent !== 'boolean') task.autoReminderSent = false;
+    if(typeof task.reminderToken !== 'string' || !task.reminderToken) task.reminderToken = '';
     if(index !== 0 && !task.activatedAt){ delete task.deadline; delete task.activatedAt; }
     return task;
   });
@@ -769,7 +788,7 @@ function playSplashHitSound(){
   }catch(e){}
 }
 
-function sendMacroDroidReminder(waitMinutes, taskName, successMessage, silent=false){
+function sendMacroDroidReminder(waitMinutes, taskName, taskToken, successMessage, silent=false){
   if(!MACRODROID_WEBHOOK_URL || MACRODROID_WEBHOOK_URL.includes('PASTE_YOUR_MACRODROID_WEBHOOK_URL_HERE')){
     if(!silent) alert('Please paste your MacroDroid webhook URL in the HTML file first.');
     return Promise.resolve(false);
@@ -781,7 +800,8 @@ function sendMacroDroidReminder(waitMinutes, taskName, successMessage, silent=fa
     MACRODROID_WEBHOOK_URL +
     separator +
     'task_name=' + encodeURIComponent(taskName || 'Kartavya Task') +
-    '&reminder_mins=' + encodeURIComponent(reminderMinutes);
+    '&reminder_mins=' + encodeURIComponent(reminderMinutes) +
+    '&task_token=' + encodeURIComponent(taskToken || '');
 
   return fetch(url, { method:'GET', mode:'no-cors' })
     .then(() => {
@@ -803,7 +823,7 @@ function autoSendMacroDroidForActiveTask(){
   const remainingMinutes = Math.max(1, Math.ceil(secondsLeft(a.deadline) / 60));
   const waitMinutes = Math.max(1, remainingMinutes - 5);
 
-  sendMacroDroidReminder(waitMinutes, a.taskName, '', true).then(ok => {
+  sendMacroDroidReminder(waitMinutes, a.taskName, a.reminderToken, '', true).then(ok => {
     if(ok){
       a.autoReminderSent = true;
       save();
@@ -822,7 +842,8 @@ function buildTask(taskName, durationMinutes, sourceType='', sourceId=null){
     createdAt: new Date().toISOString(),
     sourceType,
     sourceId,
-    autoReminderSent:false
+    autoReminderSent:false,
+    reminderToken:''
   };
 }
 
@@ -1111,7 +1132,7 @@ function resetScore(){
   state.history = [];
   state.taskStore = state.taskStore.map(item => ({...item, completed:false, autoServed:false}));
   state.routineTasks = state.routineTasks.map(item => ({...item, completed:false, autoServed:false}));
-  state.tasks = state.tasks.map(item => ({...item, autoReminderSent:false}));
+  state.tasks = state.tasks.map(item => ({...item, autoReminderSent:false, reminderToken:''}));
   save(); render();
 }
 
@@ -1310,6 +1331,8 @@ function render(){
 
   const shouldShowStartNext = state.queuePausedAfterFail && state.tasks.length > 0;
   const createButtonText = shouldShowStartNext ? 'Start Next Task' : 'Add Task';
+  const routineToggleText = state.showRoutineList ? 'Hide Routine Tasks' : 'Show Routine Tasks';
+  const storeToggleText = state.showStoreList ? 'Hide Stored Tasks' : 'Show Stored Tasks';
 
   const currentTaskHtml = a ? '<span class="current-cycle-dot"></span>' + escapeHtml(a.taskName) : 'No active task';
   const endText = a && a.deadline ? 'Ends: ' + new Date(a.deadline).toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' }) : '';
@@ -1474,10 +1497,11 @@ function render(){
     </div>
   </div>
 
-  <div style="margin-top:8px">
-    <button class="btn-gold" id="routineAddBtn">Add Routine Task</button>
+  <div class="row" style="margin-top:8px">
+    <button class="btn-gold" id="routineAddBtn" style="flex:1">Add Routine Task</button>
+    <button class="btn-outline mini" id="toggleRoutineBtn">${routineToggleText}</button>
   </div>
-  <div style="margin-top:8px">${routineHtml}</div>
+  <div id="routineListWrap" style="margin-top:8px;display:${state.showRoutineList ? 'block' : 'none'}">${routineHtml}</div>
 </div>
 
 <div class="card store-panel">
@@ -1498,10 +1522,11 @@ function render(){
     </div>
   </div>
 
-  <div style="margin-top:8px">
-    <button class="btn-gold" id="storeAddBtn">Add Task for Future</button>
+  <div class="row" style="margin-top:8px">
+    <button class="btn-gold" id="storeAddBtn" style="flex:1">Add Task for Future</button>
+    <button class="btn-outline mini" id="toggleStoreBtn">${storeToggleText}</button>
   </div>
-  <div style="margin-top:8px">${storeHtml}</div>
+  <div id="storeListWrap" style="margin-top:8px;display:${state.showStoreList ? 'block' : 'none'}">${storeHtml}</div>
 </div>
 
 <div class="card">
@@ -1525,6 +1550,8 @@ function render(){
   document.getElementById('topupBtn').addEventListener('click',addTopup);
   document.getElementById('storeAddBtn').addEventListener('click',addTaskForFuture);
   document.getElementById('routineAddBtn').addEventListener('click',addRoutineTask);
+  document.getElementById('toggleRoutineBtn').addEventListener('click',toggleRoutineList);
+  document.getElementById('toggleStoreBtn').addEventListener('click',toggleStoreList);
 
   const storeInput=document.getElementById('storeTaskInput');
   if(storeInput) storeInput.addEventListener('keydown',e=>{ if(e.key==='Enter') addTaskForFuture(); });
