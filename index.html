@@ -538,9 +538,6 @@ function normalizeDurationInput(text){
   if(mins === null || mins <= 0) return null;
   return { minutes: mins, text: formatDuration(mins) };
 }
-function newReminderToken(){
-  return 'rt_' + Date.now() + '_' + Math.random().toString(36).slice(2,8);
-}
 function toggleRoutineList(){
   state.showRoutineList = !state.showRoutineList;
   save();
@@ -550,6 +547,54 @@ function toggleStoreList(){
   state.showStoreList = !state.showStoreList;
   save();
   render();
+}
+
+function sendMacroDroidState(taskName, reminderEpoch, taskState, successMessage='', silent=false){
+  if(!MACRODROID_WEBHOOK_URL || MACRODROID_WEBHOOK_URL.includes('PASTE_YOUR_MACRODROID_WEBHOOK_URL_HERE')){
+    if(!silent) alert('Please paste your MacroDroid webhook URL in the HTML file first.');
+    return Promise.resolve(false);
+  }
+
+  const separator = MACRODROID_WEBHOOK_URL.includes('?') ? '&' : '?';
+  const url =
+    MACRODROID_WEBHOOK_URL +
+    separator +
+    'task_name=' + encodeURIComponent(taskName || '') +
+    '&reminder_epoch=' + encodeURIComponent(Math.max(0, Math.round(Number(reminderEpoch) || 0))) +
+    '&task_state=' + encodeURIComponent(taskState || 'none');
+
+  return fetch(url, { method:'GET', mode:'no-cors' })
+    .then(() => {
+      if(!silent && successMessage) alert(successMessage);
+      return true;
+    })
+    .catch(() => {
+      if(!silent) alert('Could not contact MacroDroid. Check internet and webhook URL.');
+      return false;
+    });
+}
+
+function clearMacroDroidState(){
+  return sendMacroDroidState('', 0, 'none', '', true);
+}
+
+function autoSendMacroDroidForActiveTask(){
+  const a = activeTask();
+
+  if(!a || !a.deadline){
+    return clearMacroDroidState();
+  }
+
+  if(a.macroStateSentForTaskId === a.id) return;
+
+  const reminderEpoch = Math.max(0, new Date(a.deadline).getTime() - 5*60*1000);
+
+  sendMacroDroidState(a.taskName, reminderEpoch, 'active', '', true).then(ok => {
+    if(ok){
+      a.macroStateSentForTaskId = a.id;
+      save();
+    }
+  });
 }
 
 function load(){
@@ -623,7 +668,7 @@ function activateTask(task){
   task.durationText = formatDuration(durationMinutes);
   task.activatedAt = now.toISOString();
   task.deadline = new Date(now.getTime() + durationMinutes*60000).toISOString();
-  task.reminderToken = newReminderToken();
+  task.macroStateSentForTaskId = null;
   task.autoReminderSent = false;
   state.warned10MinTaskId = null;
   state.warned5MinTaskId = null;
@@ -637,7 +682,7 @@ function migrateTasks(){
     task.durationMinutes = Math.max(1, sanitizeNumber(task.durationMinutes, DEFAULT_DURATION));
     task.durationText = formatDuration(task.durationMinutes);
     if(typeof task.autoReminderSent !== 'boolean') task.autoReminderSent = false;
-    if(typeof task.reminderToken !== 'string' || !task.reminderToken) task.reminderToken = '';
+    if(typeof task.macroStateSentForTaskId === 'undefined') task.macroStateSentForTaskId = null;
     if(index !== 0 && !task.activatedAt){ delete task.deadline; delete task.activatedAt; }
     return task;
   });
@@ -788,49 +833,6 @@ function playSplashHitSound(){
   }catch(e){}
 }
 
-function sendMacroDroidReminder(waitMinutes, taskName, taskToken, successMessage, silent=false){
-  if(!MACRODROID_WEBHOOK_URL || MACRODROID_WEBHOOK_URL.includes('PASTE_YOUR_MACRODROID_WEBHOOK_URL_HERE')){
-    if(!silent) alert('Please paste your MacroDroid webhook URL in the HTML file first.');
-    return Promise.resolve(false);
-  }
-
-  const reminderMinutes = Math.max(1, Math.round(Number(waitMinutes) || 0));
-  const separator = MACRODROID_WEBHOOK_URL.includes('?') ? '&' : '?';
-  const url =
-    MACRODROID_WEBHOOK_URL +
-    separator +
-    'task_name=' + encodeURIComponent(taskName || 'Kartavya Task') +
-    '&reminder_mins=' + encodeURIComponent(reminderMinutes) +
-    '&task_token=' + encodeURIComponent(taskToken || '');
-
-  return fetch(url, { method:'GET', mode:'no-cors' })
-    .then(() => {
-      if(!silent && successMessage) alert(successMessage);
-      return true;
-    })
-    .catch(() => {
-      if(!silent) alert('Could not contact MacroDroid. Check internet and webhook URL.');
-      return false;
-    });
-}
-
-function autoSendMacroDroidForActiveTask(){
-  const a = activeTask();
-  if(!a || !a.deadline) return;
-  if(a.autoReminderSent) return;
-  if(!MACRODROID_WEBHOOK_URL || MACRODROID_WEBHOOK_URL.includes('PASTE_YOUR_MACRODROID_WEBHOOK_URL_HERE')) return;
-
-  const remainingMinutes = Math.max(1, Math.ceil(secondsLeft(a.deadline) / 60));
-  const waitMinutes = Math.max(1, remainingMinutes - 5);
-
-  sendMacroDroidReminder(waitMinutes, a.taskName, a.reminderToken, '', true).then(ok => {
-    if(ok){
-      a.autoReminderSent = true;
-      save();
-    }
-  });
-}
-
 function buildTask(taskName, durationMinutes, sourceType='', sourceId=null){
   return {
     id: Date.now() + Math.floor(Math.random()*1000),
@@ -843,7 +845,7 @@ function buildTask(taskName, durationMinutes, sourceType='', sourceId=null){
     sourceType,
     sourceId,
     autoReminderSent:false,
-    reminderToken:''
+    macroStateSentForTaskId:null
   };
 }
 
@@ -871,7 +873,8 @@ function createTask(){
   state.durationMinutes=DEFAULT_DURATION;
   state.durationText=formatDuration(DEFAULT_DURATION);
   syncActive(); save(); render();
-  autoSendMacroDroidForActiveTask();
+  if(activeTask()) autoSendMacroDroidForActiveTask();
+  else clearMacroDroidState();
 }
 
 function startNextTask(){
@@ -880,7 +883,8 @@ function startNextTask(){
   state.activeTaskId = state.tasks[0].id;
   syncActive();
   render();
-  autoSendMacroDroidForActiveTask();
+  if(activeTask()) autoSendMacroDroidForActiveTask();
+  else clearMacroDroidState();
 }
 
 function reorderByIds(arr, draggedId, targetId){
@@ -1006,7 +1010,8 @@ function removeTask(id){
   if(wasActive) state.activeTaskId=null;
   if(!state.tasks.length) state.queuePausedAfterFail = false;
   syncActive(); save(); render();
-  autoSendMacroDroidForActiveTask();
+  if(activeTask()) autoSendMacroDroidForActiveTask();
+  else clearMacroDroidState();
 }
 
 function markSourceTaskCompleted(task){
@@ -1092,7 +1097,8 @@ function finishTask(result){
 
   state.queuePausedAfterFail = false;
   syncActive(); save(); render();
-  autoSendMacroDroidForActiveTask();
+  if(activeTask()) autoSendMacroDroidForActiveTask();
+  else clearMacroDroidState();
 }
 
 function autoFailIfOverdue(){
@@ -1119,6 +1125,8 @@ function autoFailIfOverdue(){
     state.queuePausedAfterFail = state.tasks.length > 0;
     save();
     render();
+    if(activeTask()) autoSendMacroDroidForActiveTask();
+    else clearMacroDroidState();
   }
 }
 
@@ -1132,8 +1140,10 @@ function resetScore(){
   state.history = [];
   state.taskStore = state.taskStore.map(item => ({...item, completed:false, autoServed:false}));
   state.routineTasks = state.routineTasks.map(item => ({...item, completed:false, autoServed:false}));
-  state.tasks = state.tasks.map(item => ({...item, autoReminderSent:false, reminderToken:''}));
+  state.tasks = state.tasks.map(item => ({...item, autoReminderSent:false, macroStateSentForTaskId:null}));
   save(); render();
+  if(activeTask()) autoSendMacroDroidForActiveTask();
+  else clearMacroDroidState();
 }
 
 function addDuration(mins){
@@ -1197,7 +1207,8 @@ function sendStoreTaskToQueue(id){
     state.activeTaskId = task.id;
   }
   syncActive(); save(); render();
-  autoSendMacroDroidForActiveTask();
+  if(activeTask()) autoSendMacroDroidForActiveTask();
+  else clearMacroDroidState();
 }
 
 function deleteStoreTask(id){
@@ -1238,7 +1249,8 @@ function sendRoutineTaskToQueue(id){
     state.activeTaskId = task.id;
   }
   syncActive(); save(); render();
-  autoSendMacroDroidForActiveTask();
+  if(activeTask()) autoSendMacroDroidForActiveTask();
+  else clearMacroDroidState();
 }
 
 function deleteRoutineTask(id){
@@ -1608,7 +1620,8 @@ window.addEventListener('load',()=>{
     if(splash) splash.style.display='none';
     if(app) app.style.display='block';
     render();
-    autoSendMacroDroidForActiveTask();
+    if(activeTask()) autoSendMacroDroidForActiveTask();
+    else clearMacroDroidState();
   },2200);
 });
 
@@ -1619,4 +1632,4 @@ setInterval(()=>{
 },1000);
 </script>
 </body>
-</html>
+  </html>
