@@ -231,6 +231,32 @@
 
     .mini{width:auto;padding:6px 8px;border-radius:10px;font-size:11px;white-space:nowrap;flex:0 0 auto}
     .tiny-btn{width:auto;padding:6px 8px;border-radius:10px;font-size:11px;font-weight:800}
+    .mini-copy{
+      background:linear-gradient(135deg,var(--queue-blue-1),var(--queue-blue-2));
+      color:#fff;
+      border:2px solid rgba(255,255,255,.10);
+      box-shadow:0 10px 22px rgba(37,99,235,.22)
+    }
+    .mini-distraction{
+      background:linear-gradient(135deg,#b91c1c,#ef4444);
+      color:#fff;
+      border:2px solid rgba(255,255,255,.10);
+      box-shadow:0 10px 22px rgba(239,68,68,.22)
+    }
+    .distraction-row{
+      display:flex;
+      justify-content:flex-end;
+      align-items:center;
+      gap:8px;
+      margin-top:8px;
+      margin-bottom:2px;
+      flex-wrap:wrap;
+    }
+    .distraction-label{
+      font-size:12px;
+      font-weight:800;
+      color:#ffd6d6;
+    }
 
     .action-buttons{
       display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px
@@ -344,7 +370,7 @@
       align-items:center;
       gap:8px;
     }
-    .queue-row{grid-template-columns:minmax(0,1fr) auto auto}
+    .queue-row{grid-template-columns:minmax(0,1fr) auto auto auto}
     .routine-row{grid-template-columns:minmax(0,1fr) auto auto auto}
     .store-row{grid-template-columns:minmax(0,1fr) auto auto auto}
 
@@ -422,7 +448,7 @@
       .list-title{font-size:15px}
       .mini,.drag-handle{font-size:10px;padding:5px 7px}
       .quick-row .btn-outline{font-size:10px}
-      .queue-row{grid-template-columns:minmax(0,1fr) auto auto;gap:6px}
+      .queue-row{grid-template-columns:minmax(0,1fr) auto auto auto;gap:6px}
       .routine-row{grid-template-columns:minmax(0,1fr) auto auto auto;gap:6px}
       .store-row{grid-template-columns:minmax(0,1fr) auto auto auto;gap:6px}
     }
@@ -464,6 +490,7 @@ const DEFAULT_WALLET=5000;
 const DEFAULT_REWARD=50;
 const DEFAULT_PENALTY=200;
 const DEFAULT_DURATION=30;
+const DISTRACTION_PENALTY=50;
 const MACRODROID_WEBHOOK_URL='https://trigger.macrodroid.com/9d8de64f-05db-49f9-9470-18e7f06404e1/kartavya_timer';
 
 const state={
@@ -487,7 +514,8 @@ const state={
   refillSourceNext:'store',
   lastRoutineResetDate:null,
   showRoutineList:false,
-  showStoreList:false
+  showStoreList:false,
+  distractionPenaltyTotal:0
 };
 
 const dragState={list:null,id:null,overId:null};
@@ -635,6 +663,7 @@ function load(){
   if(typeof state.queuePausedAfterFail !== 'boolean') state.queuePausedAfterFail = false;
   if(typeof state.showRoutineList !== 'boolean') state.showRoutineList = false;
   if(typeof state.showStoreList !== 'boolean') state.showStoreList = false;
+  state.distractionPenaltyTotal = sanitizeNumber(state.distractionPenaltyTotal, 0);
 
   const normalized = normalizeDurationInput(state.durationText || formatDuration(state.durationMinutes));
   state.durationText = normalized ? normalized.text : formatDuration(state.durationMinutes);
@@ -1004,6 +1033,34 @@ function bindDragAndDrop(){
   });
 }
 
+function copyQueuedTask(id){
+  const index = state.tasks.findIndex(x => x.id === id);
+  if(index === -1) return;
+  const src = state.tasks[index];
+  const copy = {
+    ...src,
+    id: Date.now() + Math.floor(Math.random()*1000),
+    createdAt: new Date().toISOString(),
+    autoReminderSent:false,
+    macroStateSentForTaskId:null
+  };
+  delete copy.activatedAt;
+  delete copy.deadline;
+  state.tasks.splice(index + 1, 0, copy);
+  save();
+  render();
+}
+
+function addDistractionPenalty(){
+  const a = activeTask();
+  if(!a) return;
+  state.wallet = Math.max(0, state.wallet - DISTRACTION_PENALTY);
+  state.distractionPenaltyTotal += DISTRACTION_PENALTY;
+  alarm('danger');
+  save();
+  render();
+}
+
 function removeTask(id){
   const wasActive = state.activeTaskId===id;
   state.tasks = state.tasks.filter(x=>x.id!==id);
@@ -1102,32 +1159,7 @@ function finishTask(result){
 }
 
 function autoFailIfOverdue(){
-  const a = activeTask();
-  if(!a || !a.deadline) return;
-
-  if(secondsLeft(a.deadline) <= 0){
-    state.wallet = Math.max(0, state.wallet - sanitizeNumber(a.penalty, DEFAULT_PENALTY));
-    alarm('danger');
-
-    state.history.unshift({
-      ...a,
-      result:'fail',
-      completedAt:new Date().toISOString()
-    });
-
-    state.tasks = state.tasks.filter(x => x.id !== a.id);
-    state.activeTaskId = null;
-
-    if(state.tasks.length === 0){
-      enqueueFromSource();
-    }
-
-    state.queuePausedAfterFail = state.tasks.length > 0;
-    save();
-    render();
-    if(activeTask()) autoSendMacroDroidForActiveTask();
-    else clearMacroDroidState();
-  }
+  return;
 }
 
 function checkDeadlineWarnings(){ return; }
@@ -1138,6 +1170,7 @@ function resetScore(){
   const ok = confirm('Reset reward, penalty and success record?');
   if(!ok) return;
   state.history = [];
+  state.distractionPenaltyTotal = 0;
   state.taskStore = state.taskStore.map(item => ({...item, completed:false, autoServed:false}));
   state.routineTasks = state.routineTasks.map(item => ({...item, completed:false, autoServed:false}));
   state.tasks = state.tasks.map(item => ({...item, autoReminderSent:false, macroStateSentForTaskId:null}));
@@ -1264,7 +1297,9 @@ function deleteRoutineTask(id){
 function stats(){
   return{
     reward:state.history.filter(x=>x.result==='success').reduce((a,b)=>a+sanitizeNumber(b.reward,0),0),
-    penalty:state.history.filter(x=>x.result==='fail').reduce((a,b)=>a+sanitizeNumber(b.penalty,0),0),
+    penalty:
+      state.history.filter(x=>x.result==='fail').reduce((a,b)=>a+sanitizeNumber(b.penalty,0),0) +
+      sanitizeNumber(state.distractionPenaltyTotal,0),
     successCount:state.history.filter(x=>x.result==='success').length,
     total:state.history.length
   };
@@ -1312,22 +1347,34 @@ function refreshLive(){
     leftBar=document.getElementById('leftBar'),
     percent=document.getElementById('successPercent'),
     topCard=document.getElementById('topCard'),
-    activeDuration=document.getElementById('activeDurationText');
+    activeDuration=document.getElementById('activeDurationText'),
+    deadlineStatus=document.getElementById('deadlineStatusText');
 
   if(percent) percent.textContent = successPercent()+'% Success';
-  if(topCard) topCard.className = 'card top-card ' + urgencyClass();
 
   if(a){
+    const overdue = a.deadline && (new Date(a.deadline) - new Date()) <= 0;
+
+    if(topCard){
+      topCard.className = 'card top-card ' + (overdue ? 'danger' : urgencyClass());
+    }
+
     if(current) current.innerHTML = '<span class="current-cycle-dot"></span>' + escapeHtml(a.taskName);
-    if(clockInline) clockInline.textContent = formatTimeLeftDisplay(secondsLeft(a.deadline));
+    if(clockInline) clockInline.textContent = overdue ? 'Overdue' : formatTimeLeftDisplay(secondsLeft(a.deadline));
     if(activeDuration) activeDuration.textContent = formatDuration(a.durationMinutes || 0);
-    const pct=progressPercent(a);
+    if(deadlineStatus) deadlineStatus.textContent = overdue
+      ? 'Deadline crossed'
+      : ('Ends: ' + new Date(a.deadline).toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' }));
+
+    const pct = overdue ? 100 : progressPercent(a);
     if(doneBar) doneBar.style.width = pct+'%';
     if(leftBar) leftBar.style.width = (100-pct)+'%';
   }else{
+    if(topCard) topCard.className = 'card top-card safe';
     if(current) current.textContent = 'No active task';
     if(clockInline) clockInline.textContent = 'Time left 0 min';
     if(activeDuration) activeDuration.textContent = '--';
+    if(deadlineStatus) deadlineStatus.textContent = '';
     if(doneBar) doneBar.style.width='0%';
     if(leftBar) leftBar.style.width='100%';
   }
@@ -1345,12 +1392,17 @@ function render(){
   const createButtonText = shouldShowStartNext ? 'Start Next Task' : 'Add Task';
   const routineToggleText = state.showRoutineList ? 'Hide Routine Tasks' : 'Show Routine Tasks';
   const storeToggleText = state.showStoreList ? 'Hide Stored Tasks' : 'Show Stored Tasks';
+  const overdue = !!(a && a.deadline && (new Date(a.deadline) - new Date()) <= 0);
 
   const currentTaskHtml = a ? '<span class="current-cycle-dot"></span>' + escapeHtml(a.taskName) : 'No active task';
-  const endText = a && a.deadline ? 'Ends: ' + new Date(a.deadline).toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' }) : '';
+  const endText = a && a.deadline
+    ? (overdue
+      ? 'Deadline crossed'
+      : 'Ends: ' + new Date(a.deadline).toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' }))
+    : '';
   const successButtonText = '✔️ Success (Get ' + rupee(Number(state.reward || DEFAULT_REWARD)) + ')';
   const failButtonText = '❌ Failed (Pay ' + rupee(Number(state.penalty || DEFAULT_PENALTY)) + ')';
-  const timeLeftText = a && a.deadline ? formatTimeLeftDisplay(secondsLeft(a.deadline)) : 'Time left 0 min';
+  const timeLeftText = a && a.deadline ? (overdue ? 'Overdue' : formatTimeLeftDisplay(secondsLeft(a.deadline))) : 'Time left 0 min';
 
   const queueHtml = state.tasks.length
     ? state.tasks.map((item, idx)=>{
@@ -1361,6 +1413,7 @@ function render(){
               '<div class="item-name">' + (isActive ? '▶ ' : (idx+1)+'. ') + escapeHtml(item.taskName) + '</div>' +
               '<div class="item-meta">' + formatDuration(item.durationMinutes||0) + '</div>' +
             '</div>' +
+            '<button class="mini mini-copy" data-copy-queue="' + item.id + '">Copy</button>' +
             '<button class="drag-handle" draggable="true" data-drag-handle="1" data-list="queue" data-id="' + item.id + '">⋮⋮</button>' +
             '<button class="btn-delete mini" data-remove="' + item.id + '">Delete</button>' +
           '</div>' +
@@ -1403,7 +1456,7 @@ function render(){
     : '<div class="empty-state">No future task stored yet.</div>';
 
   app.innerHTML=`
-<div class="card top-card ${urgency}" id="topCard">
+<div class="card top-card ${overdue ? 'danger' : urgency}" id="topCard">
   <div class="space">
     <div class="row" style="min-width:0;flex:1">
       <div class="title">Kartavya</div>
@@ -1416,15 +1469,20 @@ function render(){
     </div>
   </div>
 
+  <div class="distraction-row">
+    <div class="distraction-label">Distraction</div>
+    <button class="mini mini-distraction" id="distractionBtn" ${a ? '' : 'disabled style="opacity:.45;pointer-events:none"'}>-${rupee(DISTRACTION_PENALTY)}</button>
+  </div>
+
   <div class="bar-wrap">
-    <div class="bar-done" id="doneBar" style="width:${a?progressPercent(a):0}%"></div>
-    <div class="bar-left" id="leftBar" style="width:${a?100-progressPercent(a):100}%"></div>
+    <div class="bar-done" id="doneBar" style="width:${a?(overdue?100:progressPercent(a)):0}%"></div>
+    <div class="bar-left" id="leftBar" style="width:${a?(overdue?0:100-progressPercent(a)):100}%"></div>
     <div class="bar-label" id="timeLeftInline">${timeLeftText}</div>
   </div>
 
   <div class="task-meta">
     <div>Duration: <span id="activeDurationText">${a ? formatDuration(a.durationMinutes || 0) : '--'}</span></div>
-    <div>${endText}</div>
+    <div id="deadlineStatusText">${endText}</div>
   </div>
 
   <div class="action-buttons">
@@ -1565,6 +1623,9 @@ function render(){
   document.getElementById('toggleRoutineBtn').addEventListener('click',toggleRoutineList);
   document.getElementById('toggleStoreBtn').addEventListener('click',toggleStoreList);
 
+  const distractionBtn = document.getElementById('distractionBtn');
+  if(distractionBtn) distractionBtn.addEventListener('click',addDistractionPenalty);
+
   const storeInput=document.getElementById('storeTaskInput');
   if(storeInput) storeInput.addEventListener('keydown',e=>{ if(e.key==='Enter') addTaskForFuture(); });
 
@@ -1581,6 +1642,9 @@ function render(){
 
   document.querySelectorAll('[data-remove]').forEach(btn=>
     btn.addEventListener('click',()=>removeTask(Number(btn.getAttribute('data-remove'))))
+  );
+  document.querySelectorAll('[data-copy-queue]').forEach(btn=>
+    btn.addEventListener('click',()=>copyQueuedTask(Number(btn.getAttribute('data-copy-queue'))))
   );
   document.querySelectorAll('[data-send-queue]').forEach(btn=>
     btn.addEventListener('click',()=>sendStoreTaskToQueue(Number(btn.getAttribute('data-send-queue'))))
@@ -1632,4 +1696,4 @@ setInterval(()=>{
 },1000);
 </script>
 </body>
-  </html>
+</html>
