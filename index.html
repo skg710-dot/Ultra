@@ -154,6 +154,19 @@
       100%{opacity:1;transform:translate(0,0) scale(1)}
     }
 
+    @keyframes routineBlink{
+      0%,100%{color:#ffffff}
+      50%{color:#ef4444}
+    }
+
+    .routine-title-blink{
+      animation:routineBlink 1s infinite;
+    }
+
+    .routine-title-done{
+      color:#22c55e !important;
+    }
+
     label{display:block;font-size:12px;font-weight:800;margin-bottom:6px;color:var(--muted)}
 
     input{
@@ -491,6 +504,7 @@ const DEFAULT_REWARD=50;
 const DEFAULT_PENALTY=200;
 const DEFAULT_DURATION=30;
 const DISTRACTION_PENALTY=50;
+const ROUTINE_DAY_PENALTY=200;
 const MACRODROID_WEBHOOK_URL='https://trigger.macrodroid.com/9d8de64f-05db-49f9-9470-18e7f06404e1/kartavya_timer';
 
 const state={
@@ -513,6 +527,7 @@ const state={
   warned5MinTaskId:null,
   refillSourceNext:'store',
   lastRoutineResetDate:null,
+  routinePenaltyAppliedDate:null,
   showRoutineList:false,
   showStoreList:false,
   distractionPenaltyTotal:0
@@ -575,6 +590,31 @@ function toggleStoreList(){
   state.showStoreList = !state.showStoreList;
   save();
   render();
+}
+function unfinishedRoutineCount(){
+  return state.routineTasks.filter(item => !item.completed).length;
+}
+function allRoutineTasksFinished(){
+  return unfinishedRoutineCount() === 0;
+}
+function applyRoutineDayPenaltyForDate(dateKey){
+  if(!dateKey) return;
+  if(state.routinePenaltyAppliedDate === dateKey) return;
+  if(unfinishedRoutineCount() <= 0) return;
+
+  state.wallet = Math.max(0, state.wallet - ROUTINE_DAY_PENALTY);
+  state.history.unshift({
+    id: Date.now(),
+    taskName: 'Routine task unfinished for day',
+    reward: 0,
+    penalty: ROUTINE_DAY_PENALTY,
+    result: 'fail',
+    completedAt: new Date().toISOString(),
+    isRoutineDayPenalty: true,
+    penaltyDate: dateKey
+  });
+  state.routinePenaltyAppliedDate = dateKey;
+  save();
 }
 
 function sendMacroDroidState(taskName, reminderEpoch, taskState, successMessage='', silent=false){
@@ -664,6 +704,9 @@ function load(){
   if(typeof state.showRoutineList !== 'boolean') state.showRoutineList = false;
   if(typeof state.showStoreList !== 'boolean') state.showStoreList = false;
   state.distractionPenaltyTotal = sanitizeNumber(state.distractionPenaltyTotal, 0);
+  if(typeof state.routinePenaltyAppliedDate !== 'string' && state.routinePenaltyAppliedDate !== null){
+    state.routinePenaltyAppliedDate = null;
+  }
 
   const normalized = normalizeDurationInput(state.durationText || formatDuration(state.durationMinutes));
   state.durationText = normalized ? normalized.text : formatDuration(state.durationMinutes);
@@ -741,6 +784,11 @@ function migrateRoutineTasks(){
 
 function resetRoutineTasksIfNewDay(){
   const today = todayKey();
+
+  if(state.lastRoutineResetDate && state.lastRoutineResetDate !== today){
+    applyRoutineDayPenaltyForDate(state.lastRoutineResetDate);
+  }
+
   if(state.lastRoutineResetDate !== today){
     state.routineTasks = state.routineTasks.map(item => ({
       ...item,
@@ -748,6 +796,7 @@ function resetRoutineTasksIfNewDay(){
       autoServed:false
     }));
     state.lastRoutineResetDate = today;
+    state.routinePenaltyAppliedDate = null;
     save();
   }
 }
@@ -1174,6 +1223,7 @@ function resetScore(){
   state.taskStore = state.taskStore.map(item => ({...item, completed:false, autoServed:false}));
   state.routineTasks = state.routineTasks.map(item => ({...item, completed:false, autoServed:false}));
   state.tasks = state.tasks.map(item => ({...item, autoReminderSent:false, macroStateSentForTaskId:null}));
+  state.routinePenaltyAppliedDate = null;
   save(); render();
   if(activeTask()) autoSendMacroDroidForActiveTask();
   else clearMacroDroidState();
@@ -1353,7 +1403,7 @@ function refreshLive(){
   if(percent) percent.textContent = successPercent()+'% Success';
 
   if(a){
-    const overdue = a.deadline && (new Date(a.deadline) - new Date()) <= 0;
+    const overdue = a.deadline && (new Date(a.deadline)-new Date()) <= 0;
 
     if(topCard){
       topCard.className = 'card top-card ' + (overdue ? 'danger' : urgencyClass());
@@ -1392,7 +1442,9 @@ function render(){
   const createButtonText = shouldShowStartNext ? 'Start Next Task' : 'Add Task';
   const routineToggleText = state.showRoutineList ? 'Hide Routine Tasks' : 'Show Routine Tasks';
   const storeToggleText = state.showStoreList ? 'Hide Stored Tasks' : 'Show Stored Tasks';
-  const overdue = !!(a && a.deadline && (new Date(a.deadline) - new Date()) <= 0);
+  const overdue = !!(a && a.deadline && (new Date(a.deadline)-new Date()) <= 0);
+  const routineDone = allRoutineTasksFinished();
+  const routineTitleClass = routineDone ? 'list-title routine-title-done' : 'list-title routine-title-blink';
 
   const currentTaskHtml = a ? '<span class="current-cycle-dot"></span>' + escapeHtml(a.taskName) : 'No active task';
   const endText = a && a.deadline
@@ -1552,7 +1604,7 @@ function render(){
 <div class="card routine-panel">
   <div class="section-head">
     <span class="section-dot"></span>
-    <div class="list-title">Routine Task</div>
+    <div id="routineTitleLive" class="${routineTitleClass}">Routine Task</div>
   </div>
 
   <div class="paired-grid">
