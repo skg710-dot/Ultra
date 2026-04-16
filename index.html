@@ -595,7 +595,15 @@ function unfinishedRoutineCount(){
   return state.routineTasks.filter(item => !item.completed).length;
 }
 function allRoutineTasksFinished(){
-  return unfinishedRoutineCount() === 0;
+  return state.routineTasks.length > 0 && unfinishedRoutineCount() === 0;
+}
+function moveCompletedItemToBottom(listKey, itemId){
+  const list = [...state[listKey]];
+  const index = list.findIndex(item => item.id === itemId);
+  if(index === -1) return;
+  const [item] = list.splice(index, 1);
+  list.push(item);
+  state[listKey] = list;
 }
 function applyRoutineDayPenaltyForDate(dateKey){
   if(!dateKey) return;
@@ -1127,12 +1135,14 @@ function markSourceTaskCompleted(task){
     state.taskStore = state.taskStore.map(item =>
       item.id === task.sourceId ? {...item, completed:true} : item
     );
+    moveCompletedItemToBottom('taskStore', task.sourceId);
   }
 
   if(task.sourceType === 'routine' && task.sourceId){
     state.routineTasks = state.routineTasks.map(item =>
       item.id === task.sourceId ? {...item, completed:true} : item
     );
+    moveCompletedItemToBottom('routineTasks', task.sourceId);
   }
 }
 
