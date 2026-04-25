@@ -118,12 +118,10 @@
       width:10px;height:10px;border-radius:50%;display:inline-block;vertical-align:middle;margin-right:8px;
       box-shadow:0 0 0 4px rgba(244,180,0,.10)
     }
-    .current-cycle-dot{
-      animation:cycleTraffic 1.35s infinite;
-    }
+    .current-cycle-dot{animation:cycleTraffic 1.35s infinite}
     .paused-cycle-dot{
       background:var(--pause);
-      box-shadow:0 0 0 4px rgba(245,158,11,.12);
+      box-shadow:0 0 0 4px rgba(245,158,11,.12)
     }
 
     .status-dot{
@@ -131,6 +129,19 @@
     }
     .status-dot.red{background:var(--danger);animation:blink 1s infinite;box-shadow:0 0 0 4px rgba(239,68,68,.12)}
     .status-dot.green{background:var(--success);box-shadow:0 0 0 4px rgba(34,197,94,.12)}
+
+    .star-item-name{color:var(--gold-soft) !important}
+    .star-current-gold{color:var(--gold-soft) !important}
+    .star-current-green{color:#7dff9c !important}
+    .star-rule{
+      font-size:11px;
+      font-weight:800;
+      color:var(--gold-soft);
+      margin-top:4px;
+      margin-bottom:0;
+      text-shadow:0 1px 4px rgba(244,180,0,.18);
+      white-space:nowrap;
+    }
 
     @keyframes blink{
       0%,100%{opacity:1;transform:scale(1)}
@@ -161,19 +172,13 @@
       82%{opacity:1;transform:translate(-2px,2px) scale(1.03)}
       100%{opacity:1;transform:translate(0,0) scale(1)}
     }
-
     @keyframes routineBlink{
       0%,100%{color:#ffffff}
       50%{color:#ef4444}
     }
 
-    .routine-title-blink{
-      animation:routineBlink 1s infinite;
-    }
-
-    .routine-title-done{
-      color:#22c55e !important;
-    }
+    .routine-title-blink{animation:routineBlink 1s infinite}
+    .routine-title-done{color:#22c55e !important}
 
     label{display:block;font-size:12px;font-weight:800;margin-bottom:6px;color:var(--muted)}
 
@@ -258,26 +263,6 @@
       border:2px solid rgba(255,255,255,.10);
       box-shadow:0 10px 22px rgba(37,99,235,.22)
     }
-    .mini-distraction{
-      background:linear-gradient(135deg,#b91c1c,#ef4444);
-      color:#fff;
-      border:2px solid rgba(255,255,255,.10);
-      box-shadow:0 10px 22px rgba(239,68,68,.22)
-    }
-    .distraction-row{
-      display:flex;
-      justify-content:flex-end;
-      align-items:center;
-      gap:8px;
-      margin-top:8px;
-      margin-bottom:2px;
-      flex-wrap:wrap;
-    }
-    .distraction-label{
-      font-size:12px;
-      font-weight:800;
-      color:#ffd6d6;
-    }
 
     .action-buttons{
       display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px
@@ -301,9 +286,7 @@
       transition:transform .08s ease, box-shadow .12s ease, filter .12s ease;
       border-color:rgba(255,255,255,.18);
     }
-    .bar-wrap.tappable:hover{
-      filter:brightness(1.03);
-    }
+    .bar-wrap.tappable:hover{filter:brightness(1.03)}
     .bar-wrap.tappable:active{
       transform:translateY(1px) scale(.995);
       box-shadow:
@@ -361,9 +344,7 @@
 
     .queued-panel{
       border:1px solid rgba(120,190,255,.34);
-      box-shadow:
-        0 0 0 1px rgba(255,255,255,.03) inset,
-        0 14px 34px rgba(96,165,250,.12);
+      box-shadow:0 0 0 1px rgba(255,255,255,.03) inset, 0 14px 34px rgba(96,165,250,.12);
     }
     .queued-panel .list-title{color:var(--queued-title)}
     .queued-panel .section-dot{
@@ -373,9 +354,7 @@
 
     .routine-panel{
       border:1px solid rgba(98,235,146,.32);
-      box-shadow:
-        0 0 0 1px rgba(255,255,255,.03) inset,
-        0 14px 34px rgba(34,197,94,.12);
+      box-shadow:0 0 0 1px rgba(255,255,255,.03) inset, 0 14px 34px rgba(34,197,94,.12);
     }
     .routine-panel .list-title{color:var(--routine-title)}
     .routine-panel .section-dot{
@@ -385,9 +364,7 @@
 
     .store-panel{
       border:1px solid rgba(255,220,108,.32);
-      box-shadow:
-        0 0 0 1px rgba(255,255,255,.03) inset,
-        0 14px 34px rgba(244,180,0,.12);
+      box-shadow:0 0 0 1px rgba(255,255,255,.03) inset, 0 14px 34px rgba(244,180,0,.12);
     }
     .store-panel .list-title{color:var(--store-title)}
     .store-panel .section-dot{
@@ -543,8 +520,9 @@ const DEFAULT_WALLET=5000;
 const DEFAULT_REWARD=50;
 const DEFAULT_PENALTY=200;
 const DEFAULT_DURATION=30;
-const DISTRACTION_PENALTY=50;
 const ROUTINE_DAY_PENALTY=200;
+const STAR_HOUR_PENALTY=30;
+const STAR_MINUTES_PER_HOUR_MS=30*60*1000;
 const MACRODROID_WEBHOOK_URL='https://trigger.macrodroid.com/9d8de64f-05db-49f9-9470-18e7f06404e1/kartavya_timer';
 
 const state={
@@ -570,7 +548,9 @@ const state={
   routinePenaltyAppliedDate:null,
   showRoutineList:false,
   showStoreList:false,
-  distractionPenaltyTotal:0
+  starHourWorkMs:{},
+  starHourPenaltyApplied:{},
+  lastWorkSliceAt:null
 };
 
 const dragState={list:null,id:null,overId:null};
@@ -586,9 +566,11 @@ function escapeHtml(str){
 }
 function save(){localStorage.setItem(STORAGE_KEY,JSON.stringify(state))}
 function rupee(n){return '₹'+Number(n||0).toLocaleString('en-IN')}
-function todayKey(){
-  const now = new Date();
-  return now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0') + '-' + String(now.getDate()).padStart(2,'0');
+function todayKey(dateObj=new Date()){
+  return dateObj.getFullYear() + '-' + String(dateObj.getMonth()+1).padStart(2,'0') + '-' + String(dateObj.getDate()).padStart(2,'0');
+}
+function hourKey(dateObj){
+  return todayKey(dateObj) + '-' + String(dateObj.getHours()).padStart(2,'0');
 }
 function formatDuration(mins){
   mins = Math.max(0, Math.round(Number(mins) || 0));
@@ -621,6 +603,9 @@ function normalizeDurationInput(text){
   if(mins === null || mins <= 0) return null;
   return { minutes: mins, text: formatDuration(mins) };
 }
+function isStarredTaskName(name){
+  return /^\s*\*/.test(String(name || ''));
+}
 function toggleRoutineList(){
   state.showRoutineList = !state.showRoutineList;
   save();
@@ -637,13 +622,72 @@ function unfinishedRoutineCount(){
 function allRoutineTasksFinished(){
   return state.routineTasks.length > 0 && unfinishedRoutineCount() === 0;
 }
+function normalizeQueueOrdering(){
+  const starred = [];
+  const normal = [];
+  state.tasks.forEach(item => {
+    (isStarredTaskName(item.taskName) ? starred : normal).push(item);
+  });
+  state.tasks = [...starred, ...normal];
+}
+function normalizeTaskStoreOrdering(){
+  const starred = [];
+  const open = [];
+  const done = [];
+  state.taskStore.forEach(item => {
+    if(isStarredTaskName(item.taskName)) starred.push(item);
+    else if(item.completed) done.push(item);
+    else open.push(item);
+  });
+  state.taskStore = [...starred, ...open, ...done];
+}
+function normalizeRoutineOrdering(){
+  const starred = [];
+  const normalOpen = [];
+  const normalDone = [];
+  state.routineTasks.forEach(item => {
+    if(isStarredTaskName(item.taskName)) starred.push(item);
+    else if(item.completed) normalDone.push(item);
+    else normalOpen.push(item);
+  });
+  state.routineTasks = [...starred, ...normalOpen, ...normalDone];
+}
+function insertIntoPriorityList(listKey, item){
+  if(listKey === 'tasks'){
+    state.tasks.push(item);
+    normalizeQueueOrdering();
+    return;
+  }
+  if(listKey === 'taskStore'){
+    state.taskStore.push(item);
+    normalizeTaskStoreOrdering();
+    return;
+  }
+  if(listKey === 'routineTasks'){
+    state.routineTasks.push(item);
+    normalizeRoutineOrdering();
+    return;
+  }
+  state[listKey].push(item);
+}
 function moveCompletedItemToBottom(listKey, itemId){
   const list = [...state[listKey]];
   const index = list.findIndex(item => item.id === itemId);
   if(index === -1) return;
-  const [item] = list.splice(index, 1);
-  list.push(item);
+  const item = list[index];
+
+  if(isStarredTaskName(item.taskName)){
+    if(listKey === 'taskStore') normalizeTaskStoreOrdering();
+    if(listKey === 'routineTasks') normalizeRoutineOrdering();
+    return;
+  }
+
+  const [moved] = list.splice(index, 1);
+  list.push(moved);
   state[listKey] = list;
+
+  if(listKey === 'taskStore') normalizeTaskStoreOrdering();
+  if(listKey === 'routineTasks') normalizeRoutineOrdering();
 }
 function applyRoutineDayPenaltyForDate(dateKey){
   if(!dateKey) return;
@@ -664,7 +708,92 @@ function applyRoutineDayPenaltyForDate(dateKey){
   state.routinePenaltyAppliedDate = dateKey;
   save();
 }
+function addStarWorkSlice(startMs, endMs){
+  let changed = false;
+  let cursor = startMs;
+  while(cursor < endMs){
+    const d = new Date(cursor);
+    const hr = d.getHours();
+    const next = new Date(d);
+    next.setMinutes(0,0,0);
+    next.setHours(hr + 1);
+    const sliceEnd = Math.min(endMs, next.getTime());
+    if(hr >= 7 && hr < 23){
+      const key = hourKey(d);
+      state.starHourWorkMs[key] = (state.starHourWorkMs[key] || 0) + (sliceEnd - cursor);
+      changed = true;
+    }
+    cursor = sliceEnd;
+  }
+  return changed;
+}
+function ensureStarHourPenalties(){
+  let changed = false;
+  const now = new Date();
+  const dates = [new Date(now), new Date(now.getTime() - 86400000)];
 
+  dates.forEach(day => {
+    const y = day.getFullYear(), m = day.getMonth(), dt = day.getDate();
+    for(let h = 7; h < 23; h++){
+      const slotEnd = new Date(y, m, dt, h + 1, 0, 0, 0);
+      const key = todayKey(new Date(y, m, dt)) + '-' + String(h).padStart(2,'0');
+      if(Date.now() >= slotEnd.getTime() && !state.starHourPenaltyApplied[key]){
+        const worked = state.starHourWorkMs[key] || 0;
+        if(worked < STAR_MINUTES_PER_HOUR_MS){
+          state.wallet = Math.max(0, state.wallet - STAR_HOUR_PENALTY);
+          state.history.unshift({
+            id: Date.now() + Math.floor(Math.random()*1000),
+            taskName: '★ Task shortfall ' + key,
+            reward: 0,
+            penalty: STAR_HOUR_PENALTY,
+            result: 'fail',
+            completedAt: new Date().toISOString(),
+            isStarHourPenalty: true,
+            penaltyDate: key
+          });
+        }
+        state.starHourPenaltyApplied[key] = true;
+        changed = true;
+      }
+    }
+  });
+
+  return changed;
+}
+function accountStarredWorkAndPenalties(){
+  const now = Date.now();
+  if(!state.lastWorkSliceAt){
+    state.lastWorkSliceAt = now;
+    save();
+    return;
+  }
+
+  let changed = false;
+  const a = activeTask();
+  if(a && isStarredTaskName(a.taskName) && !a.isPaused){
+    changed = addStarWorkSlice(state.lastWorkSliceAt, now) || changed;
+  }
+
+  state.lastWorkSliceAt = now;
+  changed = ensureStarHourPenalties() || changed;
+
+  if(changed) save();
+}
+function currentHourStarSatisfied(){
+  const now = new Date();
+  const key = hourKey(now);
+  return (state.starHourWorkMs[key] || 0) >= STAR_MINUTES_PER_HOUR_MS;
+}
+function currentTaskTextClass(a){
+  if(!a || !isStarredTaskName(a.taskName)) return '';
+  return currentHourStarSatisfied() ? 'star-current-green' : 'star-current-gold';
+}
+function currentTaskHtml(a){
+  if(!a) return 'No active task';
+  const dot = a.isPaused ? 'paused-cycle-dot' : 'current-cycle-dot';
+  const cls = currentTaskTextClass(a);
+  return '<span class="' + dot + '"></span><span class="' + cls + '">' + escapeHtml(a.taskName) + '</span>';
+}
 function sendMacroDroidState(taskName, reminderEpoch, taskState, successMessage='', silent=false){
   if(!MACRODROID_WEBHOOK_URL || MACRODROID_WEBHOOK_URL.includes('PASTE_YOUR_MACRODROID_WEBHOOK_URL_HERE')){
     if(!silent) alert('Please paste your MacroDroid webhook URL in the HTML file first.');
@@ -689,11 +818,9 @@ function sendMacroDroidState(taskName, reminderEpoch, taskState, successMessage=
       return false;
     });
 }
-
 function clearMacroDroidState(){
   return sendMacroDroidState('', 0, 'none', '', true);
 }
-
 function autoSendMacroDroidForActiveTask(){
   const a = activeTask();
 
@@ -756,10 +883,12 @@ function load(){
   if(typeof state.queuePausedAfterFail !== 'boolean') state.queuePausedAfterFail = false;
   if(typeof state.showRoutineList !== 'boolean') state.showRoutineList = false;
   if(typeof state.showStoreList !== 'boolean') state.showStoreList = false;
-  state.distractionPenaltyTotal = sanitizeNumber(state.distractionPenaltyTotal, 0);
   if(typeof state.routinePenaltyAppliedDate !== 'string' && state.routinePenaltyAppliedDate !== null){
     state.routinePenaltyAppliedDate = null;
   }
+  if(typeof state.starHourWorkMs !== 'object' || !state.starHourWorkMs) state.starHourWorkMs = {};
+  if(typeof state.starHourPenaltyApplied !== 'object' || !state.starHourPenaltyApplied) state.starHourPenaltyApplied = {};
+  if(typeof state.lastWorkSliceAt !== 'number') state.lastWorkSliceAt = Date.now();
 
   const normalized = normalizeDurationInput(state.durationText || formatDuration(state.durationMinutes));
   state.durationText = normalized ? normalized.text : formatDuration(state.durationMinutes);
@@ -780,6 +909,9 @@ function load(){
   migrateTasks();
   migrateTaskStore();
   migrateRoutineTasks();
+  normalizeQueueOrdering();
+  normalizeTaskStoreOrdering();
+  normalizeRoutineOrdering();
   resetRoutineTasksIfNewDay();
   syncActive();
 }
@@ -858,6 +990,7 @@ function resetRoutineTasksIfNewDay(){
     }));
     state.lastRoutineResetDate = today;
     state.routinePenaltyAppliedDate = null;
+    normalizeRoutineOrdering();
     save();
   }
 }
@@ -891,6 +1024,21 @@ function syncActive(){
   save();
 }
 
+function currentProgressPercent(a){
+  if(!a || !a.deadline || !a.activatedAt) return 0;
+  const total=Math.max(1,new Date(a.deadline)-new Date(a.activatedAt));
+  if(a.isPaused){
+    const used = Math.max(0, Number(a.pausedUsedMs) || 0);
+    return Math.max(0,Math.min(100,Math.round((used/total)*100)));
+  }
+  const used=Math.max(0,new Date()-new Date(a.activatedAt));
+  return Math.max(0,Math.min(100,Math.round((used/total)*100)));
+}
+function currentRemainingText(a){
+  if(!a) return 'Time left 0 min';
+  if(a.isPaused) return 'Paused • Tap to Resume';
+  return formatTimeLeftDisplay(secondsLeft(a.deadline)) + ' • Tap to Pause';
+}
 function pauseActiveTask(){
   const a = activeTask();
   if(!a || a.isPaused || !a.deadline || !a.activatedAt) return;
@@ -909,7 +1057,6 @@ function pauseActiveTask(){
   render();
   clearMacroDroidState();
 }
-
 function resumeActiveTask(){
   const a = activeTask();
   if(!a || !a.isPaused) return;
@@ -930,32 +1077,11 @@ function resumeActiveTask(){
   render();
   autoSendMacroDroidForActiveTask();
 }
-
 function togglePauseResume(){
   const a = activeTask();
   if(!a) return;
   if(a.isPaused) resumeActiveTask();
   else pauseActiveTask();
-}
-
-function currentProgressPercent(a){
-  if(!a || !a.deadline || !a.activatedAt) return 0;
-
-  const total = Math.max(1, new Date(a.deadline) - new Date(a.activatedAt));
-
-  if(a.isPaused){
-    const used = Math.max(0, Number(a.pausedUsedMs) || 0);
-    return Math.max(0, Math.min(100, Math.round((used / total) * 100)));
-  }
-
-  const used = Math.max(0, new Date() - new Date(a.activatedAt));
-  return Math.max(0, Math.min(100, Math.round((used / total) * 100)));
-}
-
-function currentRemainingText(a){
-  if(!a) return 'Time left 0 min';
-  if(a.isPaused) return 'Paused • Tap to Resume';
-  return formatTimeLeftDisplay(secondsLeft(a.deadline)) + ' • Tap to Pause';
 }
 
 function alarm(type='normal'){
@@ -1072,7 +1198,7 @@ function createTask(){
   state.durationText = normalized.text;
 
   const task = buildTask(state.taskName, normalized.minutes, 'manual', null);
-  state.tasks.push(task);
+  insertIntoPriorityList('tasks', task);
   state.queuePausedAfterFail = false;
 
   if(!state.activeTaskId){
@@ -1109,6 +1235,9 @@ function reorderByIds(arr, draggedId, targetId){
 function reorderList(listKey, draggedId, targetId){
   if(!draggedId || !targetId || draggedId === targetId) return;
   state[listKey] = reorderByIds(state[listKey], draggedId, targetId);
+  if(listKey === 'tasks') normalizeQueueOrdering();
+  if(listKey === 'taskStore') normalizeTaskStoreOrdering();
+  if(listKey === 'routineTasks') normalizeRoutineOrdering();
   save();
   render();
 }
@@ -1231,17 +1360,7 @@ function copyQueuedTask(id){
   };
   delete copy.activatedAt;
   delete copy.deadline;
-  state.tasks.splice(index + 1, 0, copy);
-  save();
-  render();
-}
-
-function addDistractionPenalty(){
-  const a = activeTask();
-  if(!a) return;
-  state.wallet = Math.max(0, state.wallet - DISTRACTION_PENALTY);
-  state.distractionPenaltyTotal += DISTRACTION_PENALTY;
-  alarm('danger');
+  insertIntoPriorityList('tasks', copy);
   save();
   render();
 }
@@ -1314,7 +1433,7 @@ function enqueueFromSource(){
   }
 
   if(!task) return false;
-  state.tasks.push(task);
+  insertIntoPriorityList('tasks', task);
   return true;
 }
 
@@ -1345,19 +1464,17 @@ function finishTask(result){
   else clearMacroDroidState();
 }
 
-function autoFailIfOverdue(){
-  return;
-}
-
+function autoFailIfOverdue(){ return; }
 function checkDeadlineWarnings(){ return; }
-
 function addTopup(){ state.wallet += TOPUP; save(); render(); }
 
 function resetScore(){
   const ok = confirm('Reset reward, penalty and success record?');
   if(!ok) return;
   state.history = [];
-  state.distractionPenaltyTotal = 0;
+  state.starHourWorkMs = {};
+  state.starHourPenaltyApplied = {};
+  state.lastWorkSliceAt = Date.now();
   state.taskStore = state.taskStore.map(item => ({...item, completed:false, autoServed:false}));
   state.routineTasks = state.routineTasks.map(item => ({...item, completed:false, autoServed:false}));
   state.tasks = state.tasks.map(item => ({
@@ -1370,6 +1487,9 @@ function resetScore(){
     pausedUsedMs:null
   }));
   state.routinePenaltyAppliedDate = null;
+  normalizeQueueOrdering();
+  normalizeTaskStoreOrdering();
+  normalizeRoutineOrdering();
   save(); render();
   if(activeTask()) autoSendMacroDroidForActiveTask();
   else clearMacroDroidState();
@@ -1411,7 +1531,7 @@ function addTaskForFuture(){
 
   state.storeDurationText = normalized.text;
 
-  state.taskStore.push({
+  insertIntoPriorityList('taskStore', {
     id: Date.now() + Math.floor(Math.random()*1000),
     taskName: value,
     durationMinutes: normalized.minutes,
@@ -1430,7 +1550,7 @@ function sendStoreTaskToQueue(id){
   const item = state.taskStore.find(x=>x.id===id);
   if(!item) return;
   const task = buildTask(item.taskName, item.durationMinutes, 'store', item.id);
-  state.tasks.push(task);
+  insertIntoPriorityList('tasks', task);
   state.queuePausedAfterFail = false;
   if(!state.activeTaskId){
     state.activeTaskId = task.id;
@@ -1457,7 +1577,7 @@ function addRoutineTask(){
   const normalized = normalizeDurationInput(durationRaw || '30 min');
   if(!normalized) return alert('Enter routine duration like 30 min, 45 min, or 1 hr 15 min.');
 
-  state.routineTasks.push({
+  insertIntoPriorityList('routineTasks', {
     id: Date.now() + Math.floor(Math.random()*1000),
     taskName,
     durationMinutes: normalized.minutes,
@@ -1472,7 +1592,7 @@ function sendRoutineTaskToQueue(id){
   const item = state.routineTasks.find(x=>x.id===id);
   if(!item) return;
   const task = buildTask(item.taskName, Math.max(1, sanitizeNumber(item.durationMinutes, DEFAULT_DURATION)), 'routine', item.id);
-  state.tasks.push(task);
+  insertIntoPriorityList('tasks', task);
   state.queuePausedAfterFail = false;
   if(!state.activeTaskId){
     state.activeTaskId = task.id;
@@ -1493,9 +1613,7 @@ function deleteRoutineTask(id){
 function stats(){
   return{
     reward:state.history.filter(x=>x.result==='success').reduce((a,b)=>a+sanitizeNumber(b.reward,0),0),
-    penalty:
-      state.history.filter(x=>x.result==='fail').reduce((a,b)=>a+sanitizeNumber(b.penalty,0),0) +
-      sanitizeNumber(state.distractionPenaltyTotal,0),
+    penalty:state.history.filter(x=>x.result==='fail').reduce((a,b)=>a+sanitizeNumber(b.penalty,0),0),
     successCount:state.history.filter(x=>x.result==='success').length,
     total:state.history.length
   };
@@ -1530,7 +1648,6 @@ function bindDurationInput(){
 }
 
 function refreshLive(){
-  resetRoutineTasksIfNewDay();
   const a=activeTask(),
     current=document.getElementById('currentTaskText'),
     clockInline=document.getElementById('timeLeftInline'),
@@ -1551,10 +1668,7 @@ function refreshLive(){
       topCard.className = 'card top-card ' + (a.isPaused ? 'paused' : (overdue ? 'danger' : urgencyClass()));
     }
 
-    if(current){
-      current.innerHTML = (a.isPaused ? '<span class="paused-cycle-dot"></span>' : '<span class="current-cycle-dot"></span>') + escapeHtml(a.taskName);
-    }
-
+    if(current) current.innerHTML = currentTaskHtml(a);
     if(clockInline) clockInline.textContent = a.isPaused ? 'Paused • Tap to Resume' : (overdue ? 'Overdue • Tap to Pause' : currentRemainingText(a));
     if(activeDuration) activeDuration.textContent = formatDuration(a.durationMinutes || 0);
 
@@ -1600,10 +1714,7 @@ function render(){
   const routineDone = allRoutineTasksFinished();
   const routineTitleClass = routineDone ? 'list-title routine-title-done' : 'list-title routine-title-blink';
 
-  const currentTaskHtml = a
-    ? ((a.isPaused ? '<span class="paused-cycle-dot"></span>' : '<span class="current-cycle-dot"></span>') + escapeHtml(a.taskName))
-    : 'No active task';
-
+  const currentTaskHtmlText = currentTaskHtml(a);
   const endText = a
     ? (a.isPaused
       ? 'Paused'
@@ -1611,7 +1722,6 @@ function render(){
         ? 'Deadline crossed'
         : 'Ends: ' + new Date(a.deadline).toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' })))
     : '';
-
   const successButtonText = '✔️ Success (Get ' + rupee(Number(state.reward || DEFAULT_REWARD)) + ')';
   const failButtonText = '❌ Failed (Pay ' + rupee(Number(state.penalty || DEFAULT_PENALTY)) + ')';
   const timeLeftText = a
@@ -1621,10 +1731,12 @@ function render(){
   const queueHtml = state.tasks.length
     ? state.tasks.map((item, idx)=>{
         const isActive = item.id === state.activeTaskId;
+        const isStar = isStarredTaskName(item.taskName);
+        const label = isActive ? '▶ ' : (isStar ? '' : (idx+1)+'. ');
         return '<div class="draggable-item' + (isActive ? ' active' : '') + '" data-list="queue" data-id="' + item.id + '">' +
           '<div class="queue-row">' +
             '<div>' +
-              '<div class="item-name">' + (isActive ? '▶ ' : (idx+1)+'. ') + escapeHtml(item.taskName) + '</div>' +
+              '<div class="item-name ' + (isStar ? 'star-item-name' : '') + '">' + label + escapeHtml(item.taskName) + '</div>' +
               '<div class="item-meta">' + formatDuration(item.durationMinutes||0) + '</div>' +
             '</div>' +
             '<button class="mini mini-copy" data-copy-queue="' + item.id + '">Copy</button>' +
@@ -1638,10 +1750,12 @@ function render(){
   const routineHtml = state.routineTasks.length
     ? state.routineTasks.map((item, idx)=>{
         const dotClass = item.completed ? 'green' : 'red';
+        const isStar = isStarredTaskName(item.taskName);
+        const label = isStar ? '' : (idx+1) + '. ';
         return '<div class="draggable-item" data-list="routine" data-id="' + item.id + '">' +
           '<div class="routine-row">' +
             '<div>' +
-              '<div class="item-name"><span class="status-dot ' + dotClass + '"></span>' + (idx+1) + '. ' + escapeHtml(item.taskName) + '</div>' +
+              '<div class="item-name ' + (isStar ? 'star-item-name' : '') + '"><span class="status-dot ' + dotClass + '"></span>' + label + escapeHtml(item.taskName) + '</div>' +
               '<div class="item-meta">' + formatDuration(item.durationMinutes) + '</div>' +
             '</div>' +
             '<button class="drag-handle" draggable="true" data-drag-handle="1" data-list="routine" data-id="' + item.id + '">⋮⋮</button>' +
@@ -1655,10 +1769,12 @@ function render(){
   const storeHtml = state.taskStore.length
     ? state.taskStore.map((item, idx)=>{
         const dotClass = item.completed ? 'green' : 'red';
+        const isStar = isStarredTaskName(item.taskName);
+        const label = isStar ? '' : (idx+1)+'. ';
         return '<div class="draggable-item" data-list="store" data-id="' + item.id + '">' +
           '<div class="store-row">' +
             '<div>' +
-              '<div class="item-name"><span class="status-dot ' + dotClass + '"></span>' + (idx+1) + '. ' + escapeHtml(item.taskName) + '</div>' +
+              '<div class="item-name ' + (isStar ? 'star-item-name' : '') + '"><span class="status-dot ' + dotClass + '"></span>' + label + escapeHtml(item.taskName) + '</div>' +
               '<div class="item-meta">' + formatDuration(item.durationMinutes) + '</div>' +
             '</div>' +
             '<button class="drag-handle" draggable="true" data-drag-handle="1" data-list="store" data-id="' + item.id + '">⋮⋮</button>' +
@@ -1679,13 +1795,9 @@ function render(){
     </div>
     <div style="min-width:0;flex:1;text-align:right">
       <div class="small">Current Task</div>
-      <div class="sub" id="currentTaskText" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${currentTaskHtml}</div>
+      <div class="sub" id="currentTaskText" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${currentTaskHtmlText}</div>
+      <div class="star-rule" style="text-align:right;">★Task: 30 min/hr or lose ₹30</div>
     </div>
-  </div>
-
-  <div class="distraction-row">
-    <div class="distraction-label">Distraction</div>
-    <button class="mini mini-distraction" id="distractionBtn" ${a ? '' : 'disabled style="opacity:.45;pointer-events:none"'}>-${rupee(DISTRACTION_PENALTY)}</button>
   </div>
 
   <div class="bar-wrap ${a ? 'tappable' : ''} ${a && a.isPaused ? 'paused' : ''}" id="taskBarTap">
@@ -1837,9 +1949,6 @@ function render(){
   document.getElementById('toggleRoutineBtn').addEventListener('click',toggleRoutineList);
   document.getElementById('toggleStoreBtn').addEventListener('click',toggleStoreList);
 
-  const distractionBtn = document.getElementById('distractionBtn');
-  if(distractionBtn) distractionBtn.addEventListener('click',addDistractionPenalty);
-
   const taskBarTap = document.getElementById('taskBarTap');
   if(taskBarTap && a) taskBarTap.addEventListener('click',togglePauseResume);
 
@@ -1907,6 +2016,7 @@ window.addEventListener('load',()=>{
 });
 
 setInterval(()=>{
+  accountStarredWorkAndPenalties();
   autoFailIfOverdue();
   checkDeadlineWarnings();
   refreshLive();
