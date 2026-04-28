@@ -718,7 +718,7 @@ function addStarWorkSlice(startMs, endMs){
     next.setMinutes(0,0,0);
     next.setHours(hr + 1);
     const sliceEnd = Math.min(endMs, next.getTime());
-    if(hr >= 7 && hr < 23){
+    if(hr >= 9 && hr < 22){
       const key = hourKey(d);
       state.starHourWorkMs[key] = (state.starHourWorkMs[key] || 0) + (sliceEnd - cursor);
       changed = true;
@@ -734,7 +734,7 @@ function ensureStarHourPenalties(){
 
   dates.forEach(day => {
     const y = day.getFullYear(), m = day.getMonth(), dt = day.getDate();
-    for(let h = 7; h < 23; h++){
+    for(let h = 9; h < 22; h++){
       const slotEnd = new Date(y, m, dt, h + 1, 0, 0, 0);
       const key = todayKey(new Date(y, m, dt)) + '-' + String(h).padStart(2,'0');
       if(Date.now() >= slotEnd.getTime() && !state.starHourPenaltyApplied[key]){
@@ -1796,7 +1796,7 @@ function render(){
     <div style="min-width:0;flex:1;text-align:right">
       <div class="small">Current Task</div>
       <div class="sub" id="currentTaskText" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${currentTaskHtmlText}</div>
-      <div class="star-rule" style="text-align:right;">★Task: 30 min/hr or lose ₹30</div>
+      <div class="star-rule" style="text-align:right;">★Task: 30 min/hr (9 AM–10 PM) or lose ₹30</div>
     </div>
   </div>
 
@@ -2023,4 +2023,4 @@ setInterval(()=>{
 },1000);
 </script>
 </body>
-</html>
+  </html>
