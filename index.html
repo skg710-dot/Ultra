@@ -105,6 +105,33 @@
       border:1px solid rgba(34,197,94,.24);
     }
 
+    .stat-pill{
+      display:inline-flex;
+      align-items:center;
+      overflow:hidden;
+      border-radius:999px;
+      font-size:12px;
+      font-weight:800;
+      box-shadow:var(--shadow-soft);
+      border:1px solid rgba(255,255,255,.10);
+      white-space:nowrap;
+      line-height:1;
+    }
+    .stat-success{
+      background:linear-gradient(135deg,#f4b400,#c88d00);
+      color:#ffffff;
+      padding:7px 9px 7px 10px;
+      display:inline-flex;
+      align-items:center;
+    }
+    .stat-fail{
+      background:linear-gradient(135deg,#dc2626,#ef4444);
+      color:#ffffff;
+      padding:7px 10px 7px 9px;
+      display:inline-flex;
+      align-items:center;
+    }
+
     .logo-wrap{
       width:34px;height:34px;display:flex;align-items:center;justify-content:center;border-radius:50%;
       background:linear-gradient(135deg,rgba(244,180,0,.22),rgba(244,180,0,.06));
@@ -481,6 +508,7 @@
       .queue-row{grid-template-columns:minmax(0,1fr) auto auto auto;gap:6px}
       .routine-row{grid-template-columns:minmax(0,1fr) auto auto auto;gap:6px}
       .store-row{grid-template-columns:minmax(0,1fr) auto auto auto;gap:6px}
+      .stat-success,.stat-fail{padding-top:6px;padding-bottom:6px}
     }
   </style>
 </head>
@@ -600,8 +628,11 @@ function parseDurationToMinutes(text){
 }
 function normalizeDurationInput(text){
   const mins = parseDurationToMinutes(text);
-  if(mins === null || mins <= 0) return null;
+  if(mimsIsBad(mins)) return null;
   return { minutes: mins, text: formatDuration(mins) };
+}
+function mimsIsBad(mins){
+  return mins === null || mins <= 0;
 }
 function isStarredTaskName(name){
   return /^\s*\*/.test(String(name || ''));
@@ -1622,6 +1653,10 @@ function successPercent(){
   const s=stats();
   return s.total===0 ? 100 : Math.round((s.successCount/s.total)*100);
 }
+function failurePercent(){
+  const s = stats();
+  return s.total===0 ? 0 : Math.round(((s.total - s.successCount)/s.total)*100);
+}
 function urgencyClass(){
   const a=activeTask();
   if(!a || !a.deadline) return 'safe';
@@ -1659,7 +1694,11 @@ function refreshLive(){
     deadlineStatus=document.getElementById('deadlineStatusText'),
     taskBar=document.getElementById('taskBarTap');
 
-  if(percent) percent.textContent = successPercent()+'% Success';
+  if(percent){
+    percent.innerHTML =
+      '<span class="stat-success">' + successPercent() + '% S</span>' +
+      '<span class="stat-fail">' + failurePercent() + '% F</span>';
+  }
 
   if(a){
     const overdue = !a.isPaused && a.deadline && (new Date(a.deadline)-new Date()) <= 0;
@@ -1791,7 +1830,9 @@ function render(){
     <div class="row" style="min-width:0;flex:1">
       <div class="title">Kartavya</div>
       <div class="logo-wrap"><div class="logo">🎯</div></div>
-      <div id="successPercent" class="small pill green-pill">${successPercent()}% Success</div>
+      <div id="successPercent" class="stat-pill">
+        <span class="stat-success">${successPercent()}% S</span><span class="stat-fail">${failurePercent()}% F</span>
+      </div>
     </div>
     <div style="min-width:0;flex:1;text-align:right">
       <div class="small">Current Task</div>
@@ -2023,4 +2064,4 @@ setInterval(()=>{
 },1000);
 </script>
 </body>
-  </html>
+</html>
