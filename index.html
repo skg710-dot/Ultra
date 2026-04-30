@@ -105,33 +105,6 @@
       border:1px solid rgba(34,197,94,.24);
     }
 
-    .stat-pill{
-      display:inline-flex;
-      align-items:center;
-      overflow:hidden;
-      border-radius:999px;
-      font-size:12px;
-      font-weight:800;
-      box-shadow:var(--shadow-soft);
-      border:1px solid rgba(255,255,255,.10);
-      white-space:nowrap;
-      line-height:1;
-    }
-    .stat-success{
-      background:linear-gradient(135deg,#f4b400,#c88d00);
-      color:#ffffff;
-      padding:7px 9px 7px 10px;
-      display:inline-flex;
-      align-items:center;
-    }
-    .stat-fail{
-      background:linear-gradient(135deg,#dc2626,#ef4444);
-      color:#ffffff;
-      padding:7px 10px 7px 9px;
-      display:inline-flex;
-      align-items:center;
-    }
-
     .logo-wrap{
       width:34px;height:34px;display:flex;align-items:center;justify-content:center;border-radius:50%;
       background:linear-gradient(135deg,rgba(244,180,0,.22),rgba(244,180,0,.06));
@@ -508,7 +481,6 @@
       .queue-row{grid-template-columns:minmax(0,1fr) auto auto auto;gap:6px}
       .routine-row{grid-template-columns:minmax(0,1fr) auto auto auto;gap:6px}
       .store-row{grid-template-columns:minmax(0,1fr) auto auto auto;gap:6px}
-      .stat-success,.stat-fail{padding-top:6px;padding-bottom:6px}
     }
   </style>
 </head>
@@ -628,11 +600,8 @@ function parseDurationToMinutes(text){
 }
 function normalizeDurationInput(text){
   const mins = parseDurationToMinutes(text);
-  if(mimsIsBad(mins)) return null;
+  if(mins === null || mins <= 0) return null;
   return { minutes: mins, text: formatDuration(mins) };
-}
-function mimsIsBad(mins){
-  return mins === null || mins <= 0;
 }
 function isStarredTaskName(name){
   return /^\s*\*/.test(String(name || ''));
@@ -749,7 +718,7 @@ function addStarWorkSlice(startMs, endMs){
     next.setMinutes(0,0,0);
     next.setHours(hr + 1);
     const sliceEnd = Math.min(endMs, next.getTime());
-    if(hr >= 9 && hr < 22){
+    if(hr >= 7 && hr < 23){
       const key = hourKey(d);
       state.starHourWorkMs[key] = (state.starHourWorkMs[key] || 0) + (sliceEnd - cursor);
       changed = true;
@@ -765,7 +734,7 @@ function ensureStarHourPenalties(){
 
   dates.forEach(day => {
     const y = day.getFullYear(), m = day.getMonth(), dt = day.getDate();
-    for(let h = 9; h < 22; h++){
+    for(let h = 7; h < 23; h++){
       const slotEnd = new Date(y, m, dt, h + 1, 0, 0, 0);
       const key = todayKey(new Date(y, m, dt)) + '-' + String(h).padStart(2,'0');
       if(Date.now() >= slotEnd.getTime() && !state.starHourPenaltyApplied[key]){
@@ -1653,10 +1622,6 @@ function successPercent(){
   const s=stats();
   return s.total===0 ? 100 : Math.round((s.successCount/s.total)*100);
 }
-function failurePercent(){
-  const s = stats();
-  return s.total===0 ? 0 : Math.round(((s.total - s.successCount)/s.total)*100);
-}
 function urgencyClass(){
   const a=activeTask();
   if(!a || !a.deadline) return 'safe';
@@ -1694,11 +1659,7 @@ function refreshLive(){
     deadlineStatus=document.getElementById('deadlineStatusText'),
     taskBar=document.getElementById('taskBarTap');
 
-  if(percent){
-    percent.innerHTML =
-      '<span class="stat-success">' + successPercent() + '% S</span>' +
-      '<span class="stat-fail">' + failurePercent() + '% F</span>';
-  }
+  if(percent) percent.textContent = successPercent()+'% Success';
 
   if(a){
     const overdue = !a.isPaused && a.deadline && (new Date(a.deadline)-new Date()) <= 0;
@@ -1830,14 +1791,12 @@ function render(){
     <div class="row" style="min-width:0;flex:1">
       <div class="title">Kartavya</div>
       <div class="logo-wrap"><div class="logo">🎯</div></div>
-      <div id="successPercent" class="stat-pill">
-        <span class="stat-success">${successPercent()}% S</span><span class="stat-fail">${failurePercent()}% F</span>
-      </div>
+      <div id="successPercent" class="small pill green-pill">${successPercent()}% Success</div>
     </div>
     <div style="min-width:0;flex:1;text-align:right">
       <div class="small">Current Task</div>
       <div class="sub" id="currentTaskText" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${currentTaskHtmlText}</div>
-      <div class="star-rule" style="text-align:right;">★Task: 30 min/hr (9 AM–10 PM) or lose ₹30</div>
+      <div class="star-rule" style="text-align:right;">★Task: 30 min/hr or lose ₹30</div>
     </div>
   </div>
 
@@ -2064,4 +2023,4 @@ setInterval(()=>{
 },1000);
 </script>
 </body>
-</html>
+  </html>
