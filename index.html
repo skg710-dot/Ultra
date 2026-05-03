@@ -1468,13 +1468,34 @@ function autoFailIfOverdue(){ return; }
 function checkDeadlineWarnings(){ return; }
 function addTopup(){ state.wallet += TOPUP; save(); render(); }
 
+function markPastStarHoursAsHandled(){
+  const now = new Date();
+  const dates = [new Date(now), new Date(now.getTime() - 86400000)];
+
+  dates.forEach(day => {
+    const y = day.getFullYear();
+    const m = day.getMonth();
+    const dt = day.getDate();
+
+    for(let h = 7; h < 23; h++){
+      const slotEnd = new Date(y, m, dt, h + 1, 0, 0, 0);
+      const key = todayKey(new Date(y, m, dt)) + '-' + String(h).padStart(2,'0');
+
+      if(Date.now() >= slotEnd.getTime()){
+        state.starHourPenaltyApplied[key] = true;
+      }
+    }
+  });
+}
+
 function resetScore(){
   const ok = confirm('Reset reward, penalty and success record?');
   if(!ok) return;
   state.history = [];
-  state.starHourWorkMs = {};
-  state.starHourPenaltyApplied = {};
-  state.lastWorkSliceAt = Date.now();
+state.starHourWorkMs = {};
+state.starHourPenaltyApplied = {};
+markPastStarHoursAsHandled();
+state.lastWorkSliceAt = Date.now();
   state.taskStore = state.taskStore.map(item => ({...item, completed:false, autoServed:false}));
   state.routineTasks = state.routineTasks.map(item => ({...item, completed:false, autoServed:false}));
   state.tasks = state.tasks.map(item => ({
@@ -2023,4 +2044,4 @@ setInterval(()=>{
 },1000);
 </script>
 </body>
-  </html>
+</html>
