@@ -352,7 +352,8 @@ const state={
   starHourWorkMs:{},
   starHourPenaltyApplied:{},
   lastWorkSliceAt:null,
-  taskTimeTotals:{}
+  taskTimeTotals:{},
+  taskTimeTotalsMigratedFromHistory:false
 };
 
 const dragState={list:null,id:null,overId:null};
@@ -403,7 +404,51 @@ function getTaskDoneMinutes(taskName){
   return Math.max(0, Number(state.taskTimeTotals[key].minutes) || 0);
 }
 function taskTotalLine(taskName){
-  return 'Total done: ' + formatDoneTotal(getTaskDoneMinutes(taskName));
+  return 'Total: ' + formatDoneTotal(getTaskDoneMinutes(taskName));
+}
+function migrateTaskTimeTotalsFromHistory(){
+  if(state.taskTimeTotalsMigratedFromHistory) return;
+  if(!state.taskTimeTotals || typeof state.taskTimeTotals !== 'object') state.taskTimeTotals = {};
+
+  const rebuilt = {};
+
+  if(Array.isArray(state.history)){
+    state.history.forEach(item => {
+      if(!item || item.result !== 'success' || !item.taskName) return;
+
+      const cleanName = String(item.taskName || '').trim();
+      const key = taskTotalKey(cleanName);
+      if(!key) return;
+
+      let mins = Number(item.actualWorkedMinutes);
+      if(!Number.isFinite(mins) || mins <= 0){
+        mins = Number(item.durationMinutes);
+      }
+      if(!Number.isFinite(mins) || mins <= 0) return;
+
+      mins = Math.round(mins);
+
+      if(!rebuilt[key]){
+        rebuilt[key] = {
+          displayName: cleanName,
+          minutes: 0
+        };
+      }
+      rebuilt[key].minutes += mins;
+    });
+  }
+
+  Object.keys(rebuilt).forEach(key => {
+    const oldMinutes = state.taskTimeTotals[key] ? Number(state.taskTimeTotals[key].minutes) || 0 : 0;
+    const rebuiltMinutes = Number(rebuilt[key].minutes) || 0;
+
+    state.taskTimeTotals[key] = {
+      displayName: rebuilt[key].displayName,
+      minutes: Math.max(oldMinutes, rebuiltMinutes)
+    };
+  });
+
+  state.taskTimeTotalsMigratedFromHistory = true;
 }
 function addTaskDoneTime(taskName, actualMinutes){
   if(!state.taskTimeTotals || typeof state.taskTimeTotals !== 'object') state.taskTimeTotals = {};
@@ -622,6 +667,7 @@ function load(){
   if(typeof state.starHourWorkMs !== 'object' || !state.starHourWorkMs) state.starHourWorkMs = {};
   if(typeof state.starHourPenaltyApplied !== 'object' || !state.starHourPenaltyApplied) state.starHourPenaltyApplied = {};
   if(typeof state.taskTimeTotals !== 'object' || !state.taskTimeTotals) state.taskTimeTotals = {};
+  if(typeof state.taskTimeTotalsMigratedFromHistory !== 'boolean') state.taskTimeTotalsMigratedFromHistory = false;
   if(typeof state.lastWorkSliceAt !== 'number') state.lastWorkSliceAt = Date.now();
   const normalized = normalizeDurationInput(state.durationText || formatDuration(state.durationMinutes));
   state.durationText = normalized ? normalized.text : formatDuration(state.durationMinutes);
@@ -635,7 +681,7 @@ function load(){
   if(typeof state.taskName !== 'string') state.taskName = '';
   state.soundEnabled = true;
   state.vibrationEnabled = true;
-  migrateTasks();migrateTaskStore();migrateRoutineTasks();normalizeQueueOrdering();normalizeTaskStoreOrdering();normalizeRoutineOrdering();resetRoutineTasksIfNewDay();syncActive();
+  migrateTasks();migrateTaskStore();migrateRoutineTasks();migrateTaskTimeTotalsFromHistory();normalizeQueueOrdering();normalizeTaskStoreOrdering();normalizeRoutineOrdering();resetRoutineTasksIfNewDay();syncActive();
 }
 
 function activateTask(task){
