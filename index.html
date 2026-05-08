@@ -8,6 +8,7 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon-192.png" sizes="192x192">
 <link rel="apple-touch-icon" href="icon-192.png">
+
 <style>
 :root{
   --text:#f5f1e8;--muted:#c7bfae;--success:#22c55e;--danger:#ef4444;
@@ -30,8 +31,13 @@ body{
 .app{max-width:430px;margin:0 auto;min-height:100vh;padding:12px;display:none}
 .card{
   background:linear-gradient(180deg,rgba(28,28,28,.90),rgba(18,18,18,.88));
-  border:1px solid rgba(220,240,255,.35);border-radius:var(--radius-xl);
-  padding:12px;box-shadow:var(--shadow);margin-bottom:10px;position:relative;overflow:hidden
+  border:1px solid rgba(220,240,255,.35);
+  border-radius:var(--radius-xl);
+  padding:12px;
+  box-shadow:var(--shadow);
+  margin-bottom:10px;
+  position:relative;
+  overflow:hidden
 }
 .space{display:flex;justify-content:space-between;align-items:center;gap:8px}
 .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
@@ -70,6 +76,7 @@ body{
 .oldest-required{text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:3px}
 .required-check{display:inline-flex;color:#ef4444;font-weight:900;margin-left:4px;font-size:15px;text-decoration:none!important}
 .star-rule{font-size:11px;font-weight:800;color:var(--gold-soft);margin-top:4px;text-align:right;white-space:nowrap}
+
 @keyframes cycleTraffic{
   0%,24%{background:#ef4444;box-shadow:0 0 0 4px rgba(239,68,68,.12)}
   25%,49%{background:#f4b400;box-shadow:0 0 0 4px rgba(244,180,0,.12)}
@@ -79,6 +86,7 @@ body{
 @keyframes pulse-danger{0%,100%{box-shadow:var(--shadow)}50%{box-shadow:0 0 0 7px rgba(239,68,68,.12),var(--shadow)}}
 @keyframes pulse-warning{0%,100%{box-shadow:var(--shadow)}50%{box-shadow:0 0 0 7px rgba(244,180,0,.10),var(--shadow)}}
 @keyframes dotBlink{0%,100%{transform:scale(1);outline-color:rgba(255,255,255,.75)}50%{transform:scale(1.35);outline-color:rgba(244,180,0,.9)}}
+
 label{display:block;font-size:12px;font-weight:800;margin-bottom:6px;color:var(--muted)}
 input{
   width:100%;padding:12px;border-radius:14px;border:1px solid rgba(244,180,0,.18);
@@ -89,6 +97,7 @@ input::placeholder{color:#c9b78c}
 input:focus{border-color:rgba(244,180,0,.38);box-shadow:0 0 0 4px rgba(244,180,0,.08)}
 #storeTaskInput{background:var(--soft-green);border:1px solid var(--soft-green-border)}
 .duration-input{background:var(--soft-blue);border:1px solid var(--soft-blue-border)}
+
 button{
   width:100%;padding:11px 12px;border-radius:14px;font-size:14px;font-weight:800;
   cursor:pointer;border:none;transition:transform .12s ease,filter .15s ease
@@ -112,6 +121,7 @@ button:active{transform:scale(.98)}
 }
 .action-buttons{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:7px}
 .action-buttons button{padding:8px 7px;min-height:36px;border-radius:12px;font-size:12px;line-height:1.05}
+
 .bar-wrap{
   position:relative;width:100%;height:30px;border-radius:999px;overflow:hidden;
   background:rgba(255,255,255,.08);margin-top:8px;display:flex;
@@ -127,6 +137,7 @@ button:active{transform:scale(.98)}
   font-size:14px;font-weight:800;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.50);pointer-events:none
 }
 .task-meta{margin-top:5px;display:flex;justify-content:center;gap:8px;flex-wrap:wrap;font-size:12px;font-weight:800;color:#c9b78c}
+
 .performance-wrap{margin-top:10px}
 .performance-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
 .perf-box{
@@ -138,6 +149,7 @@ button:active{transform:scale(.98)}
 .perf-reward{background:linear-gradient(135deg,rgba(34,197,94,.18),rgba(34,197,94,.08))}
 .perf-penalty{background:linear-gradient(135deg,rgba(239,68,68,.18),rgba(239,68,68,.08))}
 .perf-wallet{background:linear-gradient(135deg,rgba(244,180,0,.18),rgba(244,180,0,.08))}
+
 .focus-strip{margin-top:10px;padding:9px 10px;border-radius:18px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);box-shadow:var(--shadow-soft)}
 .focus-head{display:flex;justify-content:space-between;align-items:center;font-size:12px;font-weight:900;color:var(--gold-soft);margin-bottom:8px}
 .focus-dots{display:grid;grid-template-columns:repeat(14,1fr);gap:5px}
@@ -150,10 +162,7 @@ button:active{transform:scale(.98)}
 .focus-dot.red{background:#ef4444;border-color:#fecaca;color:#fff}
 .focus-dot.current{outline:2px solid rgba(255,255,255,.75);outline-offset:2px;animation:dotBlink 1s infinite}
 .focus-times{display:grid;grid-template-columns:repeat(14,1fr);gap:5px;margin-top:5px;font-size:7px;color:#bdb29c;text-align:center}
-.must-start-box{margin-top:6px;padding:7px 9px;border-radius:16px;background:rgba(239,68,68,.10);border:1px solid rgba(239,68,68,.22);box-shadow:var(--shadow-soft)}
-.must-start-head{display:flex;justify-content:space-between;align-items:center;font-size:10px;font-weight:900;color:#ffd0d0;margin-bottom:5px}
-.must-start-bar{height:8px;border-radius:999px;overflow:hidden;background:linear-gradient(90deg,#ef4444,#ff8080);border:1px solid rgba(255,255,255,.12)}
-.must-start-fill{height:100%;background:linear-gradient(90deg,#16a34a,#22c55e);transition:width .4s ease}
+
 .paired-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px;margin-top:10px}
 .paired-box{border:1px solid rgba(255,255,255,.08);border-radius:18px;padding:10px;background:rgba(255,255,255,.06);box-shadow:var(--shadow-soft);min-width:0}
 .list-title{font-size:17px;font-weight:800;margin:0 0 8px 0;color:#fff5d7}
@@ -203,6 +212,7 @@ button:active{transform:scale(.98)}
 }
 </style>
 </head>
+
 <body>
 <div class="splash" id="splashScreen">
   <div class="splash-logo">
@@ -331,22 +341,11 @@ function effectiveStoreWorkedMs(item){return storeItemCumulativeWorkedMs(item)+a
 function isAttendedEnough(item){return effectiveStoreWorkedMs(item)>=COMPULSORY_START_MS}
 function isCompulsoryStoreItem(item){return !!(item&&!isAttendedEnough(item)&&isOldEnoughForCompulsory(item))}
 function oldestCompulsoryStoreItem(){return state.taskStore.filter(isCompulsoryStoreItem).sort((a,b)=>taskCreatedMs(a)-taskCreatedMs(b))[0]||null}
-function compulsoryProgressMsForTask(task){
-  if(!task||task.sourceType!=='store'||!task.sourceId)return 0;
-  const item=getStoreItem(task.sourceId);
-  const base=item?storeItemCumulativeWorkedMs(item):0;
-  return Math.min(COMPULSORY_START_MS,base+taskWorkedMs(task))
-}
 function isCompulsoryActiveTask(task){
   const old=oldestCompulsoryStoreItem();
-  return !!(task&&old&&task.sourceType==='store'&&task.sourceId===old.id&&compulsoryProgressMsForTask(task)<COMPULSORY_START_MS)
+  return !!(task&&old&&task.sourceType==='store'&&task.sourceId===old.id&&taskWorkedMs(task)<COMPULSORY_START_MS)
 }
-function compulsoryProgressHtml(task){
-  const done=compulsoryProgressMsForTask(task);
-  if(!isCompulsoryActiveTask(task)||done>=COMPULSORY_START_MS)return '';
-  const pct=Math.max(0,Math.min(100,Math.round((done/COMPULSORY_START_MS)*100)));
-  return '<div class="must-start-box" id="mustStartBox"><div class="must-start-head"><span>Oldest task attendance</span><span id="mustStartText">'+formatMs(done)+' / 10 min</span></div><div class="must-start-bar"><div class="must-start-fill" id="mustStartFill" style="width:'+pct+'%"></div></div></div>'
-}
+function compulsoryProgressHtml(task){return ''}
 
 function normalizeQueueOrdering(){
   const starred=[],normal=[];
@@ -433,7 +432,8 @@ function focusDotsHtml(){
     else if(Date.now()>=slotEnd.getTime()){cls+=' red'}
     if(currentHour===h)cls+=' current';
     const label=(h<12?h+' AM':(h===12?'12 PM':(h-12)+' PM'))+'-'+((h+1)<12?(h+1)+' AM':((h+1)===12?'12 PM':(h+1-12)+' PM'));
-    dots+='<span class="'+cls+'" onclick="alert(\''+label+': '+mins+' min\')" title="'+label+': '+mins+' min"></span>';
+    const display=currentHour===h?String(mins):'';
+    dots+='<span class="'+cls+'" onclick="alert(\''+label+': '+mins+' min\')" title="'+label+': '+mins+' min">'+display+'</span>';
     times+='<span>'+h+'</span>'
   }
   return{greenCount,html:'<div class="focus-strip"><div class="focus-head"><span>*Main Task Today '+greenCount+'/14</span><span>8 AM-10 PM ('+formatMs(totalMs)+')</span></div><div class="focus-dots">'+dots+'</div><div class="focus-times">'+times+'</div></div>'}
@@ -660,7 +660,7 @@ function disclaimerHtml(){
 }
 function instructionsHtml(){
   if(!state.showInstructions)return '';
-  return '<div class="card instructions-card"><div class="section-head"><span class="section-dot"></span><div class="sub">How to Use Kartavya</div></div><div class="instructions-body"><p><b>1. Add tasks in Task Store</b><br>Write the task name, enter duration like <b>30 min</b>, <b>1 hr</b>, or <b>1 hr 30 min</b>, and press <b>Add Task</b>.</p><p><b>2. Use * for Main Tasks</b><br>If a task is very important, start its name with <b>*</b>. Starred tasks help complete the rule of 30 minutes main work per hour.</p><p><b>3. Queue a task to start</b><br>Press <b>Queue</b>. The timer starts only when the task becomes active/current.</p><p><b>4. Progress bar meaning</b><br><b>Green</b> means time already worked. <b>Red</b> means time still pending. Tap the bar to <b>Pause</b> or <b>Resume</b>.</p><p><b>5. Total Hrs</b><br><b>Total Hrs</b> shows actual active working time spent on that task across sessions. It does not count leftover time or merely the date of creation.</p><p><b>6. Oldest task rule</b><br>If a task remains unattended for 3 days, it comes to the top with underline and red check mark. You must work on it for at least <b>10 minutes</b>.</p><p><b>7. Main Task Today dots</b><br>The dots cover <b>8 AM to 10 PM</b>. Green means 30 minutes or more main-task work. Red means the hour ended without 30 minutes. Tap any dot to see counted minutes.</p><p><b>8. Money note</b><br>Reward, penalty and wallet are only motivational values. No real money is paid or deducted.</p></div></div>'
+  return '<div class="card instructions-card"><div class="section-head"><span class="section-dot"></span><div class="sub">How to Use Kartavya</div></div><div class="instructions-body"><p><b>1. Add tasks in Task Store</b><br>Write the task name, enter duration like <b>30 min</b>, <b>1 hr</b>, or <b>1 hr 30 min</b>, and press <b>Add Task</b>.</p><p><b>2. Use * for Main Tasks</b><br>If a task is very important, start its name with <b>*</b>. Starred tasks help complete the rule of 30 minutes main work per hour.</p><p><b>3. Queue a task to start</b><br>Press <b>Queue</b>. The timer starts only when the task becomes active/current.</p><p><b>4. Progress bar meaning</b><br><b>Green</b> means time already worked. <b>Red</b> means time still pending. Tap the bar to <b>Pause</b> or <b>Resume</b>.</p><p><b>5. Total Hrs</b><br><b>Total Hrs</b> shows actual active working time spent on that task across sessions. It does not count leftover time or merely the date of creation.</p><p><b>6. Oldest task rule</b><br>If a task remains unattended for 3 days, it comes to the top with underline and red check mark. You must work on it for at least <b>10 minutes</b>. There is no separate 10-minute bar; the main task bar alone shows actual work time.</p><p><b>7. Main Task Today dots</b><br>The dots cover <b>8 AM to 10 PM</b>. Green means 30 minutes or more main-task work. Red means the hour ended without 30 minutes. The current dot shows live minutes. Tap any dot to see counted minutes.</p><p><b>8. Money note</b><br>Reward, penalty and wallet are only motivational values. No real money is paid or deducted.</p></div></div>'
 }
 function bindStoreDurationInput(){
   const input=document.getElementById('storeDurationInput');if(!input)return;
@@ -698,15 +698,6 @@ function refreshLive(){
     if(clockInline)clockInline.textContent=a.isPaused?'Paused • Tap to Resume':(overdue?'Completed duration • Tap to Pause':currentRemainingText(a));
     if(activeDuration)activeDuration.textContent=formatDuration(a.durationMinutes||0);
     if(activeTotal)activeTotal.textContent=formatMs(taskCumulativeWorkedMs(a));
-    const mustStartBox=document.getElementById('mustStartBox');
-    if(mustStartBox){
-      const done=compulsoryProgressMsForTask(a);
-      const pct=Math.max(0,Math.min(100,Math.round((done/COMPULSORY_START_MS)*100)));
-      const mustStartText=document.getElementById('mustStartText'),mustStartFill=document.getElementById('mustStartFill');
-      if(mustStartText)mustStartText.textContent=formatMs(done)+' / 10 min';
-      if(mustStartFill)mustStartFill.style.width=pct+'%';
-      if(done>=COMPULSORY_START_MS||!isCompulsoryActiveTask(a)){mustStartBox.remove();normalizeTaskStoreOrdering();save()}
-    }
     if(deadlineStatus)deadlineStatus.textContent=a.isPaused?'Paused':(overdue?'Duration completed':'Remaining: '+formatMs(taskRemainingMs(a)));
     const pct=taskProgressPercent(a);
     if(doneBar)doneBar.style.width=pct+'%';
@@ -771,7 +762,6 @@ function render(){
     <div>Total Hrs: <span id="activeTotalHrsText">${a?formatMs(taskCumulativeWorkedMs(a)):'--'}</span></div>
     <div id="deadlineStatusText">${endText}</div>
   </div>
-  ${compulsoryProgressHtml(a)}
   <div class="action-buttons">
     <button class="btn-success" id="successBtn" ${a?'':'disabled style="opacity:.45;pointer-events:none"'}>${successButtonText}</button>
     <button class="btn-danger" id="failBtn" ${a?'':'disabled style="opacity:.45;pointer-events:none"'}>${failButtonText}</button>
