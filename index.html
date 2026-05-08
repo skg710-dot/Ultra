@@ -277,12 +277,20 @@ function capWorkedMs(task,ms){return Math.max(0,Math.min(Number(ms)||0,plannedMs
 
 /* IMPORTANT: actual task time is separate from the 10-minute oldest-task bar */
 function currentActiveWorkedMs(task){
-  if(!task||!task.activatedAt)return 0;
-  let total=Number(task.sessionWorkedMs)||0;
-  if(!task.isPaused && task.lastSessionTickAt){
-    total += Math.max(0,Date.now()-Number(task.lastSessionTickAt));
+  if(!task || !task.activatedAt) return 0;
+
+  let total = Number(task.sessionWorkedMs) || 0;
+
+  if(!task.isPaused){
+    if(task.lastSessionTickAt){
+      total += Math.max(0, Date.now() - Number(task.lastSessionTickAt));
+    }else if(total === 0){
+      // Safety fallback: if session counter did not start, count from activation time.
+      total = Math.max(0, Date.now() - new Date(task.activatedAt).getTime());
+    }
   }
-  return capWorkedMs(task,total);
+
+  return capWorkedMs(task, total);
 }
 function accountActualTaskWork(){
   const a=activeTask();
@@ -518,7 +526,7 @@ function activateTask(task){
   task.deadline=new Date(now+durationMinutes*60000).toISOString();
   task.isPaused=false;task.pausedAt=null;task.pausedRemainingMs=null;task.pausedUsedMs=null;
   task.macroStateSentForTaskId=null;task.macroReminderEpochSent=null;
-  task.sessionWorkedMs=0;task.lastSessionTickAt=now
+  task.sessionWorkedMs=0; task.lastSessionTickAt=now;
 }
 function migrateTasks(){
   state.tasks=state.tasks.map((task,index)=>{
