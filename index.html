@@ -8,7 +8,6 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon-192.png" sizes="192x192">
 <link rel="apple-touch-icon" href="icon-192.png">
-
 <style>
 :root{
   --text:#f5f1e8;--muted:#c7bfae;--success:#22c55e;--danger:#ef4444;
@@ -76,7 +75,6 @@ body{
 .oldest-required{text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:3px}
 .required-check{display:inline-flex;color:#ef4444;font-weight:900;margin-left:4px;font-size:15px;text-decoration:none!important}
 .star-rule{font-size:11px;font-weight:800;color:var(--gold-soft);margin-top:4px;text-align:right;white-space:nowrap}
-
 @keyframes cycleTraffic{
   0%,24%{background:#ef4444;box-shadow:0 0 0 4px rgba(239,68,68,.12)}
   25%,49%{background:#f4b400;box-shadow:0 0 0 4px rgba(244,180,0,.12)}
@@ -86,7 +84,6 @@ body{
 @keyframes pulse-danger{0%,100%{box-shadow:var(--shadow)}50%{box-shadow:0 0 0 7px rgba(239,68,68,.12),var(--shadow)}}
 @keyframes pulse-warning{0%,100%{box-shadow:var(--shadow)}50%{box-shadow:0 0 0 7px rgba(244,180,0,.10),var(--shadow)}}
 @keyframes dotBlink{0%,100%{transform:scale(1);outline-color:rgba(255,255,255,.75)}50%{transform:scale(1.35);outline-color:rgba(244,180,0,.9)}}
-
 label{display:block;font-size:12px;font-weight:800;margin-bottom:6px;color:var(--muted)}
 input{
   width:100%;padding:12px;border-radius:14px;border:1px solid rgba(244,180,0,.18);
@@ -97,7 +94,6 @@ input::placeholder{color:#c9b78c}
 input:focus{border-color:rgba(244,180,0,.38);box-shadow:0 0 0 4px rgba(244,180,0,.08)}
 #storeTaskInput{background:var(--soft-green);border:1px solid var(--soft-green-border)}
 .duration-input{background:var(--soft-blue);border:1px solid var(--soft-blue-border)}
-
 button{
   width:100%;padding:11px 12px;border-radius:14px;font-size:14px;font-weight:800;
   cursor:pointer;border:none;transition:transform .12s ease,filter .15s ease
@@ -117,11 +113,10 @@ button:active{transform:scale(.98)}
 .drag-handle{
   width:auto;padding:6px 10px;border-radius:10px;font-size:15px;line-height:1;font-weight:800;
   color:#eef4ff;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.18);
-  box-shadow:var(--shadow-soft);cursor:grab;user-select:none;touch-action:none;flex:0 0 auto
+  box-shadow:var(--shadow-soft);cursor:grab;user-select:none;-webkit-user-select:none;touch-action:none;flex:0 0 auto
 }
 .action-buttons{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:7px}
 .action-buttons button{padding:8px 7px;min-height:36px;border-radius:12px;font-size:12px;line-height:1.05}
-
 .bar-wrap{
   position:relative;width:100%;height:30px;border-radius:999px;overflow:hidden;
   background:rgba(255,255,255,.08);margin-top:8px;display:flex;
@@ -137,7 +132,6 @@ button:active{transform:scale(.98)}
   font-size:14px;font-weight:800;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.50);pointer-events:none
 }
 .task-meta{margin-top:5px;display:flex;justify-content:center;gap:8px;flex-wrap:wrap;font-size:12px;font-weight:800;color:#c9b78c}
-
 .performance-wrap{margin-top:10px}
 .performance-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
 .perf-box{
@@ -149,7 +143,6 @@ button:active{transform:scale(.98)}
 .perf-reward{background:linear-gradient(135deg,rgba(34,197,94,.18),rgba(34,197,94,.08))}
 .perf-penalty{background:linear-gradient(135deg,rgba(239,68,68,.18),rgba(239,68,68,.08))}
 .perf-wallet{background:linear-gradient(135deg,rgba(244,180,0,.18),rgba(244,180,0,.08))}
-
 .focus-strip{margin-top:10px;padding:9px 10px;border-radius:18px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);box-shadow:var(--shadow-soft)}
 .focus-head{display:flex;justify-content:space-between;align-items:center;font-size:12px;font-weight:900;color:var(--gold-soft);margin-bottom:8px}
 .focus-dots{display:grid;grid-template-columns:repeat(14,1fr);gap:5px}
@@ -162,7 +155,6 @@ button:active{transform:scale(.98)}
 .focus-dot.red{background:#ef4444;border-color:#fecaca;color:#fff}
 .focus-dot.current{outline:2px solid rgba(255,255,255,.75);outline-offset:2px;animation:dotBlink 1s infinite}
 .focus-times{display:grid;grid-template-columns:repeat(14,1fr);gap:5px;margin-top:5px;font-size:7px;color:#bdb29c;text-align:center}
-
 .paired-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px;margin-top:10px}
 .paired-box{border:1px solid rgba(255,255,255,.08);border-radius:18px;padding:10px;background:rgba(255,255,255,.06);box-shadow:var(--shadow-soft);min-width:0}
 .list-title{font-size:17px;font-weight:800;margin:0 0 8px 0;color:#fff5d7}
@@ -177,6 +169,8 @@ button:active{transform:scale(.98)}
   background:linear-gradient(180deg,rgba(255,255,255,.08),rgba(255,255,255,.04));box-shadow:0 6px 14px rgba(0,0,0,.14)
 }
 .draggable-item.active{background:linear-gradient(135deg,rgba(34,197,94,.20),rgba(34,197,94,.10));border-color:rgba(34,197,94,.28)}
+.draggable-item.over{outline:2px dashed rgba(147,197,253,.75);outline-offset:2px}
+.draggable-item.drag-source{opacity:.65}
 .queue-row,.store-row{display:grid;grid-template-columns:minmax(0,1fr) auto auto auto;align-items:center;gap:8px}
 .item-name{font-weight:800;line-height:1.22;font-size:13px;word-break:break-word;color:#fff8e9;min-width:0}
 .item-date{color:#d8ccb3;font-weight:800}
@@ -189,7 +183,6 @@ button:active{transform:scale(.98)}
 .instructions-body{line-height:1.55;color:#f5e8c8;font-size:12px}
 .instructions-body p{margin:0 0 10px}
 .instructions-body b{color:#ffd76a}
-.instruction-example{display:block;margin-top:5px;padding:7px 9px;border-radius:12px;background:rgba(255,255,255,.07);color:#fff7dc;border:1px solid rgba(244,180,0,.16);font-weight:800}
 .splash{
   position:fixed;inset:0;z-index:9999;background:radial-gradient(circle at top,rgba(244,180,0,.14),transparent 28%),linear-gradient(180deg,#080808,#111);
   color:white;display:flex;align-items:center;justify-content:center;flex-direction:column;text-align:center;padding:24px
@@ -212,7 +205,6 @@ button:active{transform:scale(.98)}
 }
 </style>
 </head>
-
 <body>
 <div class="splash" id="splashScreen">
   <div class="splash-logo">
@@ -292,12 +284,17 @@ function activeTask(){return state.activeTaskId?state.tasks.find(x=>x.id===state
 function getStoreItem(id){return state.taskStore.find(x=>x.id===id)||null}
 function cleanTaskName(name){let s=String(name||'').trim().toLowerCase();while(s.includes('  '))s=s.replaceAll('  ',' ');return s}
 
-/* FINAL CLEAN TIME MODEL */
 function taskWorkedMs(task){
   if(!task)return 0;
   const base=Math.max(0,Number(task.workedBeforePauseMs)||0);
   if(task.isPaused||!task.runningSinceMs)return base;
   return base+Math.max(0,Date.now()-Number(task.runningSinceMs));
+}
+function taskWorkedMsAt(task,timeMs){
+  if(!task)return 0;
+  const base=Math.max(0,Number(task.workedBeforePauseMs)||0);
+  if(task.isPaused||!task.runningSinceMs)return base;
+  return base+Math.max(0,Number(timeMs)-Number(task.runningSinceMs));
 }
 function taskPlannedMs(task){
   return Math.max(1,Number(task&&task.durationMinutes)||DEFAULT_DURATION)*60000;
@@ -309,7 +306,6 @@ function taskProgressPercent(task){
   if(!task)return 0;
   return Math.max(0,Math.min(100,Math.round((taskWorkedMs(task)/taskPlannedMs(task))*100)))
 }
-
 function storedWorkedMs(item){return Math.max(0,Number(item&&item.totalWorkedMs)||0)}
 function historyWorkedMsForStoreItem(item){
   if(!item)return 0;
@@ -330,7 +326,6 @@ function taskCumulativeWorkedMs(task){
   const base=item?storeItemCumulativeWorkedMs(item):0;
   return base+taskWorkedMs(task)
 }
-
 function taskCreatedMs(item){const t=new Date(item&&item.createdAt).getTime();return Number.isFinite(t)?t:Date.now()}
 function isOldEnoughForCompulsory(item){return Date.now()-taskCreatedMs(item)>=COMPULSORY_AFTER_DAYS*24*60*60*1000}
 function activeWorkMsForStoreItem(item){
@@ -345,8 +340,6 @@ function isCompulsoryActiveTask(task){
   const old=oldestCompulsoryStoreItem();
   return !!(task&&old&&task.sourceType==='store'&&task.sourceId===old.id&&taskWorkedMs(task)<COMPULSORY_START_MS)
 }
-function compulsoryProgressHtml(task){return ''}
-
 function normalizeQueueOrdering(){
   const starred=[],normal=[];
   state.tasks.forEach(i=>(isStarredTaskName(i.taskName)?starred:normal).push(i));
@@ -368,7 +361,6 @@ function insertIntoPriorityList(listKey,item){
   if(listKey==='tasks')normalizeQueueOrdering();
   if(listKey==='taskStore')normalizeTaskStoreOrdering()
 }
-
 function addStarWorkSlice(startMs,endMs){
   let changed=false,cursor=startMs;
   while(cursor<endMs){
@@ -402,53 +394,28 @@ function ensureStarHourPenalties(){
   });
   return changed
 }
-function taskWorkedMsAt(task, timeMs){
-  if(!task) return 0;
-
-  const base = Math.max(0, Number(task.workedBeforePauseMs) || 0);
-
-  if(task.isPaused || !task.runningSinceMs){
-    return base;
-  }
-
-  return base + Math.max(0, Number(timeMs) - Number(task.runningSinceMs));
-}
 function accountStarredWorkAndPenalties(){
-  const now = Date.now();
-
-  if(!state.lastStarTickAt){
-    state.lastStarTickAt = now;
-    save();
-    return;
-  }
-
-  let changed = false;
-  const a = activeTask();
-
-  if(a && (isStarredTaskName(a.taskName) || isCompulsoryActiveTask(a)) && !a.isPaused){
-
-    const tickStart = state.lastStarTickAt;
-    const tickEnd = now;
-
-    const workedAtTickStart = taskWorkedMsAt(a, tickStart);
-    const planned = taskPlannedMs(a);
-
-    const remainingAtTickStart = Math.max(0, planned - workedAtTickStart);
-
-    if(remainingAtTickStart > 0){
-      const allowedDuration = Math.min(tickEnd - tickStart, remainingAtTickStart);
-      const allowedEnd = tickStart + allowedDuration;
-
-      if(allowedEnd > tickStart){
-        changed = addStarWorkSlice(tickStart, allowedEnd) || changed;
+  const now=Date.now();
+  if(!state.lastStarTickAt){state.lastStarTickAt=now;save();return}
+  let changed=false;
+  const a=activeTask();
+  if(a&&(isStarredTaskName(a.taskName)||isCompulsoryActiveTask(a))&&!a.isPaused){
+    const tickStart=state.lastStarTickAt;
+    const tickEnd=now;
+    const workedAtTickStart=taskWorkedMsAt(a,tickStart);
+    const planned=taskPlannedMs(a);
+    const remainingAtTickStart=Math.max(0,planned-workedAtTickStart);
+    if(remainingAtTickStart>0){
+      const allowedDuration=Math.min(tickEnd-tickStart,remainingAtTickStart);
+      const allowedEnd=tickStart+allowedDuration;
+      if(allowedEnd>tickStart){
+        changed=addStarWorkSlice(tickStart,allowedEnd)||changed
       }
     }
   }
-
-  state.lastStarTickAt = now;
-  changed = ensureStarHourPenalties() || changed;
-
-  if(changed) save();
+  state.lastStarTickAt=now;
+  changed=ensureStarHourPenalties()||changed;
+  if(changed)save()
 }
 function currentHourStarSatisfied(){const key=hourKey(new Date());return(state.starHourWorkMs[key]||0)>=STAR_MINUTES_PER_HOUR_MS}
 function currentTaskTextClass(a){if(!a||!isStarredTaskName(a.taskName))return'';return currentHourStarSatisfied()?'star-current-green':'star-current-gold'}
@@ -475,7 +442,6 @@ function focusDotsHtml(){
   }
   return{greenCount,html:'<div class="focus-strip"><div class="focus-head"><span>*Main Task Today '+greenCount+'/14</span><span>8 AM-10 PM ('+formatMs(totalMs)+')</span></div><div class="focus-dots">'+dots+'</div><div class="focus-times">'+times+'</div></div>'}
 }
-
 function sendMacroDroidState(taskName,reminderEpoch,taskState,successMessage='',silent=false){
   if(!MACRODROID_WEBHOOK_URL)return Promise.resolve(false);
   const sep=MACRODROID_WEBHOOK_URL.includes('?')?'&':'?';
@@ -494,7 +460,6 @@ function autoSendMacroDroidForActiveTask(){
     if(ok){a.macroStateSentForTaskId=a.id;a.macroReminderEpochSent=reminderEpoch;save()}
   })
 }
-
 function load(){
   const raw=localStorage.getItem(STORAGE_KEY);
   if(raw){try{Object.assign(state,JSON.parse(raw))}catch(e){}}
@@ -697,7 +662,7 @@ function disclaimerHtml(){
 }
 function instructionsHtml(){
   if(!state.showInstructions)return '';
-  return '<div class="card instructions-card"><div class="section-head"><span class="section-dot"></span><div class="sub">How to Use Kartavya</div></div><div class="instructions-body"><p><b>1. Add tasks in Task Store</b><br>Write the task name, enter duration like <b>30 min</b>, <b>1 hr</b>, or <b>1 hr 30 min</b>, and press <b>Add Task</b>.</p><p><b>2. Use * for Main Tasks</b><br>If a task is very important, start its name with <b>*</b>. Starred tasks help complete the rule of 30 minutes main work per hour.</p><p><b>3. Queue a task to start</b><br>Press <b>Queue</b>. The timer starts only when the task becomes active/current.</p><p><b>4. Progress bar meaning</b><br><b>Green</b> means time already worked. <b>Red</b> means time still pending. Tap the bar to <b>Pause</b> or <b>Resume</b>.</p><p><b>5. Total Hrs</b><br><b>Total Hrs</b> shows actual active working time spent on that task across sessions. It does not count leftover time or merely the date of creation.</p><p><b>6. Oldest task rule</b><br>If a task remains unattended for 3 days, it comes to the top with underline and red check mark. You must work on it for at least <b>10 minutes</b>. There is no separate 10-minute bar; the main task bar alone shows actual work time.</p><p><b>7. Main Task Today dots</b><br>The dots cover <b>8 AM to 10 PM</b>. Green means 30 minutes or more main-task work. Red means the hour ended without 30 minutes. The current dot shows live minutes. Tap any dot to see counted minutes.</p><p><b>8. Money note</b><br>Reward, penalty and wallet are only motivational values. No real money is paid or deducted.</p></div></div>'
+  return '<div class="card instructions-card"><div class="section-head"><span class="section-dot"></span><div class="sub">How to Use Kartavya</div></div><div class="instructions-body"><p><b>1. Add tasks in Task Store</b><br>Write the task name, enter duration like <b>30 min</b>, <b>1 hr</b>, or <b>1 hr 30 min</b>, and press <b>Add Task</b>.</p><p><b>2. Use * for Main Tasks</b><br>If a task is very important, start its name with <b>*</b>. Starred tasks help complete the rule of 30 minutes main work per hour.</p><p><b>3. Queue a task to start</b><br>Press <b>Queue</b>. The timer starts only when the task becomes active/current.</p><p><b>4. Progress bar meaning</b><br><b>Green</b> means time already worked. <b>Red</b> means time still pending. Tap the bar to <b>Pause</b> or <b>Resume</b>.</p><p><b>5. Total Hrs</b><br><b>Total Hrs</b> shows actual active working time spent on that task across sessions. It does not count leftover time or merely the date of creation.</p><p><b>6. Oldest task rule</b><br>If a task remains unattended for 3 days, it comes to the top with underline and red check mark. You must work on it for at least <b>10 minutes</b>. There is no separate 10-minute bar; the main task bar alone shows actual work time.</p><p><b>7. Main Task Today dots</b><br>The dots cover <b>8 AM to 10 PM</b>. Green means 30 minutes or more main-task work. Red means the hour ended without 30 minutes. The current dot shows live minutes. Tap any dot to see counted minutes.</p><p><b>8. Shifting tasks</b><br>Drag the <b>⋮⋮</b> handle to shift tasks. The oldest compulsory task will remain on top until it has been attended for 10 minutes.</p><p><b>9. Money note</b><br>Reward, penalty and wallet are only motivational values. No real money is paid or deducted.</p></div></div>'
 }
 function bindStoreDurationInput(){
   const input=document.getElementById('storeDurationInput');if(!input)return;
@@ -723,6 +688,106 @@ function currentRemainingText(a){
   if(!a)return'Time left 0 min';
   if(a.isPaused)return'Paused • Tap to Resume';
   return formatTimeLeftDisplay(taskRemainingMs(a)/1000)+' • Tap to Pause'
+}
+function bindDragAndDrop(){
+  const dragState={list:null,id:null,overId:null};
+  function clearDragClasses(){
+    document.querySelectorAll('.draggable-item').forEach(el=>{
+      el.classList.remove('over','drag-source')
+    })
+  }
+  function reorderByIds(arr,draggedId,targetId){
+    const from=arr.findIndex(x=>x.id===draggedId);
+    const to=arr.findIndex(x=>x.id===targetId);
+    if(from===-1||to===-1||from===to)return arr;
+    const copy=[...arr];
+    const moved=copy.splice(from,1)[0];
+    copy.splice(to,0,moved);
+    return copy
+  }
+  function reorderList(listKey,draggedId,targetId){
+    if(!draggedId||!targetId||draggedId===targetId)return;
+    state[listKey]=reorderByIds(state[listKey],draggedId,targetId);
+    if(listKey==='tasks')normalizeQueueOrdering();
+    if(listKey==='taskStore')normalizeTaskStoreOrdering();
+    save();render()
+  }
+  document.querySelectorAll('.draggable-item').forEach(row=>{
+    row.addEventListener('dragover',e=>{
+      if(!dragState.list)return;
+      const list=row.getAttribute('data-list');
+      if(list!==dragState.list)return;
+      e.preventDefault();
+      clearDragClasses();
+      row.classList.add('over');
+      dragState.overId=Number(row.getAttribute('data-id'));
+      const source=document.querySelector('.draggable-item[data-list="'+dragState.list+'"][data-id="'+dragState.id+'"]');
+      if(source)source.classList.add('drag-source')
+    });
+    row.addEventListener('drop',e=>{
+      e.preventDefault();
+      const list=row.getAttribute('data-list');
+      const targetId=Number(row.getAttribute('data-id'));
+      if(list===dragState.list){
+        const map={queue:'tasks',store:'taskStore'};
+        reorderList(map[list],dragState.id,targetId)
+      }
+      dragState.list=null;dragState.id=null;dragState.overId=null;
+      clearDragClasses()
+    });
+    row.addEventListener('dragend',()=>{
+      dragState.list=null;dragState.id=null;dragState.overId=null;
+      clearDragClasses()
+    })
+  });
+  document.querySelectorAll('[data-drag-handle]').forEach(handle=>{
+    handle.addEventListener('dragstart',e=>{
+      dragState.list=handle.getAttribute('data-list');
+      dragState.id=Number(handle.getAttribute('data-id'));
+      dragState.overId=null;
+      if(e.dataTransfer){
+        e.dataTransfer.effectAllowed='move';
+        e.dataTransfer.setData('text/plain',String(dragState.id))
+      }
+      const source=document.querySelector('.draggable-item[data-list="'+dragState.list+'"][data-id="'+dragState.id+'"]');
+      if(source)source.classList.add('drag-source')
+    });
+    handle.addEventListener('touchstart',e=>{
+      dragState.list=handle.getAttribute('data-list');
+      dragState.id=Number(handle.getAttribute('data-id'));
+      dragState.overId=null;
+      clearDragClasses();
+      const source=document.querySelector('.draggable-item[data-list="'+dragState.list+'"][data-id="'+dragState.id+'"]');
+      if(source)source.classList.add('drag-source')
+    },{passive:false});
+    handle.addEventListener('touchmove',e=>{
+      if(!dragState.list)return;
+      e.preventDefault();
+      const touch=e.touches[0];
+      if(!touch)return;
+      const el=document.elementFromPoint(touch.clientX,touch.clientY);
+      const row=el&&el.closest('.draggable-item');
+      clearDragClasses();
+      const source=document.querySelector('.draggable-item[data-list="'+dragState.list+'"][data-id="'+dragState.id+'"]');
+      if(source)source.classList.add('drag-source');
+      if(row&&row.getAttribute('data-list')===dragState.list){
+        row.classList.add('over');
+        dragState.overId=Number(row.getAttribute('data-id'))
+      }
+    },{passive:false});
+    handle.addEventListener('touchend',()=>{
+      if(dragState.list&&dragState.overId&&dragState.overId!==dragState.id){
+        const map={queue:'tasks',store:'taskStore'};
+        reorderList(map[dragState.list],dragState.id,dragState.overId)
+      }
+      dragState.list=null;dragState.id=null;dragState.overId=null;
+      clearDragClasses()
+    });
+    handle.addEventListener('touchcancel',()=>{
+      dragState.list=null;dragState.id=null;dragState.overId=null;
+      clearDragClasses()
+    })
+  })
 }
 function refreshLive(){
   const a=activeTask(),current=document.getElementById('currentTaskText'),clockInline=document.getElementById('timeLeftInline'),doneBar=document.getElementById('doneBar'),leftBar=document.getElementById('leftBar'),percent=document.getElementById('successPercent'),topCard=document.getElementById('topCard'),activeDuration=document.getElementById('activeDurationText'),activeTotal=document.getElementById('activeTotalHrsText'),deadlineStatus=document.getElementById('deadlineStatusText'),taskBar=document.getElementById('taskBarTap'),focus=document.getElementById('focusDotsWrap');
@@ -752,7 +817,6 @@ function refreshLive(){
     if(taskBar)taskBar.className='bar-wrap'
   }
 }
-function bindDragAndDrop(){}
 function render(){
   normalizeTaskStoreOrdering();
   const app=document.getElementById('app'),a=activeTask(),s=stats(),urgency=urgencyClass();
@@ -862,7 +926,8 @@ ${instructionsHtml()}${disclaimerHtml()}`;
   document.querySelectorAll('[data-edit-store]').forEach(el=>el.addEventListener('click',()=>startEditStoreTask(Number(el.getAttribute('data-edit-store')))));
   document.querySelectorAll('[data-save-store-edit]').forEach(btn=>btn.addEventListener('click',()=>saveEditStoreTask(Number(btn.getAttribute('data-save-store-edit')))));
   document.querySelectorAll('[data-cancel-store-edit]').forEach(btn=>btn.addEventListener('click',cancelEditStoreTask));
-  document.querySelectorAll('[data-store-delete]').forEach(btn=>btn.addEventListener('click',()=>deleteStoreTask(Number(btn.getAttribute('data-store-delete')))))
+  document.querySelectorAll('[data-store-delete]').forEach(btn=>btn.addEventListener('click',()=>deleteStoreTask(Number(btn.getAttribute('data-store-delete')))));
+  bindDragAndDrop();
 }
 
 load();
