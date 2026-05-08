@@ -402,16 +402,53 @@ function ensureStarHourPenalties(){
   });
   return changed
 }
-function accountStarredWorkAndPenalties(){
-  const now=Date.now();
-  if(!state.lastStarTickAt){state.lastStarTickAt=now;save();return}
-  let changed=false;const a=activeTask();
-  if(a&&(isStarredTaskName(a.taskName)||isCompulsoryActiveTask(a))&&!a.isPaused){
-    changed=addStarWorkSlice(state.lastStarTickAt,now)||changed
+function taskWorkedMsAt(task, timeMs){
+  if(!task) return 0;
+
+  const base = Math.max(0, Number(task.workedBeforePauseMs) || 0);
+
+  if(task.isPaused || !task.runningSinceMs){
+    return base;
   }
-  state.lastStarTickAt=now;
-  changed=ensureStarHourPenalties()||changed;
-  if(changed)save()
+
+  return base + Math.max(0, Number(timeMs) - Number(task.runningSinceMs));
+}
+function accountStarredWorkAndPenalties(){
+  const now = Date.now();
+
+  if(!state.lastStarTickAt){
+    state.lastStarTickAt = now;
+    save();
+    return;
+  }
+
+  let changed = false;
+  const a = activeTask();
+
+  if(a && (isStarredTaskName(a.taskName) || isCompulsoryActiveTask(a)) && !a.isPaused){
+
+    const tickStart = state.lastStarTickAt;
+    const tickEnd = now;
+
+    const workedAtTickStart = taskWorkedMsAt(a, tickStart);
+    const planned = taskPlannedMs(a);
+
+    const remainingAtTickStart = Math.max(0, planned - workedAtTickStart);
+
+    if(remainingAtTickStart > 0){
+      const allowedDuration = Math.min(tickEnd - tickStart, remainingAtTickStart);
+      const allowedEnd = tickStart + allowedDuration;
+
+      if(allowedEnd > tickStart){
+        changed = addStarWorkSlice(tickStart, allowedEnd) || changed;
+      }
+    }
+  }
+
+  state.lastStarTickAt = now;
+  changed = ensureStarHourPenalties() || changed;
+
+  if(changed) save();
 }
 function currentHourStarSatisfied(){const key=hourKey(new Date());return(state.starHourWorkMs[key]||0)>=STAR_MINUTES_PER_HOUR_MS}
 function currentTaskTextClass(a){if(!a||!isStarredTaskName(a.taskName))return'';return currentHourStarSatisfied()?'star-current-green':'star-current-gold'}
