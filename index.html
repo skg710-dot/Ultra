@@ -248,7 +248,7 @@ const state={
   editStoreTaskDurationText:'30 min',
   starHourWorkMs:{},
   starHourPenaltyApplied:{},
-  lastWorkSliceAt:null,
+  lastStarTickAt:null,
   soundEnabled:true,
   vibrationEnabled:true
 };
@@ -282,31 +282,22 @@ function activeTask(){return state.activeTaskId?state.tasks.find(x=>x.id===state
 function getStoreItem(id){return state.taskStore.find(x=>x.id===id)||null}
 function cleanTaskName(name){let s=String(name||'').trim().toLowerCase();while(s.includes('  '))s=s.replaceAll('  ',' ');return s}
 
-/* CLEAN TIME LOGIC: active time is never derived from leftover/deadline/10-min bar */
-function currentActiveWorkedMs(task){
+/* FINAL CLEAN TIME MODEL */
+function taskWorkedMs(task){
   if(!task)return 0;
-  let total=Number(task.accumulatedMs)||0;
-  if(!task.isPaused && task.sessionStartMs){
-    total+=Math.max(0,Date.now()-Number(task.sessionStartMs));
-  }
-  return Math.max(0,total);
+  const base=Math.max(0,Number(task.workedBeforePauseMs)||0);
+  if(task.isPaused||!task.runningSinceMs)return base;
+  return base+Math.max(0,Date.now()-Number(task.runningSinceMs));
 }
-function currentPlannedMs(task){
+function taskPlannedMs(task){
   return Math.max(1,Number(task&&task.durationMinutes)||DEFAULT_DURATION)*60000;
 }
-function progressPercent(task){
-  if(!task)return 0;
-  return Math.max(0,Math.min(100,Math.round((currentActiveWorkedMs(task)/currentPlannedMs(task))*100)))
+function taskRemainingMs(task){
+  return Math.max(0,taskPlannedMs(task)-taskWorkedMs(task));
 }
-function updateActiveAccumulation(){
-  const a=activeTask();
-  if(!a||a.isPaused||!a.sessionStartMs)return false;
-  const now=Date.now();
-  const delta=Math.max(0,now-Number(a.sessionStartMs));
-  if(delta<=0)return false;
-  a.accumulatedMs=(Number(a.accumulatedMs)||0)+delta;
-  a.sessionStartMs=now;
-  return true;
+function taskProgressPercent(task){
+  if(!task)return 0;
+  return Math.max(0,Math.min(100,Math.round((taskWorkedMs(task)/taskPlannedMs(task))*100)))
 }
 
 function storedWorkedMs(item){return Math.max(0,Number(item&&item.totalWorkedMs)||0)}
@@ -327,12 +318,15 @@ function taskCumulativeWorkedMs(task){
   if(!task)return 0;
   const item=(task.sourceType==='store'&&task.sourceId)?getStoreItem(task.sourceId):null;
   const base=item?storeItemCumulativeWorkedMs(item):0;
-  return base+currentActiveWorkedMs(task)
+  return base+taskWorkedMs(task)
 }
 
 function taskCreatedMs(item){const t=new Date(item&&item.createdAt).getTime();return Number.isFinite(t)?t:Date.now()}
 function isOldEnoughForCompulsory(item){return Date.now()-taskCreatedMs(item)>=COMPULSORY_AFTER_DAYS*24*60*60*1000}
-function activeWorkMsForStoreItem(item){const a=activeTask();return(a&&item&&a.sourceType==='store'&&a.sourceId===item.id)?currentActiveWorkedMs(a):0}
+function activeWorkMsForStoreItem(item){
+  const a=activeTask();
+  return(a&&item&&a.sourceType==='store'&&a.sourceId===item.id)?taskWorkedMs(a):0
+}
 function effectiveStoreWorkedMs(item){return storeItemCumulativeWorkedMs(item)+activeWorkMsForStoreItem(item)}
 function isAttendedEnough(item){return effectiveStoreWorkedMs(item)>=COMPULSORY_START_MS}
 function isCompulsoryStoreItem(item){return !!(item&&!isAttendedEnough(item)&&isOldEnoughForCompulsory(item))}
@@ -341,7 +335,7 @@ function compulsoryProgressMsForTask(task){
   if(!task||task.sourceType!=='store'||!task.sourceId)return 0;
   const item=getStoreItem(task.sourceId);
   const base=item?storeItemCumulativeWorkedMs(item):0;
-  return Math.min(COMPULSORY_START_MS,base+currentActiveWorkedMs(task))
+  return Math.min(COMPULSORY_START_MS,base+taskWorkedMs(task))
 }
 function isCompulsoryActiveTask(task){
   const old=oldestCompulsoryStoreItem();
@@ -411,12 +405,12 @@ function ensureStarHourPenalties(){
 }
 function accountStarredWorkAndPenalties(){
   const now=Date.now();
-  if(!state.lastWorkSliceAt){state.lastWorkSliceAt=now;save();return}
+  if(!state.lastStarTickAt){state.lastStarTickAt=now;save();return}
   let changed=false;const a=activeTask();
   if(a&&(isStarredTaskName(a.taskName)||isCompulsoryActiveTask(a))&&!a.isPaused){
-    changed=addStarWorkSlice(state.lastWorkSliceAt,now)||changed
+    changed=addStarWorkSlice(state.lastStarTickAt,now)||changed
   }
-  state.lastWorkSliceAt=now;
+  state.lastStarTickAt=now;
   changed=ensureStarHourPenalties()||changed;
   if(changed)save()
 }
@@ -454,11 +448,11 @@ function sendMacroDroidState(taskName,reminderEpoch,taskState,successMessage='',
 function clearMacroDroidState(){return sendMacroDroidState('',0,'none','',true)}
 function autoSendMacroDroidForActiveTask(){
   const a=activeTask();
-  if(!a||!a.deadline||a.isPaused)return clearMacroDroidState();
-  const reminderEpoch=Math.max(0,new Date(a.deadline).getTime()-1*60*1000);
-  const remainingMs=Math.max(0,new Date(a.deadline).getTime()-Date.now());
-  if(remainingMs<=1*60*1000)return clearMacroDroidState();
-  if(a.macroReminderEpochSent===reminderEpoch&&a.macroStateSentForTaskId===a.id)return;
+  if(!a||a.isPaused)return clearMacroDroidState();
+  const remaining=taskRemainingMs(a);
+  if(remaining<=1*60*1000)return clearMacroDroidState();
+  const reminderEpoch=Date.now()+remaining-1*60*1000;
+  if(a.macroReminderEpochSent&&Math.abs(a.macroReminderEpochSent-reminderEpoch)<2000)return;
   sendMacroDroidState(a.taskName,reminderEpoch,'active','',true).then(ok=>{
     if(ok){a.macroStateSentForTaskId=a.id;a.macroReminderEpochSent=reminderEpoch;save()}
   })
@@ -481,20 +475,22 @@ function load(){
   if(typeof state.editStoreTaskDurationText!=='string')state.editStoreTaskDurationText='30 min';
   if(typeof state.starHourWorkMs!=='object'||!state.starHourWorkMs)state.starHourWorkMs={};
   if(typeof state.starHourPenaltyApplied!=='object'||!state.starHourPenaltyApplied)state.starHourPenaltyApplied={};
-  if(typeof state.lastWorkSliceAt!=='number')state.lastWorkSliceAt=Date.now();
+  if(typeof state.lastStarTickAt!=='number')state.lastStarTickAt=Date.now();
   const storeNormalized=normalizeDurationInput(state.storeDurationText||'30 min');
   state.storeDurationText=storeNormalized?storeNormalized.text:'30 min';
   migrateTasks();migrateTaskStore();normalizeQueueOrdering();normalizeTaskStoreOrdering();syncActive()
 }
 function activateTask(task){
   if(!task)return;
-  if(task.activatedAt&&task.deadline)return;
+  if(task.activatedAt&&(task.runningSinceMs||task.isPaused))return;
   const now=Date.now(),durationMinutes=Math.max(1,sanitizeNumber(task.durationMinutes,DEFAULT_DURATION));
   task.durationMinutes=durationMinutes;task.durationText=formatDuration(durationMinutes);
   task.activatedAt=new Date(now).toISOString();
-  task.deadline=new Date(now+durationMinutes*60000).toISOString();
-  task.isPaused=false;task.accumulatedMs=0;task.sessionStartMs=now;
-  task.macroStateSentForTaskId=null;task.macroReminderEpochSent=null
+  task.workedBeforePauseMs=0;
+  task.runningSinceMs=now;
+  task.isPaused=false;
+  task.macroStateSentForTaskId=null;
+  task.macroReminderEpochSent=null
 }
 function migrateTasks(){
   state.tasks=state.tasks.map((task,index)=>{
@@ -505,9 +501,13 @@ function migrateTasks(){
     task.durationText=formatDuration(task.durationMinutes);
     if(!task.createdAt)task.createdAt=new Date().toISOString();
     if(typeof task.isPaused!=='boolean')task.isPaused=false;
-    if(typeof task.accumulatedMs!=='number')task.accumulatedMs=Number(task.sessionWorkedMs)||0;
-    if(typeof task.sessionStartMs!=='number'&&!task.isPaused&&task.activatedAt)task.sessionStartMs=Date.now();
-    if(index!==0&&!task.activatedAt){delete task.deadline;delete task.activatedAt}
+    if(typeof task.workedBeforePauseMs!=='number'){
+      task.workedBeforePauseMs=Number(task.accumulatedMs)||Number(task.sessionWorkedMs)||0
+    }
+    if(!task.isPaused&&typeof task.runningSinceMs!=='number'&&task.activatedAt){
+      task.runningSinceMs=Date.now()
+    }
+    if(index!==0&&!task.activatedAt){delete task.runningSinceMs;delete task.activatedAt}
     return task
   })
 }
@@ -528,27 +528,23 @@ function syncActive(){
   if(!exists)state.activeTaskId=state.tasks[0].id;
   activateTask(activeTask());save()
 }
-function secondsLeft(d){return Math.max(0,Math.floor((new Date(d)-new Date())/1000))}
-function currentProgressPercent(a){return progressPercent(a)}
-function currentRemainingText(a){
-  if(!a)return'Time left 0 min';
-  if(a.isPaused)return'Paused • Tap to Resume';
-  return formatTimeLeftDisplay(secondsLeft(a.deadline))+' • Tap to Pause'
-}
 function pauseActiveTask(){
   const a=activeTask();if(!a||a.isPaused)return;
-  updateActiveAccumulation();
-  a.isPaused=true;a.sessionStartMs=null;
-  a.macroStateSentForTaskId=null;a.macroReminderEpochSent=null;
+  a.workedBeforePauseMs=taskWorkedMs(a);
+  a.runningSinceMs=null;
+  a.isPaused=true;
+  a.macroStateSentForTaskId=null;
+  a.macroReminderEpochSent=null;
   save();render();clearMacroDroidState()
 }
 function resumeActiveTask(){
   const a=activeTask();if(!a||!a.isPaused)return;
-  const remainingMs=Math.max(0,new Date(a.deadline).getTime()-Date.now());
-  a.deadline=new Date(Date.now()+remainingMs).toISOString();
-  a.isPaused=false;a.sessionStartMs=Date.now();
-  a.macroStateSentForTaskId=null;a.macroReminderEpochSent=null;
-  state.lastWorkSliceAt=Date.now();
+  const now=Date.now();
+  a.runningSinceMs=now;
+  a.isPaused=false;
+  a.macroStateSentForTaskId=null;
+  a.macroReminderEpochSent=null;
+  state.lastStarTickAt=now;
   save();render();autoSendMacroDroidForActiveTask()
 }
 function togglePauseResume(){const a=activeTask();if(!a)return;if(a.isPaused)resumeActiveTask();else pauseActiveTask()}
@@ -564,7 +560,7 @@ function buildTask(taskName,durationMinutes,sourceType='',sourceId=null,createdA
     id:Date.now()+Math.floor(Math.random()*1000),taskName:taskName.trim(),
     reward:sanitizeNumber(state.reward,DEFAULT_REWARD),penalty:sanitizeNumber(state.penalty,DEFAULT_PENALTY),
     durationMinutes,durationText:formatDuration(durationMinutes),createdAt:createdAt||new Date().toISOString(),
-    sourceType,sourceId,accumulatedMs:0,sessionStartMs:null,isPaused:false,
+    sourceType,sourceId,workedBeforePauseMs:0,runningSinceMs:null,isPaused:false,
     macroStateSentForTaskId:null,macroReminderEpochSent:null
   }
 }
@@ -641,8 +637,7 @@ function markSourceTaskCompleted(task){
 }
 function finishTask(result){
   const a=activeTask();if(!a)return;
-  updateActiveAccumulation();
-  const workedMs=currentActiveWorkedMs(a);
+  const workedMs=taskWorkedMs(a);
   addWorkedTimeToStore(a,workedMs);
   if(result==='success'){state.wallet+=sanitizeNumber(a.reward,DEFAULT_REWARD);markSourceTaskCompleted(a);alarm('normal')}
   else{state.wallet=Math.max(0,state.wallet-sanitizeNumber(a.penalty,DEFAULT_PENALTY));alarm('danger')}
@@ -655,7 +650,7 @@ function addTopup(){state.wallet+=TOPUP;save();render()}
 function resetScore(){
   if(!confirm('Reset reward, penalty and success record? Cumulative task hours will remain.'))return;
   state.history=[];state.starHourWorkMs={};state.starHourPenaltyApplied={};
-  state.lastWorkSliceAt=Date.now();save();render()
+  state.lastStarTickAt=Date.now();save();render()
 }
 function toggleInstructions(){state.showInstructions=!state.showInstructions;save();render()}
 function toggleDisclaimer(){state.showDisclaimer=!state.showDisclaimer;save();render()}
@@ -682,25 +677,25 @@ function stats(){
 }
 function successPercent(){const s=stats();return s.total===0?100:Math.round((s.successCount/s.total)*100)}
 function urgencyClass(){
-  const a=activeTask();if(!a||!a.deadline)return'safe';
+  const a=activeTask();if(!a)return'safe';
   if(a.isPaused)return'paused';
-  const mins=Math.max(0,Math.floor((new Date(a.deadline)-new Date())/60000));
+  const mins=Math.floor(taskRemainingMs(a)/60000);
   if(mins<=5)return'danger';if(mins<=10)return'warning';return'safe'
 }
 function currentRemainingText(a){
   if(!a)return'Time left 0 min';
   if(a.isPaused)return'Paused • Tap to Resume';
-  return formatTimeLeftDisplay(Math.max(0,(new Date(a.deadline)-new Date())/1000))+' • Tap to Pause'
+  return formatTimeLeftDisplay(taskRemainingMs(a)/1000)+' • Tap to Pause'
 }
 function refreshLive(){
   const a=activeTask(),current=document.getElementById('currentTaskText'),clockInline=document.getElementById('timeLeftInline'),doneBar=document.getElementById('doneBar'),leftBar=document.getElementById('leftBar'),percent=document.getElementById('successPercent'),topCard=document.getElementById('topCard'),activeDuration=document.getElementById('activeDurationText'),activeTotal=document.getElementById('activeTotalHrsText'),deadlineStatus=document.getElementById('deadlineStatusText'),taskBar=document.getElementById('taskBarTap'),focus=document.getElementById('focusDotsWrap');
   if(percent)percent.textContent=successPercent()+'% Success';
   if(focus)focus.innerHTML=focusDotsHtml().html;
   if(a){
-    const overdue=!a.isPaused&&a.deadline&&(new Date(a.deadline)-new Date())<=0;
+    const overdue=taskRemainingMs(a)<=0;
     if(topCard)topCard.className='card top-card '+(a.isPaused?'paused':(overdue?'danger':urgencyClass()));
     if(current)current.innerHTML=currentTaskHtml(a);
-    if(clockInline)clockInline.textContent=a.isPaused?'Paused • Tap to Resume':(overdue?'Overdue • Tap to Pause':currentRemainingText(a));
+    if(clockInline)clockInline.textContent=a.isPaused?'Paused • Tap to Resume':(overdue?'Completed duration • Tap to Pause':currentRemainingText(a));
     if(activeDuration)activeDuration.textContent=formatDuration(a.durationMinutes||0);
     if(activeTotal)activeTotal.textContent=formatMs(taskCumulativeWorkedMs(a));
     const mustStartBox=document.getElementById('mustStartBox');
@@ -712,8 +707,8 @@ function refreshLive(){
       if(mustStartFill)mustStartFill.style.width=pct+'%';
       if(done>=COMPULSORY_START_MS||!isCompulsoryActiveTask(a)){mustStartBox.remove();normalizeTaskStoreOrdering();save()}
     }
-    if(deadlineStatus)deadlineStatus.textContent=a.isPaused?'Paused':(overdue?'Deadline crossed':'Ends: '+new Date(a.deadline).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}));
-    const pct=progressPercent(a);
+    if(deadlineStatus)deadlineStatus.textContent=a.isPaused?'Paused':(overdue?'Duration completed':'Remaining: '+formatMs(taskRemainingMs(a)));
+    const pct=taskProgressPercent(a);
     if(doneBar)doneBar.style.width=pct+'%';
     if(leftBar)leftBar.style.width=(100-pct)+'%';
     if(taskBar)taskBar.className='bar-wrap tappable'+(a.isPaused?' paused':'')
@@ -733,11 +728,11 @@ function bindDragAndDrop(){}
 function render(){
   normalizeTaskStoreOrdering();
   const app=document.getElementById('app'),a=activeTask(),s=stats(),urgency=urgencyClass();
-  const overdue=!!(a&&!a.isPaused&&a.deadline&&(new Date(a.deadline)-new Date())<=0);
-  const endText=a?(a.isPaused?'Paused':(overdue?'Deadline crossed':'Ends: '+new Date(a.deadline).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}))):'';
+  const overdue=!!(a&&taskRemainingMs(a)<=0);
+  const endText=a?(a.isPaused?'Paused':(overdue?'Duration completed':'Remaining: '+formatMs(taskRemainingMs(a)))):'';
   const successButtonText='✔️ Success (Get '+rupee(Number(state.reward||DEFAULT_REWARD))+')';
   const failButtonText='❌ Failed (Pay '+rupee(Number(state.penalty||DEFAULT_PENALTY))+')';
-  const timeLeftText=a?(a.isPaused?'Paused • Tap to Resume':(overdue?'Overdue • Tap to Pause':currentRemainingText(a))):'Time left 0 min';
+  const timeLeftText=a?(a.isPaused?'Paused • Tap to Resume':(overdue?'Completed duration • Tap to Pause':currentRemainingText(a))):'Time left 0 min';
   const focus=focusDotsHtml();
 
   const queueHtml=state.tasks.length?state.tasks.map((item,idx)=>{
@@ -767,8 +762,8 @@ function render(){
     </div>
   </div>
   <div class="bar-wrap ${a?'tappable':''} ${a&&a.isPaused?'paused':''}" id="taskBarTap">
-    <div class="bar-done" id="doneBar" style="width:${a?progressPercent(a):0}%"></div>
-    <div class="bar-left" id="leftBar" style="width:${a?100-progressPercent(a):100}%"></div>
+    <div class="bar-done" id="doneBar" style="width:${a?taskProgressPercent(a):0}%"></div>
+    <div class="bar-left" id="leftBar" style="width:${a?100-taskProgressPercent(a):100}%"></div>
     <div class="bar-label" id="timeLeftInline">${timeLeftText}</div>
   </div>
   <div class="task-meta">
@@ -854,10 +849,9 @@ window.addEventListener('load',()=>{
   },1000)
 });
 setInterval(()=>{
-  updateActiveAccumulation();
   accountStarredWorkAndPenalties();
   refreshLive();
-  save()
+  save();
 },1000);
 </script>
 </body>
