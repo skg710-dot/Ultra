@@ -8,6 +8,7 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon-192.png" sizes="192x192">
 <link rel="apple-touch-icon" href="icon-192.png">
+
 <style>
 :root{
   --text:#f5f1e8;--muted:#c7bfae;--success:#22c55e;--danger:#ef4444;
@@ -75,6 +76,7 @@ body{
 .oldest-required{text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:3px}
 .required-check{display:inline-flex;color:#ef4444;font-weight:900;margin-left:4px;font-size:15px;text-decoration:none!important}
 .star-rule{font-size:11px;font-weight:800;color:var(--gold-soft);margin-top:4px;text-align:right;white-space:nowrap}
+
 @keyframes cycleTraffic{
   0%,24%{background:#ef4444;box-shadow:0 0 0 4px rgba(239,68,68,.12)}
   25%,49%{background:#f4b400;box-shadow:0 0 0 4px rgba(244,180,0,.12)}
@@ -84,6 +86,7 @@ body{
 @keyframes pulse-danger{0%,100%{box-shadow:var(--shadow)}50%{box-shadow:0 0 0 7px rgba(239,68,68,.12),var(--shadow)}}
 @keyframes pulse-warning{0%,100%{box-shadow:var(--shadow)}50%{box-shadow:0 0 0 7px rgba(244,180,0,.10),var(--shadow)}}
 @keyframes dotBlink{0%,100%{transform:scale(1);outline-color:rgba(255,255,255,.75)}50%{transform:scale(1.35);outline-color:rgba(244,180,0,.9)}}
+
 label{display:block;font-size:12px;font-weight:800;margin-bottom:6px;color:var(--muted)}
 input{
   width:100%;padding:12px;border-radius:14px;border:1px solid rgba(244,180,0,.18);
@@ -94,6 +97,7 @@ input::placeholder{color:#c9b78c}
 input:focus{border-color:rgba(244,180,0,.38);box-shadow:0 0 0 4px rgba(244,180,0,.08)}
 #storeTaskInput{background:var(--soft-green);border:1px solid var(--soft-green-border)}
 .duration-input{background:var(--soft-blue);border:1px solid var(--soft-blue-border)}
+
 button{
   width:100%;padding:11px 12px;border-radius:14px;font-size:14px;font-weight:800;
   cursor:pointer;border:none;transition:transform .12s ease,filter .15s ease
@@ -109,6 +113,16 @@ button:active{transform:scale(.98)}
 .btn-delete{background:linear-gradient(135deg,#dc2626,#ef4444);color:#fff;border:2px solid rgba(255,255,255,.10);box-shadow:0 10px 22px rgba(239,68,68,.22)}
 .mini{width:auto;padding:6px 8px;border-radius:10px;font-size:11px;white-space:nowrap;flex:0 0 auto}
 .tiny-btn{width:auto;padding:6px 8px;border-radius:10px;font-size:11px;font-weight:800}
+.distraction-btn{
+  width:100%;
+  padding:4px 4px;
+  border-radius:8px;
+  font-size:9px;
+  line-height:1;
+  min-height:18px;
+  margin-top:3px;
+  box-shadow:none;
+}
 .mini-copy{background:linear-gradient(135deg,var(--queue-blue-1),var(--queue-blue-2));color:#fff;border:2px solid rgba(255,255,255,.10)}
 .drag-handle{
   width:auto;padding:6px 10px;border-radius:10px;font-size:15px;line-height:1;font-weight:800;
@@ -117,6 +131,7 @@ button:active{transform:scale(.98)}
 }
 .action-buttons{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:7px}
 .action-buttons button{padding:8px 7px;min-height:36px;border-radius:12px;font-size:12px;line-height:1.05}
+
 .bar-wrap{
   position:relative;width:100%;height:30px;border-radius:999px;overflow:hidden;
   background:rgba(255,255,255,.08);margin-top:8px;display:flex;
@@ -132,17 +147,20 @@ button:active{transform:scale(.98)}
   font-size:14px;font-weight:800;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.50);pointer-events:none
 }
 .task-meta{margin-top:5px;display:flex;justify-content:center;gap:8px;flex-wrap:wrap;font-size:12px;font-weight:800;color:#c9b78c}
+
 .performance-wrap{margin-top:10px}
 .performance-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
 .perf-box{
-  border-radius:18px;padding:10px 8px;min-height:74px;display:flex;flex-direction:column;justify-content:space-between;
+  border-radius:18px;padding:8px 8px;min-height:74px;display:flex;flex-direction:column;justify-content:space-between;
   border:1px solid rgba(255,255,255,.08);box-shadow:var(--shadow-soft)
 }
 .perf-box h4{margin:0;font-size:11px;line-height:1.15;font-weight:800;color:#d7c6a0}
-.perf-box .val{font-size:18px;font-weight:800;line-height:1.1;word-break:break-word}
+.perf-box .val{font-size:18px;font-weight:800;line-height:1.05;word-break:break-word}
+.perf-penalty .val{font-size:16px}
 .perf-reward{background:linear-gradient(135deg,rgba(34,197,94,.18),rgba(34,197,94,.08))}
 .perf-penalty{background:linear-gradient(135deg,rgba(239,68,68,.18),rgba(239,68,68,.08))}
 .perf-wallet{background:linear-gradient(135deg,rgba(244,180,0,.18),rgba(244,180,0,.08))}
+
 .focus-strip{margin-top:10px;padding:9px 10px;border-radius:18px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);box-shadow:var(--shadow-soft)}
 .focus-head{display:flex;justify-content:space-between;align-items:center;font-size:12px;font-weight:900;color:var(--gold-soft);margin-bottom:8px}
 .focus-dots{display:grid;grid-template-columns:repeat(14,1fr);gap:5px}
@@ -155,6 +173,7 @@ button:active{transform:scale(.98)}
 .focus-dot.red{background:#ef4444;border-color:#fecaca;color:#fff}
 .focus-dot.current{outline:2px solid rgba(255,255,255,.75);outline-offset:2px;animation:dotBlink 1s infinite}
 .focus-times{display:grid;grid-template-columns:repeat(14,1fr);gap:5px;margin-top:5px;font-size:7px;color:#bdb29c;text-align:center}
+
 .paired-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px;margin-top:10px}
 .paired-box{border:1px solid rgba(255,255,255,.08);border-radius:18px;padding:10px;background:rgba(255,255,255,.06);box-shadow:var(--shadow-soft);min-width:0}
 .list-title{font-size:17px;font-weight:800;margin:0 0 8px 0;color:#fff5d7}
@@ -183,6 +202,7 @@ button:active{transform:scale(.98)}
 .instructions-body{line-height:1.55;color:#f5e8c8;font-size:12px}
 .instructions-body p{margin:0 0 10px}
 .instructions-body b{color:#ffd76a}
+
 .splash{
   position:fixed;inset:0;z-index:9999;background:radial-gradient(circle at top,rgba(244,180,0,.14),transparent 28%),linear-gradient(180deg,#080808,#111);
   color:white;display:flex;align-items:center;justify-content:center;flex-direction:column;text-align:center;padding:24px
@@ -202,9 +222,11 @@ button:active{transform:scale(.98)}
   .app{padding:10px}.title{font-size:23px}.sub{font-size:16px}.bar-wrap{height:28px}.bar-label{font-size:13px}
   .perf-box .val{font-size:16px}.mini,.drag-handle{font-size:10px;padding:5px 7px}
   .queue-row,.store-row{gap:6px}.focus-dot{width:12px;height:12px;font-size:6px}.focus-times{font-size:7px}
+  .distraction-btn{font-size:8px;padding:4px 3px}
 }
 </style>
 </head>
+
 <body>
 <div class="splash" id="splashScreen">
   <div class="splash-logo">
@@ -229,6 +251,7 @@ if('serviceWorker' in navigator){
 
 const STORAGE_KEY='kartavya-main-data';
 const TOPUP=5000,DEFAULT_WALLET=5000,DEFAULT_REWARD=50,DEFAULT_PENALTY=200,DEFAULT_DURATION=30;
+const DISTRACTION_PENALTY=10;
 const STAR_HOUR_PENALTY=30,STAR_MINUTES_PER_HOUR_MS=30*60*1000,STAR_START_HOUR=8,STAR_END_HOUR=22;
 const COMPULSORY_START_MS=10*60*1000,COMPULSORY_AFTER_DAYS=3;
 const MACRODROID_WEBHOOK_URL='https://trigger.macrodroid.com/9d8de64f-05db-49f9-9470-18e7f06404e1/kartavya_timer';
@@ -310,7 +333,7 @@ function storedWorkedMs(item){return Math.max(0,Number(item&&item.totalWorkedMs)
 function historyWorkedMsForStoreItem(item){
   if(!item)return 0;
   return state.history.reduce((sum,h)=>{
-    if(!h||h.isStarHourPenalty)return sum;
+    if(!h||h.isStarHourPenalty||h.isDistractionPenalty)return sum;
     const sameSource=h.sourceType==='store'&&h.sourceId===item.id;
     const sameName=cleanTaskName(h.taskName)===cleanTaskName(item.taskName);
     if(!sameSource&&!sameName)return sum;
@@ -459,6 +482,16 @@ function autoSendMacroDroidForActiveTask(){
   sendMacroDroidState(a.taskName,reminderEpoch,'active','',true).then(ok=>{
     if(ok){a.macroStateSentForTaskId=a.id;a.macroReminderEpochSent=reminderEpoch;save()}
   })
+}
+function markPastStarHoursAsHandled(){
+  const now=new Date();
+  for(let h=STAR_START_HOUR;h<STAR_END_HOUR;h++){
+    const slotEnd=new Date(now.getFullYear(),now.getMonth(),now.getDate(),h+1,0,0,0);
+    const key=todayKey(new Date(now.getFullYear(),now.getMonth(),now.getDate(),h,0,0,0))+'-'+String(h).padStart(2,'0');
+    if(Date.now()>=slotEnd.getTime()){
+      state.starHourPenaltyApplied[key]=true
+    }
+  }
 }
 function load(){
   const raw=localStorage.getItem(STORAGE_KEY);
@@ -649,53 +682,30 @@ function finishTask(result){
   if(activeTask())autoSendMacroDroidForActiveTask();else clearMacroDroidState()
 }
 function addTopup(){state.wallet+=TOPUP;save();render()}
-function markPastStarHoursAsHandled(){
-  const now = new Date();
-
-  for(let h = STAR_START_HOUR; h < STAR_END_HOUR; h++){
-    const slotEnd = new Date(
-      now.getFullYear(),
-      now.getMonth(),
-      now.getDate(),
-      h + 1,
-      0,
-      0,
-      0
-    );
-
-    const key = todayKey(
-      new Date(now.getFullYear(), now.getMonth(), now.getDate(), h, 0, 0, 0)
-    ) + '-' + String(h).padStart(2,'0');
-
-    if(Date.now() >= slotEnd.getTime()){
-      state.starHourPenaltyApplied[key] = true;
-    }
-  }
+function addDistractionPenalty(){
+  state.wallet=Math.max(0,state.wallet-DISTRACTION_PENALTY);
+  state.history.unshift({
+    id:Date.now()+Math.floor(Math.random()*1000),
+    taskName:'Distraction',
+    reward:0,
+    penalty:DISTRACTION_PENALTY,
+    result:'fail',
+    completedAt:new Date().toISOString(),
+    isDistractionPenalty:true
+  });
+  alarm('danger');
+  save();
+  render()
 }
 function resetScore(){
-  if(!confirm('Reset reward, penalty and success record? Work minutes will remain.')) return;
-
-  // Reset only reward/penalty/success record.
-  // Do NOT clear starHourWorkMs, because it contains today's worked minutes.
-  // Do NOT clear starHourPenaltyApplied, otherwise old hourly penalties will be applied again.
-  state.history = [];
-
-  // Keep today's Main Task minutes and hourly dots intact.
-  if(typeof state.starHourWorkMs !== 'object' || !state.starHourWorkMs){
-    state.starHourWorkMs = {};
-  }
-
-  if(typeof state.starHourPenaltyApplied !== 'object' || !state.starHourPenaltyApplied){
-    state.starHourPenaltyApplied = {};
-  }
-
-  // Mark already-passed hours today as handled, so reset does not create instant back-penalty.
+  if(!confirm('Reset reward, penalty and success record? Work minutes will remain.'))return;
+  state.history=[];
+  if(typeof state.starHourWorkMs!=='object'||!state.starHourWorkMs)state.starHourWorkMs={};
+  if(typeof state.starHourPenaltyApplied!=='object'||!state.starHourPenaltyApplied)state.starHourPenaltyApplied={};
   markPastStarHoursAsHandled();
-
-  state.lastStarTickAt = Date.now();
-
+  state.lastStarTickAt=Date.now();
   save();
-  render();
+  render()
 }
 function toggleInstructions(){state.showInstructions=!state.showInstructions;save();render()}
 function toggleDisclaimer(){state.showDisclaimer=!state.showDisclaimer;save();render()}
@@ -705,7 +715,7 @@ function disclaimerHtml(){
 }
 function instructionsHtml(){
   if(!state.showInstructions)return '';
-  return '<div class="card instructions-card"><div class="section-head"><span class="section-dot"></span><div class="sub">How to Use Kartavya</div></div><div class="instructions-body"><p><b>1. Add tasks in Task Store</b><br>Write the task name, enter duration like <b>30 min</b>, <b>1 hr</b>, or <b>1 hr 30 min</b>, and press <b>Add Task</b>.</p><p><b>2. Use * for Main Tasks</b><br>If a task is very important, start its name with <b>*</b>. Starred tasks help complete the rule of 30 minutes main work per hour.</p><p><b>3. Queue a task to start</b><br>Press <b>Queue</b>. The timer starts only when the task becomes active/current.</p><p><b>4. Progress bar meaning</b><br><b>Green</b> means time already worked. <b>Red</b> means time still pending. Tap the bar to <b>Pause</b> or <b>Resume</b>.</p><p><b>5. Total Hrs</b><br><b>Total Hrs</b> shows actual active working time spent on that task across sessions. It does not count leftover time or merely the date of creation.</p><p><b>6. Oldest task rule</b><br>If a task remains unattended for 3 days, it comes to the top with underline and red check mark. You must work on it for at least <b>10 minutes</b>. There is no separate 10-minute bar; the main task bar alone shows actual work time.</p><p><b>7. Main Task Today dots</b><br>The dots cover <b>8 AM to 10 PM</b>. Green means 30 minutes or more main-task work. Red means the hour ended without 30 minutes. The current dot shows live minutes. Tap any dot to see counted minutes.</p><p><b>8. Shifting tasks</b><br>Drag the <b>⋮⋮</b> handle to shift tasks. The oldest compulsory task will remain on top until it has been attended for 10 minutes.</p><p><b>9. Money note</b><br>Reward, penalty and wallet are only motivational values. No real money is paid or deducted.</p></div></div>'
+  return '<div class="card instructions-card"><div class="section-head"><span class="section-dot"></span><div class="sub">How to Use Kartavya</div></div><div class="instructions-body"><p><b>1. Add tasks in Task Store</b><br>Write the task name, enter duration like <b>30 min</b>, <b>1 hr</b>, or <b>1 hr 30 min</b>, and press <b>Add Task</b>.</p><p><b>2. Use * for Main Tasks</b><br>If a task is very important, start its name with <b>*</b>. Starred tasks help complete the rule of 30 minutes main work per hour.</p><p><b>3. Queue a task to start</b><br>Press <b>Queue</b>. The timer starts only when the task becomes active/current.</p><p><b>4. Progress bar meaning</b><br><b>Green</b> means time already worked. <b>Red</b> means time still pending. Tap the bar to <b>Pause</b> or <b>Resume</b>.</p><p><b>5. Total Hrs</b><br><b>Total Hrs</b> shows actual active working time spent on that task across sessions. It does not count leftover time or merely the date of creation.</p><p><b>6. Oldest task rule</b><br>If a task remains unattended for 3 days, it comes to the top with underline and red check mark. You must work on it for at least <b>10 minutes</b>. There is no separate 10-minute bar; the main task bar alone shows actual work time.</p><p><b>7. Main Task Today dots</b><br>The dots cover <b>8 AM to 10 PM</b>. Green means 30 minutes or more main-task work. Red means the hour ended without 30 minutes. The current dot shows live minutes. Tap any dot to see counted minutes.</p><p><b>8. Distraction button</b><br>If you get distracted, press <b>Distraction = -₹10</b>. It deducts ₹10 from Wallet and adds ₹10 to Total Penalty for self-discipline.</p><p><b>9. Shifting tasks</b><br>Drag the <b>⋮⋮</b> handle to shift tasks. The oldest compulsory task will remain on top until it has been attended for 10 minutes.</p><p><b>10. Money note</b><br>Reward, penalty and wallet are only motivational values. No real money is paid or deducted.</p></div></div>'
 }
 function bindStoreDurationInput(){
   const input=document.getElementById('storeDurationInput');if(!input)return;
@@ -916,9 +926,20 @@ function render(){
   <div class="section-head"><span class="section-dot"></span><div class="sub">Your Performance</div></div>
   <div class="performance-wrap">
     <div class="performance-grid">
-      <div class="perf-box perf-reward"><h4>Total Reward</h4><div class="val" style="color:#d8ffe6">${rupee(s.reward)}</div></div>
-      <div class="perf-box perf-penalty"><h4>Total Penalty</h4><div class="val" style="color:#ffd0d0">${rupee(s.penalty)}</div></div>
-      <div class="perf-box perf-wallet"><h4>Wallet Balance</h4><div class="val">${rupee(state.wallet)}</div><button class="btn-primary tiny-btn" id="topupBtn">+${rupee(TOPUP)}</button></div>
+      <div class="perf-box perf-reward">
+        <h4>Total Reward</h4>
+        <div class="val" style="color:#d8ffe6">${rupee(s.reward)}</div>
+      </div>
+      <div class="perf-box perf-penalty">
+        <h4>Total Penalty</h4>
+        <div class="val" style="color:#ffd0d0">${rupee(s.penalty)}</div>
+        <button class="btn-danger distraction-btn" id="distractionBtn">Distraction = -₹10</button>
+      </div>
+      <div class="perf-box perf-wallet">
+        <h4>Wallet Balance</h4>
+        <div class="val">${rupee(state.wallet)}</div>
+        <button class="btn-primary tiny-btn" id="topupBtn">+${rupee(TOPUP)}</button>
+      </div>
     </div>
     <div id="focusDotsWrap">${focus.html}</div>
   </div>
@@ -954,6 +975,7 @@ ${instructionsHtml()}${disclaimerHtml()}`;
 
   bindStoreDurationInput();
   document.getElementById('topupBtn').addEventListener('click',addTopup);
+  document.getElementById('distractionBtn').addEventListener('click',addDistractionPenalty);
   document.getElementById('storeAddBtn').addEventListener('click',addTaskForFuture);
   document.getElementById('toggleStoreBtn').addEventListener('click',()=>{state.showStoreList=!state.showStoreList;save();render()});
   const taskBarTap=document.getElementById('taskBarTap');if(taskBarTap&&a)taskBarTap.addEventListener('click',togglePauseResume);
