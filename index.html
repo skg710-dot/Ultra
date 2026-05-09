@@ -649,10 +649,53 @@ function finishTask(result){
   if(activeTask())autoSendMacroDroidForActiveTask();else clearMacroDroidState()
 }
 function addTopup(){state.wallet+=TOPUP;save();render()}
+function markPastStarHoursAsHandled(){
+  const now = new Date();
+
+  for(let h = STAR_START_HOUR; h < STAR_END_HOUR; h++){
+    const slotEnd = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      now.getDate(),
+      h + 1,
+      0,
+      0,
+      0
+    );
+
+    const key = todayKey(
+      new Date(now.getFullYear(), now.getMonth(), now.getDate(), h, 0, 0, 0)
+    ) + '-' + String(h).padStart(2,'0');
+
+    if(Date.now() >= slotEnd.getTime()){
+      state.starHourPenaltyApplied[key] = true;
+    }
+  }
+}
 function resetScore(){
-  if(!confirm('Reset reward, penalty and success record? Cumulative task hours will remain.'))return;
-  state.history=[];state.starHourWorkMs={};state.starHourPenaltyApplied={};
-  state.lastStarTickAt=Date.now();save();render()
+  if(!confirm('Reset reward, penalty and success record? Work minutes will remain.')) return;
+
+  // Reset only reward/penalty/success record.
+  // Do NOT clear starHourWorkMs, because it contains today's worked minutes.
+  // Do NOT clear starHourPenaltyApplied, otherwise old hourly penalties will be applied again.
+  state.history = [];
+
+  // Keep today's Main Task minutes and hourly dots intact.
+  if(typeof state.starHourWorkMs !== 'object' || !state.starHourWorkMs){
+    state.starHourWorkMs = {};
+  }
+
+  if(typeof state.starHourPenaltyApplied !== 'object' || !state.starHourPenaltyApplied){
+    state.starHourPenaltyApplied = {};
+  }
+
+  // Mark already-passed hours today as handled, so reset does not create instant back-penalty.
+  markPastStarHoursAsHandled();
+
+  state.lastStarTickAt = Date.now();
+
+  save();
+  render();
 }
 function toggleInstructions(){state.showInstructions=!state.showInstructions;save();render()}
 function toggleDisclaimer(){state.showDisclaimer=!state.showDisclaimer;save();render()}
