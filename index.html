@@ -363,6 +363,13 @@ function isCompulsoryActiveTask(task){
   const old=oldestCompulsoryStoreItem();
   return !!(task&&old&&task.sourceType==='store'&&task.sourceId===old.id&&taskWorkedMs(task)<COMPULSORY_START_MS)
 }
+function countsAsMainTaskToday(task){
+  if(!task)return false;
+  if(isStarredTaskName(task.taskName))return true;
+  if(task.wasCompulsoryWhenQueued)return true;
+  if(isCompulsoryActiveTask(task))return true;
+  return false;
+}
 function normalizeQueueOrdering(){
   const starred=[],normal=[];
   state.tasks.forEach(i=>(isStarredTaskName(i.taskName)?starred:normal).push(i));
@@ -400,7 +407,6 @@ function addStarWorkSlice(startMs,endMs){
   return changed
 }
 
-/* SAFE VERSION: checks only today. It no longer checks yesterday, preventing ₹840-type jumps. */
 function ensureStarHourPenalties(){
   let changed=false;
   const now=new Date();
@@ -445,7 +451,8 @@ function accountStarredWorkAndPenalties(){
   if(!state.lastStarTickAt){state.lastStarTickAt=now;save();return}
   let changed=false;
   const a=activeTask();
-  if(a&&(isStarredTaskName(a.taskName)||isCompulsoryActiveTask(a))&&!a.isPaused){
+
+  if(a&&countsAsMainTaskToday(a)&&!a.isPaused){
     const tickStart=state.lastStarTickAt;
     const tickEnd=now;
     const workedAtTickStart=taskWorkedMsAt(a,tickStart);
@@ -459,6 +466,7 @@ function accountStarredWorkAndPenalties(){
       }
     }
   }
+
   state.lastStarTickAt=now;
   changed=ensureStarHourPenalties()||changed;
   if(changed)save()
@@ -548,7 +556,8 @@ function activateTask(task){
   task.runningSinceMs=now;
   task.isPaused=false;
   task.macroStateSentForTaskId=null;
-  task.macroReminderEpochSent=null
+  task.macroReminderEpochSent=null;
+  if(typeof task.wasCompulsoryWhenQueued!=='boolean')task.wasCompulsoryWhenQueued=false;
 }
 function migrateTasks(){
   state.tasks=state.tasks.map((task,index)=>{
@@ -559,6 +568,7 @@ function migrateTasks(){
     task.durationText=formatDuration(task.durationMinutes);
     if(!task.createdAt)task.createdAt=new Date().toISOString();
     if(typeof task.isPaused!=='boolean')task.isPaused=false;
+    if(typeof task.wasCompulsoryWhenQueued!=='boolean')task.wasCompulsoryWhenQueued=false;
     if(typeof task.workedBeforePauseMs!=='number'){
       task.workedBeforePauseMs=Number(task.accumulatedMs)||Number(task.sessionWorkedMs)||0
     }
@@ -619,7 +629,8 @@ function buildTask(taskName,durationMinutes,sourceType='',sourceId=null,createdA
     reward:sanitizeNumber(state.reward,DEFAULT_REWARD),penalty:sanitizeNumber(state.penalty,DEFAULT_PENALTY),
     durationMinutes,durationText:formatDuration(durationMinutes),createdAt:createdAt||new Date().toISOString(),
     sourceType,sourceId,workedBeforePauseMs:0,runningSinceMs:null,isPaused:false,
-    macroStateSentForTaskId:null,macroReminderEpochSent:null
+    macroStateSentForTaskId:null,macroReminderEpochSent:null,
+    wasCompulsoryWhenQueued:false
   }
 }
 function addTaskForFuture(){
@@ -637,6 +648,7 @@ function sendStoreTaskToQueue(id){
   if(oldest&&oldest.id!==id){alert('Please attempt the oldest task first for at least ten minutes.');return}
   const item=state.taskStore.find(x=>x.id===id);if(!item)return;
   const task=buildTask(item.taskName,item.durationMinutes,'store',item.id,item.createdAt);
+  task.wasCompulsoryWhenQueued=isCompulsoryStoreItem(item);
   insertIntoPriorityList('tasks',task);
   if(!state.activeTaskId)state.activeTaskId=task.id;
   syncActive();save();render();autoSendMacroDroidForActiveTask()
@@ -670,6 +682,7 @@ function saveEditStoreTask(id){
 function copyQueuedTask(id){
   const src=state.tasks.find(x=>x.id===id);if(!src)return;
   const copy=buildTask(src.taskName,src.durationMinutes,src.sourceType,src.sourceId,src.createdAt);
+  copy.wasCompulsoryWhenQueued=!!src.wasCompulsoryWhenQueued;
   insertIntoPriorityList('tasks',copy);save();render()
 }
 function removeTask(id){
@@ -738,7 +751,7 @@ function disclaimerHtml(){
 }
 function instructionsHtml(){
   if(!state.showInstructions)return '';
-  return '<div class="card instructions-card"><div class="section-head"><span class="section-dot"></span><div class="sub">How to Use Kartavya</div></div><div class="instructions-body"><p><b>1. Add tasks in Task Store</b><br>Write the task name, enter duration like <b>30 min</b>, <b>1 hr</b>, or <b>1 hr 30 min</b>, and press <b>Add Task</b>.</p><p><b>2. Use * for Main Tasks</b><br>If a task is very important, start its name with <b>*</b>. Starred tasks help complete the rule of 30 minutes main work per hour.</p><p><b>3. Queue a task to start</b><br>Press <b>Queue</b>. The timer starts only when the task becomes active/current.</p><p><b>4. Progress bar meaning</b><br><b>Green</b> means time already worked. <b>Red</b> means time still pending. Tap the bar to <b>Pause</b> or <b>Resume</b>.</p><p><b>5. Total Hrs</b><br><b>Total Hrs</b> shows actual active working time spent on that task across sessions. It does not count leftover time or merely the date of creation.</p><p><b>6. Oldest task rule</b><br>If a task remains unattended for 3 days, it comes to the top with underline and red check mark. You must work on it for at least <b>10 minutes</b>. There is no separate 10-minute bar; the main task bar alone shows actual work time.</p><p><b>7. Main Task Today dots</b><br>The dots cover <b>8 AM to 10 PM</b>. Green means 30 minutes or more main-task work. Red means the hour ended without 30 minutes. The current dot shows live minutes. Tap any dot to see counted minutes.</p><p><b>8. Hourly penalty safety</b><br>The app checks today’s hours only. Reset Score keeps work minutes safe and prevents old hours from being charged again.</p><p><b>9. Distraction button</b><br>If you get distracted, press <b>Distraction = -₹10</b>. It deducts ₹10 from Wallet and adds ₹10 to Total Penalty for self-discipline.</p><p><b>10. Shifting tasks</b><br>Drag the <b>⋮⋮</b> handle to shift tasks. The oldest compulsory task will remain on top until it has been attended for 10 minutes.</p><p><b>11. Money note</b><br>Reward, penalty and wallet are only motivational values. No real money is paid or deducted.</p></div></div>'
+  return '<div class="card instructions-card"><div class="section-head"><span class="section-dot"></span><div class="sub">How to Use Kartavya</div></div><div class="instructions-body"><p><b>1. Add tasks in Task Store</b><br>Write the task name, enter duration like <b>30 min</b>, <b>1 hr</b>, or <b>1 hr 30 min</b>, and press <b>Add Task</b>.</p><p><b>2. Use * for Main Tasks</b><br>If a task is very important, start its name with <b>*</b>. Starred tasks help complete the rule of 30 minutes main work per hour.</p><p><b>3. Queue a task to start</b><br>Press <b>Queue</b>. The timer starts only when the task becomes active/current.</p><p><b>4. Progress bar meaning</b><br><b>Green</b> means time already worked. <b>Red</b> means time still pending. Tap the bar to <b>Pause</b> or <b>Resume</b>.</p><p><b>5. Total Hrs</b><br><b>Total Hrs</b> shows actual active working time spent on that task across sessions. It does not count leftover time or merely the date of creation.</p><p><b>6. Oldest task rule</b><br>If a task remains unattended for 3 days, it comes to the top with underline and red check mark. You must work on it for at least <b>10 minutes</b>. Once queued, its full active session counts in Main Task Today, even after the first 10 minutes.</p><p><b>7. Main Task Today dots</b><br>The dots cover <b>8 AM to 10 PM</b>. Green means 30 minutes or more main-task work. Red means the hour ended without 30 minutes. The current dot shows live minutes. Tap any dot to see counted minutes.</p><p><b>8. Hourly penalty safety</b><br>The app checks today’s hours only. Reset Score keeps work minutes safe and prevents old hours from being charged again.</p><p><b>9. Distraction button</b><br>If you get distracted, press <b>Distraction = -₹10</b>. It deducts ₹10 from Wallet and adds ₹10 to Total Penalty for self-discipline.</p><p><b>10. Shifting tasks</b><br>Drag the <b>⋮⋮</b> handle to shift tasks. The oldest compulsory task will remain on top until it has been attended for 10 minutes.</p><p><b>11. Money note</b><br>Reward, penalty and wallet are only motivational values. No real money is paid or deducted.</p></div></div>'
 }
 function bindStoreDurationInput(){
   const input=document.getElementById('storeDurationInput');if(!input)return;
